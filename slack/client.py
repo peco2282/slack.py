@@ -3,7 +3,6 @@ from __future__ import annotations
 import asyncio
 import logging
 import signal
-import traceback
 from typing import (
     List,
     Dict,
@@ -77,7 +76,7 @@ class Client:
             "ready": self._handle_ready
         }
         self.connection: ConnectionState = self._get_state(**options)
-        self._teams: List[Dict[str, Any]] = self.http.teams
+        self._teams: List[Dict[str, Any]]
 
     def _get_state(self, **options) -> ConnectionState:
         return ConnectionState(
@@ -207,6 +206,7 @@ class Client:
         login as bot
         """
         data = await self.http.login()
+        await self.connection.initialize()
         await self.connect(data.get("url"))
 
     async def close(self) -> None:
@@ -227,7 +227,7 @@ class Client:
                     await self.ws.poll_event()
 
             except Exception as e:
-                _logger.error("%s was raise", e)
+                _logger.error("raise %s", e)
                 raise e
 
     def _schedule_event(

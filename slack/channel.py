@@ -32,6 +32,7 @@ class Channel:
             The data that was sent to the channel.
 
         """
+        self.data = data
         self.state = state
         self.id: str = data.get("id")
         self.name = data.get("name")

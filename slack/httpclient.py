@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import asyncio
-from typing import Any, Dict, TYPE_CHECKING, List, Optional, Union
+from typing import Any, Dict, TYPE_CHECKING, Optional, Union
 
 import aiohttp
 
@@ -38,8 +38,6 @@ class HTTPClient:
         self.bot_token: str = bot_token
         self.__session: aiohttp.ClientSession = None
         self.ws: SlackWebSocket = None
-        self.teams: Dict[str, Any] = {
-        }
 
     async def ws_connect(self, url: str):
         """It connects to a websocket and returns a websocket object
@@ -76,7 +74,8 @@ class HTTPClient:
             Union[Dict[str, Any], str]
         """
         headers = {
-            "Authorization": f"Bearer {route.token}"
+            "Authorization": f"Bearer {route.token}",
+            "X-Slack-No-Retry": "1"
         }
         params = {
             "headers": headers
@@ -142,24 +141,6 @@ class HTTPClient:
         data = await self.request(
             Route("POST", "apps.connections.open", self.token)
         )
-        await asyncio.sleep(0.5)
-        _list = await self.request(
-            Route("GET", "auth.teams.list", self.bot_token)
-        )
-        _teams: List[Dict[str, str]] = _list["teams"]
-        print(_teams)
-        if len(_teams) >= 1:
-            for _id in _teams:
-                _t = await self.request(
-                    Route("GET", "team.info", self.bot_token),
-                    data={
-                        "team": _id["id"]
-                    }
-                )
-                _k = _id["id"]
-                self.teams[_k] = _t
-                await asyncio.sleep(0.2)
-            print(self.teams)
         return data
 
     async def close(self):

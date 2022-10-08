@@ -2,13 +2,16 @@ from __future__ import annotations
 
 import asyncio
 import json
+import logging
 from typing import TYPE_CHECKING, Dict, Any, Callable, List
 
 import aiohttp
 
 if TYPE_CHECKING:
-    from . import Client
+    from . import Client, ConnectionState
 
+
+_logger = logging.getLogger(__name__)
 
 class SlackWebSocket:
     def __init__(
@@ -34,7 +37,7 @@ class SlackWebSocket:
         self._dispatch_listeners = []
 
     @classmethod
-    async def from_client(cls, client: Client, ws_url) -> SlackWebSocket:
+    async def from_client(cls, client: Client, ws_url: str) -> SlackWebSocket:
         """`from_client` is a class method that takes a `Client` object and a websocket URL and returns a `SlackWebSocket`
         object
 
@@ -99,7 +102,6 @@ class SlackWebSocket:
         """
         event_type: str = None
         if data.get("type") == "hello":
-            print(data)
             self._slack_parsers["ready"] = data
             # TODO get team
 
@@ -107,7 +109,6 @@ class SlackWebSocket:
             payload: Dict[str, Any] = data.get("payload")
             event: Dict[str, Any] = payload.get("event")
             event_type: str = event.get("subtype") if event is not None else "undefined event"
-            print(event_type)
             if event_type is None:
                 event_type = event.get("type")
 
@@ -116,13 +117,10 @@ class SlackWebSocket:
 
             try:
                 func: Callable = self._slack_parsers[event_type]
-                print("func:", func.__name__)
 
             except KeyError as key:
-                print("---")
-                print(payload)
-                print("---")
-                print(f"{event_type} is not defined")
+                _logger.info("%s is not defined.", event_type)
+                pass
 
             else:
                 func(payload)

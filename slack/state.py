@@ -1,5 +1,6 @@
 import asyncio
 import inspect
+import json
 import logging
 from typing import Dict, Callable, Any
 
@@ -11,8 +12,9 @@ from . import (
     PurposeMessage,
     DeletedMessage,
     DeletedChannel,
-    ArchivedMessage
+    ArchivedMessage, Route
 )
+from .user import User
 
 _logger = logging.getLogger(__name__)
 
@@ -34,9 +36,43 @@ class ConnectionState:
         self.handlers: Dict[str, Callable] = handlers
         parsers: Dict[str, Callable]
         self.parsers = parsers = {}
+        self.teams = {}
+        self.channels = {}
+        self.members = {}
         for attr, func in inspect.getmembers(self):
             if attr.startswith("parse_"):
                 parsers[attr[6:]] = func
+
+    async def initialize(self):
+        teams = await self.http.request(
+            Route("GET", "auth.teams.list", self.http.bot_token)
+        )
+        for team in teams["teams"]:
+            team_id = team["id"]
+            info = await self.http.request(
+                Route("GET", "team.info", self.http.bot_token),
+                data={
+                    "team": team_id
+                }
+            )
+            self.teams[team_id] = info["team"]
+
+        self.teams = teams["teams"]
+        for team in teams["teams"]:
+            team_id = team["id"]
+            channels = await self.http.request(
+                Route("GET", "conversations.list", self.http.bot_token),
+                data={
+                    "team": team_id
+                }
+            )
+            self.channels[team_id] = [Channel(self, ch) for ch in channels["channels"]]
+
+        members = await self.http.request(
+            Route("GET", "users.list", self.http.bot_token)
+        )
+        for member in members["members"]:
+            self.members[member["id"]] = User(member)
 
     def parse_message(self, payload: Dict[str, Any]) -> None:
         """It takes a dictionary of data, and returns a message object

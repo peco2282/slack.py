@@ -1,6 +1,12 @@
 from typing import TypedDict
 
 
+class Purpose(TypedDict):
+    value: str
+    creator: str
+    last_set: int
+
+
 class Channel(TypedDict):
     id: str
     is_channel: bool
@@ -11,6 +17,7 @@ class Channel(TypedDict):
     is_shared: bool
     is_org_shared: bool
     context_team_id: str
+    purpose: Purpose
 
 
 class DeletedChannel(TypedDict):
