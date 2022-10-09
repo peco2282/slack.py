@@ -14,7 +14,7 @@ from typing import (
     Optional
 )
 
-from . import HTTPClient, SlackWebSocket, ConnectionState
+from . import HTTPClient, SlackWebSocket, ConnectionState, Team, Channel, Member
 
 Coro = TypeVar("Coro", bound=Callable[..., Coroutine[Any, Any, Any]])
 
@@ -77,6 +77,9 @@ class Client:
         }
         self.connection: ConnectionState = self._get_state(**options)
         self._teams: List[Dict[str, Any]]
+        self.teams: Dict[str, Team] = {}
+        self.channels: Dict[str, Channel] = {}
+        self.members: Dict[str, Member] = {}
 
     def _get_state(self, **options) -> ConnectionState:
         return ConnectionState(
@@ -208,6 +211,9 @@ class Client:
         data = await self.http.login()
         await self.connection.initialize()
         await self.connect(data.get("url"))
+        self.members = self.connection.members
+        self.channels = self.connection.channels
+        self.teams = self.connection.teams
 
     async def close(self) -> None:
         self._closed = True

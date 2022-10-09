@@ -8,10 +8,10 @@ from typing import TYPE_CHECKING, Dict, Any, Callable, List
 import aiohttp
 
 if TYPE_CHECKING:
-    from . import Client, ConnectionState
-
+    from . import Client
 
 _logger = logging.getLogger(__name__)
+
 
 class SlackWebSocket:
     def __init__(
@@ -103,7 +103,6 @@ class SlackWebSocket:
         event_type: str = None
         if data.get("type") == "hello":
             self._slack_parsers["ready"] = data
-            # TODO get team
 
         else:
             payload: Dict[str, Any] = data.get("payload")

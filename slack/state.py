@@ -1,6 +1,5 @@
 import asyncio
 import inspect
-import json
 import logging
 from typing import Dict, Callable, Any
 
@@ -12,9 +11,9 @@ from . import (
     PurposeMessage,
     DeletedMessage,
     DeletedChannel,
-    ArchivedMessage, Route
+    ArchivedMessage, Route, Team
 )
-from .user import User
+from .member import Member
 
 _logger = logging.getLogger(__name__)
 
@@ -36,9 +35,9 @@ class ConnectionState:
         self.handlers: Dict[str, Callable] = handlers
         parsers: Dict[str, Callable]
         self.parsers = parsers = {}
-        self.teams = {}
-        self.channels = {}
-        self.members = {}
+        self.teams: Dict[str, Team] = {}
+        self.channels: Dict[str, Channel] = {}
+        self.members: Dict[str, Member] = {}
         for attr, func in inspect.getmembers(self):
             if attr.startswith("parse_"):
                 parsers[attr[6:]] = func
@@ -55,9 +54,8 @@ class ConnectionState:
                     "team": team_id
                 }
             )
-            self.teams[team_id] = info["team"]
+            self.teams[team_id] = Team(info["team"])
 
-        self.teams = teams["teams"]
         for team in teams["teams"]:
             team_id = team["id"]
             channels = await self.http.request(
@@ -72,7 +70,7 @@ class ConnectionState:
             Route("GET", "users.list", self.http.bot_token)
         )
         for member in members["members"]:
-            self.members[member["id"]] = User(member)
+            self.members[member["id"]] = Member(member)
 
     def parse_message(self, payload: Dict[str, Any]) -> None:
         """It takes a dictionary of data, and returns a message object
