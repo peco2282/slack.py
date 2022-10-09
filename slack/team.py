@@ -26,7 +26,7 @@ class Icon:
 
 
 class Team:
-    def __init__(self, data: TeamPayload):
+    def __init__(self, state, data: TeamPayload):
         """This function takes in a TeamPayload object and sets the data attribute of the Team object to the TeamPayload object
 
         Parameters
