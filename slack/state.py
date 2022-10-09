@@ -57,7 +57,7 @@ class ConnectionState:
                 }
             )
             self.teams[team_id] = Team(state=self, data=info["team"])
-
+        await asyncio.sleep(0.2)
         for team in teams["teams"]:
             team_id = team["id"]
             channels = await self.http.request(
