@@ -1,16 +1,16 @@
 from .types import (
-    User as UserPayload,
+    Member as MemberPayload,
     Profile as ProfilePayload
 )
 
 __all__ = (
     "Profile",
-    "User"
+    "Member"
 )
 
 
 class Profile:
-    def __init__(self, user: "User", data: ProfilePayload):
+    def __init__(self, user: "Member", data: ProfilePayload):
         """This function takes in a user and a data object and sets the user and data attributes of the Profile class to the
         user and data objects passed in
 
@@ -27,8 +27,8 @@ class Profile:
 
 
 # It creates a class called User.
-class User:
-    def __init__(self, data: UserPayload):
+class Member:
+    def __init__(self, data: MemberPayload):
         """This function takes in a UserPayload object and assigns it to the data attribute of the User class
 
         Parameters

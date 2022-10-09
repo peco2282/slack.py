@@ -26,7 +26,7 @@ class Profile(TypedDict):
     team: str
 
 
-class User(TypedDict):
+class Member(TypedDict):
     id: str
     team_id: str
     name: str
