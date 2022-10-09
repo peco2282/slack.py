@@ -102,7 +102,14 @@ class SlackWebSocket:
         """
         event_type: str = None
         if data.get("type") == "hello":
-            self._slack_parsers["ready"] = data
+            try:
+                func = self._slack_parsers["hello"]
+
+            except KeyError:
+                pass
+
+            else:
+                func()
 
         else:
             payload: Dict[str, Any] = data.get("payload")

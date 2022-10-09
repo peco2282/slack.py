@@ -11,9 +11,11 @@ from . import (
     PurposeMessage,
     DeletedMessage,
     DeletedChannel,
-    ArchivedMessage, Route, Team
+    ArchivedMessage,
+    Route,
+    Team,
+    Member
 )
-from .member import Member
 
 _logger = logging.getLogger(__name__)
 
@@ -54,7 +56,7 @@ class ConnectionState:
                     "team": team_id
                 }
             )
-            self.teams[team_id] = Team(info["team"])
+            self.teams[team_id] = Team(state=self, data=info["team"])
 
         for team in teams["teams"]:
             team_id = team["id"]
@@ -71,6 +73,11 @@ class ConnectionState:
         )
         for member in members["members"]:
             self.members[member["id"]] = Member(member)
+
+        return self.teams, self.channels, self.members
+
+    def parse_hello(self, *args, **kwargs):
+        self.dispatch("ready")
 
     def parse_message(self, payload: Dict[str, Any]) -> None:
         """It takes a dictionary of data, and returns a message object

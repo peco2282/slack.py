@@ -209,11 +209,8 @@ class Client:
         login as bot
         """
         data = await self.http.login()
-        await self.connection.initialize()
+        self.teams, self.channels, self.members = await self.connection.initialize()
         await self.connect(data.get("url"))
-        self.members = self.connection.members
-        self.channels = self.connection.channels
-        self.teams = self.connection.teams
 
     async def close(self) -> None:
         self._closed = True
