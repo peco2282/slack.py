@@ -72,7 +72,7 @@ class ConnectionState:
             Route("GET", "users.list", self.http.bot_token)
         )
         for member in members["members"]:
-            self.members[member["id"]] = Member(member)
+            self.members[member["id"]] = Member(state=self, data=member)
 
         return self.teams, self.channels, self.members
 
