@@ -2,12 +2,14 @@ from __future__ import annotations
 
 from datetime import datetime
 from typing import TYPE_CHECKING
-from . import Channel
+
+from . import Channel, Member
 
 if TYPE_CHECKING:
     from . import (
+        Team,
         ConnectionState
-)
+    )
 from .types import (
     Message as MessagePayload,
     JoinMessage as JoinMessagePayload,
@@ -29,6 +31,7 @@ class Message:
     """
     Message l
     """
+
     def __init__(self, state: ConnectionState, data: MessagePayload):
         """This function is a constructor for the Message class. It takes in two parameters, state and data. The state
         parameter is a ConnectionState object, and the data parameter is a MessagePayload object. The function then sets the
@@ -45,18 +48,22 @@ class Message:
         self.state = state
         self.team_id = data.get("team")
         self.id = data.get("ts")
-        self.author = data.get("user")
+        self.user = data.get("user")
         self.channel_id = data.get("channel")
         self.content = data.get("text", "")
         self.created_at: datetime = datetime.fromtimestamp(float(self.id))
 
     @property
-    def mention(self):
-        return f"<@{self.id}>"
+    def channel(self):
+        return Channel(state=self.state, data=self.state.channels[self.channel_id])
 
     @property
-    def channel(self):
-        return Channel(state=self.state, data={"id": self.channel_id})
+    def author(self) -> Member:
+        return self.state.members[self.user]
+
+    @property
+    def team(self) -> Team:
+        return self.state.teams[self.team_id]
 
     async def delete(self, text: str, ts: str = None):
         """It deletes a message.
@@ -91,7 +98,6 @@ class JoinMessage(Message):
 
         """
         super().__init__(state, data)
-        self.author = data.get("user")
 
 
 class PurposeMessage(JoinMessage):

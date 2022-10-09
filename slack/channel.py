@@ -41,6 +41,9 @@ class Channel:
         self.created_by: str = data.get("creator")
         self.overload(data)
 
+    def __repr__(self) -> str:
+        return f"<{self.__class__.__name__} id={self.id} name={self.name}>"
+
     def overload(self, data: ChannelPayload):
         pass
 
