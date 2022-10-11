@@ -3,13 +3,15 @@ from __future__ import annotations
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from .types import (
+from .types.channel import (
     Channel as ChannelPayload,
     DeletedChannel as DeletedChannelPayload
 )
 
 if TYPE_CHECKING:
-    from . import ConnectionState, Message
+    from .state import ConnectionState
+    from .route import Route
+    from .message import Message
 
 __all__ = (
     "Channel",
@@ -64,8 +66,22 @@ class Channel:
             "channel": self.id,
             "text": text
         }
-        message = await self.state.http.send_message(param)
-        return Message(state=self.state, data=message)
+        message = await self.state.http.send_message(
+            Route("POST", "chat.postMessage", token=self.state.http.bot_token),
+            param
+        )
+        return Message(state=self.state, data=message["message"])
+
+    async def send_as_user(self, text: str):
+        param = {
+            "channel": self.id,
+            "text": text
+        }
+        message = await self.state.http.send_message(
+            Route(method="POST", endpoint="chat.postMessage", token=self.state.http.user_token),
+            param
+        )
+        return Message(state=self.state, data=message["message"])
 
 
 class DeletedChannel:

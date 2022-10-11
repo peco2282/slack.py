@@ -11,10 +11,18 @@ from typing import (
     TypeVar,
     Coroutine,
     Any,
-    Optional
+    Optional,
+    TYPE_CHECKING
 )
 
-from . import HTTPClient, SlackWebSocket, ConnectionState, Team, Channel, Member
+from .ws import SlackWebSocket
+from .httpclient import HTTPClient
+from .state import ConnectionState
+
+if TYPE_CHECKING:
+    from .team import Team
+    from .channel import Channel
+    from .member import Member
 
 Coro = TypeVar("Coro", bound=Callable[..., Coroutine[Any, Any, Any]])
 

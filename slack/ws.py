@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, Dict, Any, Callable, List
 import aiohttp
 
 if TYPE_CHECKING:
-    from . import Client
+    from .client import Client
 
 _logger = logging.getLogger(__name__)
 

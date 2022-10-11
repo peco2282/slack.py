@@ -1,21 +1,30 @@
+from __future__ import annotations
+
 import asyncio
 import inspect
 import logging
-from typing import Dict, Callable, Any
-
-from . import (
-    HTTPClient,
-    Message,
-    Channel,
-    JoinMessage,
-    PurposeMessage,
-    DeletedMessage,
-    DeletedChannel,
-    ArchivedMessage,
-    Route,
-    Team,
-    Member
+from typing import (
+    Dict,
+    Callable,
+    Any,
+    TYPE_CHECKING
 )
+
+from .route import Route
+from .team import Team
+from .channel import Channel
+from .member import Member
+
+if TYPE_CHECKING:
+    from .httpclient import HTTPClient
+    from .channel import DeletedChannel
+    from .message import (
+        Message,
+        JoinMessage,
+        PurposeMessage,
+        DeletedMessage,
+        ArchivedMessage,
+    )
 
 _logger = logging.getLogger(__name__)
 
@@ -66,7 +75,7 @@ class ConnectionState:
                     "team": team_id
                 }
             )
-            self.channels[team_id] = [Channel(self, ch) for ch in channels["channels"]]
+            self.channels = {ch["id"]: Channel(state=self, data=ch) for ch in channels["channels"]}
 
         members = await self.http.request(
             Route("GET", "users.list", self.http.bot_token)

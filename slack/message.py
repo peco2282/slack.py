@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from . import Channel, Member
+from . import Member
 
 if TYPE_CHECKING:
     from . import (
@@ -55,7 +55,7 @@ class Message:
 
     @property
     def channel(self):
-        return Channel(state=self.state, data=self.state.channels[self.channel_id])
+        return self.state.channels[self.channel_id]
 
     @property
     def author(self) -> Member:

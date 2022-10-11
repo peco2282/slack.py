@@ -3,13 +3,13 @@ from __future__ import annotations
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from .types import (
+from .types.member import (
     Member as MemberPayload,
     Profile as ProfilePayload
 )
 
 if TYPE_CHECKING:
-    from . import ConnectionState
+    from .state import ConnectionState
 
 __all__ = (
     "Profile",

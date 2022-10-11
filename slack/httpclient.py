@@ -5,10 +5,10 @@ from typing import Any, Dict, TYPE_CHECKING, Optional, Union
 
 import aiohttp
 
-from . import Route
+from .route import Route
 
 if TYPE_CHECKING:
-    from . import SlackWebSocket
+    from .ws import SlackWebSocket
 
 
 class SlackException(Exception):

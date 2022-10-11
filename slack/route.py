@@ -15,6 +15,10 @@ class Route:
             The token you got from the previous step.
 
         """
-        self.method = method
-        self.url = BASE + endpoint
-        self.token = token
+        self.method: str = method
+        self.url: str = BASE + endpoint
+        self.token: str = token
+
+    @property
+    def base(self) -> str:
+        return BASE

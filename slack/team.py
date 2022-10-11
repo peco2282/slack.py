@@ -2,13 +2,13 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from .types import (
+from .types.team import (
     Icon as IconPayload,
     Team as TeamPayload
 )
 
 if TYPE_CHECKING:
-    from . import (
+    from .state import (
         ConnectionState
     )
 
