@@ -16,6 +16,16 @@ class SlackException(Exception):
 
 
 class HTTPClient:
+    """connector of slackAPI
+
+    Attributes
+    ----------
+    loop : asyncio.AbstractEventLoop
+    user_token : str
+    token : str
+    bot_token : str
+
+    """
     def __init__(
             self,
             loop: asyncio.AbstractEventLoop,
@@ -23,15 +33,6 @@ class HTTPClient:
             token: str,
             bot_token: str
     ):
-        """connector of slackAPI
-
-        Parameters
-        ----------
-        loop : asyncio.AbstractEventLoop
-        user_token : str
-        token : str
-        bot_token : str
-        """
         self.loop: asyncio.AbstractEventLoop = loop
         self.user_token: str = user_token
         self.token: str = token

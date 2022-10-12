@@ -18,18 +18,20 @@ __all__ = (
 
 
 class Profile:
+    """This function takes in a user and a data object and sets the user and data attributes of the Profile class to the
+    user and data objects passed in
+
+    Attributes
+    ----------
+    user : :class:`User`
+        The user object that is being updated.
+    phone: :class:`str`
+        The phone number.
+
+    status_text :class:`str`
+        text of status.
+    """
     def __init__(self, state: ConnectionState, user: "Member", data: ProfilePayload):
-        """This function takes in a user and a data object and sets the user and data attributes of the Profile class to the
-        user and data objects passed in
-
-        Parameters
-        ----------
-        user : "User"
-            The user object that is being updated.
-        data : ProfilePayload
-            The data that was sent to the API.
-
-        """
         self.user = user
         self.phone = data.get("phone")
         self.status_text = data.get("status_text")
@@ -37,15 +39,31 @@ class Profile:
 
 # It creates a class called User.
 class Member:
+    """This function takes in a UserPayload object and assigns it to the data attribute of the User class
+
+    Attributes
+    ----------
+    state : :class:`ConnectionState`
+        The connection state.
+
+    id : :class:`str`
+        Your user ID.
+
+    team : :class:`Team`
+        Your team object.
+    
+    deleted: :class:`bool`
+        Account was deleted.
+
+    color: :class:`str`
+        Account icon color.
+
+    name: :class:`str`
+        Account name.
+
+    """
     def __init__(self, state: ConnectionState, data: MemberPayload):
-        """This function takes in a UserPayload object and assigns it to the data attribute of the User class
-
-        Parameters
-        ----------
-        data : UserPayload
-            The data to be sent to the API.
-
-        """
+        self.state = state
         self.id = data.get("id")
         self.team = state.teams[data.get("team_id")]
         self.deleted = data.get("deleted", False)

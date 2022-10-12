@@ -21,20 +21,32 @@ __all__ = (
 
 # > A `Channel` is a named pipe that can be used to send and receive messages
 class Channel:
+    """This function is a constructor for the Channel class. It takes in a ConnectionState object and a ChannelPayload
+    object. It sets the state, id, name, team, created_at, and created_by attributes of the Channel object. It then
+    calls the overload function
+
+    Attributes
+    ----------
+    state : :class:`ConnectionState`
+        The connection state.
+
+    id : :class:`str`
+        Channel ID.
+
+    team : :class:`Team`
+        Your team object.
+
+    name: :class:`str`
+        Account name.
+
+    created_at: :class:`datetime`
+        When create this channel.
+
+    created_by: :class:`str`
+        Who channel create.
+
+    """
     def __init__(self, state: ConnectionState, data: ChannelPayload):
-        """This function is a constructor for the Channel class. It takes in a ConnectionState object and a ChannelPayload
-        object. It sets the state, id, name, team, created_at, and created_by attributes of the Channel object. It then
-        calls the overload function
-
-        Parameters
-        ----------
-        state : ConnectionState
-            The connection state.
-        data : ChannelPayload
-            The data that was sent to the channel.
-
-        """
-        self.data = data
         self.state = state
         self.id: str = data.get("id")
         self.name = data.get("name")
@@ -68,7 +80,6 @@ class Channel:
         }
         message = await self.state.http.send_message(
             Route("POST", "chat.postMessage", token=self.state.http.bot_token),
-            param
         )
         return Message(state=self.state, data=message["message"])
 
@@ -78,23 +89,21 @@ class Channel:
             "text": text
         }
         message = await self.state.http.send_message(
-            Route(method="POST", endpoint="chat.postMessage", token=self.state.http.user_token),
-            param
+            Route(method="POST", endpoint="chat.postMessage", token=self.state.http.user_token)
         )
         return Message(state=self.state, data=message["message"])
 
 
 class DeletedChannel:
+    """This function is called when a channel is deleted
+
+    Attributes
+    ----------
+    state : :class:`ConnectionState`
+        ConnectionState
+
+    """
     def __init__(self, state: ConnectionState, data: DeletedChannelPayload):
-        """This function is called when a channel is deleted
-
-        Parameters
-        ----------
-        state : ConnectionState
-            ConnectionState
-        data : DeletedChannelPayload
-            DeletedChannelPayload
-
-        """
+        self.state = state
         self.channel = data.get("channel")
         self.ts: datetime = datetime.fromtimestamp(float(data.get("event_ts", "nan")))

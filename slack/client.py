@@ -15,9 +15,9 @@ from typing import (
     TYPE_CHECKING
 )
 
-from .ws import SlackWebSocket
 from .httpclient import HTTPClient
 from .state import ConnectionState
+from .ws import SlackWebSocket
 
 if TYPE_CHECKING:
     from .team import Team
@@ -38,6 +38,27 @@ def result_task(loop: asyncio.AbstractEventLoop):
 
 
 class Client:
+    r"""Create `Client` object from params.
+    Represents a client connection that connects to Discord.
+    This class is used to interact with the Discord WebSocket and API.
+
+    A number of options can be passed to the :class:`Client`.
+
+    Attributes
+    -----------
+    user_token: :class:`str`
+        The connector to use for connection pooling.
+    bot_token: :class:`str`
+        Proxy URL.
+    token: :class:`str`
+        Integer starting at ``0`` and less than :attr:`.shard_count`.
+
+    loop: Optional[:class:`asyncio.AbstractEventLoop`]
+        The :class:`asyncio.AbstractEventLoop` to use for asynchronous operations.
+        Defaults to ``None``, in which case the default event loop is used via
+        :func:`asyncio.get_event_loop()`.
+    """
+
     def __init__(
             self,
             user_token: str,
@@ -47,21 +68,6 @@ class Client:
             loop: Optional[asyncio.AbstractEventLoop] = None,
             **options
     ):
-        """Create `Client` object from params.
-
-        Parameters
-        ----------
-        user_token : str
-            Your Slack Token.
-        bot_token : str
-            Application Slack Token.
-        token : str
-            Slack Token with your application account.
-        loop : Optional[asyncio.AbstractEventLoop]
-            The loop object of your bot.
-        options : Any
-            params. (No usage.)
-        """
         self._listeners: Dict[
             str, List[
                 Tuple[
@@ -105,11 +111,11 @@ class Client:
         """Dispatch event with any keyword.
         Parameters
         ----------
-        event : str
+        event : :class:`str`
             The event name.
-        args : Any
+        args : :class:`Any`
             params of event action.
-        kwargs : Any
+        kwargs : :class:`Any`
             keyword of event action.
         """
         method = f"on_{event}"
@@ -149,7 +155,7 @@ class Client:
 
         Parameters
         ----------
-        coro : Coro
+        coro : :class:`Coro`
             The coroutine function to be decorated.
 
         Returns
@@ -165,8 +171,25 @@ class Client:
         return coro
 
     def run(self) -> None:
-        """It runs the event loop until the future is done, then it stops the loop and returns the result of the future
+        """A blocking call that abstracts away the event loop
+        initialisation from you.
+        If you want more control over the event loop then this
+        function should not be used. Use :meth:`start` coroutine
+        or :meth:`connect` + :meth:`login`.
+        Roughly Equivalent to: ::
+            try:
+                loop.run_until_complete(start(*args, **kwargs))
+            except KeyboardInterrupt:
+                loop.run_until_complete(close())
+                # cancel all tasks lingering
+            finally:
+                loop.close()
+        .. warning::
+            This function must be the last function to call due to the fact that it
+            is blocking. That means that registration of events or anything being
+            called after this function call will not execute until it returns.
         """
+
         loop: asyncio.AbstractEventLoop = self.loop
         try:
             loop.add_signal_handler(signal.SIGINT, loop.stop)
@@ -228,7 +251,7 @@ class Client:
         connect to slack-API
         Parameters
         ----------
-        ws_url : str
+        ws_url : :class:`str`
         """
         while True:
             try:
@@ -252,10 +275,10 @@ class Client:
 
         Parameters
         ----------
-        coro : Callable[..., Coroutine[Any, Any, Any]]
-        event_name : str
-        args : Any
-        kwargs : Any
+        coro : :class:`Callable[..., Coroutine[Any, Any, Any]]`
+        event_name : :class:`str`
+        args : :class:`Any`
+        kwargs : :class:`Any`
 
         Returns
         -------

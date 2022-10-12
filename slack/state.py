@@ -30,6 +30,9 @@ _logger = logging.getLogger(__name__)
 
 
 class ConnectionState:
+    """
+
+    """
     _parsers: Dict[str, Callable[[Dict[str, Any]], None]]
 
     def __init__(

@@ -19,31 +19,44 @@ __all__ = (
 
 
 class Icon:
+    """This function is used to initialize the Icon class
+
+    Parameters
+    ----------
+    team : :class:`~Team`
+        The team that the icon is for.
+    data : :class:`IconPayload`
+        The data that was sent to the webhook.
+
+    """
     def __init__(self, state: ConnectionState, team: "Team", data: IconPayload):
-        """This function is used to initialize the Icon class
-
-        Parameters
-        ----------
-        team : "Team"
-            The team that the icon is for.
-        data : IconPayload
-            The data that was sent to the webhook.
-
-        """
         self.data = data
         self.team = team
 
 
 class Team:
+    """This function takes in a TeamPayload object and sets the data attribute of the Team object to the TeamPayload object
+
+    Attributes
+    ----------
+    state : :class:`~ConnectionState`
+        The connection state.
+
+    id : :class:`str`
+        Team ID.
+
+    url: :class:`bool`
+        team link.
+
+    icon: :class:`Icon`
+        Team icon data.
+
+    name: :class:`str`
+        Team name.
+
+    """
     def __init__(self, state: ConnectionState, data: TeamPayload):
-        """This function takes in a TeamPayload object and sets the data attribute of the Team object to the TeamPayload object
-
-        Parameters
-        ----------
-        data : TeamPayload
-            The data that was sent to the webhook.
-
-        """
+        self.state = state
         self.id = data.get("id")
         self.name = data.get("name")
         self.url = data.get("url")
