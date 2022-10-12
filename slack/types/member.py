@@ -6,7 +6,7 @@ class Profile(TypedDict):
     phone: str
     skype: str
     real_name: str
-    real_name_normalaized: str
+    real_name_normalized: str
     fields: Dict[str, Any]
     status_text: str
     status_emoji: str
