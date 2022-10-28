@@ -120,27 +120,32 @@ class PurposeMessage(JoinMessage):
 class DeletedMessage:
     """This function is used to delete a message from a channel
 
-    Attribute
+    Attributes
     ----------
     state : ConnectionState
         The ConnectionState object that contains information about the connection.
 
+    data : DeletedMessagePayload
+        The deleted Message.
+
     """
     def __init__(self, state: ConnectionState, data: DeletedMessagePayload):
+        self.state = state
         self.channel = data.get("channel")
 
 
 class ArchivedMessage:
     """A constructor for the class.
 
-    Attribute
+    Attributes
     ----------
     state : ConnectionState
         ConnectionState
+
     data : ArchivedMessagePayload
         The data that was sent in the message.
 
     """
     def __init__(self, state: ConnectionState, data: ArchivedMessagePayload):
-
-        pass
+        self.state = state
+        self.__data = data
