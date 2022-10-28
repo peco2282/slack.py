@@ -7,24 +7,26 @@ from typing import (
     Dict,
     Callable,
     Any,
-    TYPE_CHECKING
+    TYPE_CHECKING,
+    Tuple
 )
 
-from .route import Route
-from .team import Team
 from .channel import Channel
 from .member import Member
+from .message import (
+    Message,
+    JoinMessage,
+    PurposeMessage,
+    DeletedMessage,
+    ArchivedMessage,
+)
+from .route import Route
+from .team import Team
 
 if TYPE_CHECKING:
     from .httpclient import HTTPClient
     from .channel import DeletedChannel
-    from .message import (
-        Message,
-        JoinMessage,
-        PurposeMessage,
-        DeletedMessage,
-        ArchivedMessage,
-    )
+
 
 _logger = logging.getLogger(__name__)
 
@@ -56,7 +58,11 @@ class ConnectionState:
             if attr.startswith("parse_"):
                 parsers[attr[6:]] = func
 
-    async def initialize(self):
+    async def initialize(self) -> Tuple[
+        Dict[str, Team],
+        Dict[str, Channel],
+        Dict[str, Member]
+    ]:
         teams = await self.http.request(
             Route("GET", "auth.teams.list", self.http.bot_token)
         )
@@ -157,7 +163,7 @@ class ConnectionState:
         message = DeletedMessage(state=self, data=event)
         self.dispatch("message_delete", message)
 
-    def parse_channel_join(self, payload: Dict[str, Any]) -> None:
+    def parse_channel_joined(self, payload: Dict[str, Any]) -> None:
         """It takes a payload (a dictionary) and returns a JoinMessage object
 
         Parameters

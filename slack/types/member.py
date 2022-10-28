@@ -1,4 +1,4 @@
-from typing import TypedDict, Dict, Any, List
+from typing import TypedDict, Dict, Any, List, Optional
 
 
 class Profile(TypedDict):
@@ -7,12 +7,15 @@ class Profile(TypedDict):
     skype: str
     real_name: str
     real_name_normalized: str
-    fields: Dict[str, Any]
+    display_name: str
+    display_name_normalized: str
+    fields: Optional[Dict[str, Any]]
     status_text: str
     status_emoji: str
     status_emoji_display_info: List[Any]
     status_expiration: int
     avatar_hash: str
+    huddle_state: str
     always_active: bool
     first_name: str
     last_name: str

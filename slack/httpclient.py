@@ -94,11 +94,13 @@ class HTTPClient:
             except:
                 return await response.text()
 
-    def send_message(self, param):
+    def send_message(self, route: Route, param):
         """It takes a parameter, and returns a request
 
         Parameters
         ----------
+        route
+            a data to request.
         param
             a dictionary of parameters to send to the Slack API.
 
@@ -108,15 +110,18 @@ class HTTPClient:
 
         """
         return self.request(
-            Route("POST", "chat.postMessage", self.bot_token),
+            route,
             param
         )
 
-    def delete_message(self, param):
+    def delete_message(self, route: Route, param):
         """This function deletes a message from a chat
 
         Parameters
         ----------
+        route
+            a data to connect.
+
         param
             keyword of send message.
 
@@ -126,7 +131,13 @@ class HTTPClient:
 
         """
         return self.request(
-            Route("POST", "chat.delete", self.user_token),
+            route,
+            param
+        )
+
+    def create_channel(self, route: Route, param):
+        return self.request(
+            route,
             param
         )
 

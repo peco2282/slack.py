@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
+from .team import Team
 from .types.member import (
     Member as MemberPayload,
     Profile as ProfilePayload
@@ -23,18 +24,49 @@ class Profile:
 
     Attributes
     ----------
-    user : :class:`User`
+    user : :class:`Member`
         The user object that is being updated.
+
     phone: :class:`str`
         The phone number.
 
-    status_text :class:`str`
+    status_text: :class:`str`
         text of status.
+
+    skype: :class:`str`
+        skype user name.
+
+    team: :class:`Team`
+        team data.
+
     """
     def __init__(self, state: ConnectionState, user: "Member", data: ProfilePayload):
+        self.state = state
         self.user = user
         self.phone = data.get("phone")
+        self.skype = data.get("skype")
+        self.real_name = data.get("real_name")
+        self.real_name_normalized = data.get("real_name_normalized")
+        self.display_name = data.get("display_name")
+        self.display_name_normalized = data.get("display_name_normalized")
+        self.fields = data.get("fields")
         self.status_text = data.get("status_text")
+        self.status_emoji = data.get("status_emoji")
+        self.status_emoji_display_info = data.get("status_emoji_display_info", [])
+        self.status_expiration = data.get("status_expiration")
+        self.avatar_hash = data.get("avatar_hash")
+        self.huddle_state = data.get("huddle_state")
+        self.first_name = data.get("first_name")
+        self.last_name = data.get("last_name")
+        self.image_24 = data.get("image_24")
+        self.image_32 = data.get("image_32")
+        self.image_48 = data.get("image_48")
+        self.image_72 = data.get("image_72")
+        self.image_192 = data.get("image_192")
+        self.image_512 = data.get("image_512")
+        self.status_text_canonical = data.get("status_text_canonical")
+        team = data.get("team")
+        self.team: Optional[Team] = state.teams[team] if team is not None else None
 
 
 # It creates a class called User.
@@ -62,6 +94,7 @@ class Member:
         Account name.
 
     """
+
     def __init__(self, state: ConnectionState, data: MemberPayload):
         self.state = state
         self.id = data.get("id")
