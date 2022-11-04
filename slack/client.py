@@ -307,8 +307,8 @@ class Client:
             raise exc
 
     async def on_error(self, event_name, exc: Exception, *args, **kwargs) -> None:
-        """It prints the name of the event that raised the exception, the name of the exception, and the name of the class that
-        the event is in.
+        """It prints the name of the event that raised the exception, the name of the exception, and the name of the
+        class that the event is in.
 
         Parameters
         ----------
@@ -318,4 +318,4 @@ class Client:
             The exception that was raised.
 
         """
-        print(f"{event_name} raise {exc.__class__.__name__} in {self.__class__.__name__}")
+        _logger.error(f"{event_name} raise {exc.__class__.__name__} in {self.__class__.__name__}")

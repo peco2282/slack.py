@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import json
 from typing import Any, Dict, TYPE_CHECKING, Optional, Union
 
 import aiohttp
@@ -76,7 +77,6 @@ class HTTPClient:
         """
         headers = {
             "Authorization": f"Bearer {route.token}",
-            "X-Slack-No-Retry": "1"
         }
         params = {
             "headers": headers
@@ -89,9 +89,14 @@ class HTTPClient:
 
         async with self.__session.request(method, url, **params) as response:
             try:
-                return await response.json()
+                _json = await response.json()
+                if _json.get("ok"):
+                    return _json
 
-            except:
+                else:
+                    pass
+
+            except json.JSONDecodeError:
                 return await response.text()
 
     def send_message(self, route: Route, param):

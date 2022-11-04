@@ -1,11 +1,10 @@
 from __future__ import annotations
 
-import re
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from .route import Route
 from .message import Message
+from .route import Route
 from .types.channel import (
     Channel as ChannelPayload,
     DeletedChannel as DeletedChannelPayload

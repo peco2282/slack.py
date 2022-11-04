@@ -15,6 +15,7 @@ from .types.message import (
     Message as MessagePayload,
     JoinMessage as JoinMessagePayload,
     PurposeMessage as PurposeMessagePayload,
+    PreviousMessage as PreviousMessagePayload,
     DeletedMessage as DeletedMessagePayload,
     ArchivedMessage as ArchivedMessagePayload
 )
@@ -117,6 +118,16 @@ class PurposeMessage(JoinMessage):
         self.state = state
 
 
+class PreviousMessage:
+    def __init__(self, state: ConnectionState, data: PreviousMessagePayload):
+        self.state = state
+        self.client_msg_id = data.get("client_msg_id")
+        self.text = data.get("text")
+        self.user = self.state.members[data.get("user")]
+        self.team = self.state.teams[data.get("team")]
+        self.ts = data.get("ts")
+
+
 class DeletedMessage:
     """This function is used to delete a message from a channel
 
@@ -125,13 +136,23 @@ class DeletedMessage:
     state : ConnectionState
         The ConnectionState object that contains information about the connection.
 
-    data : DeletedMessagePayload
+    channel : Channel
         The deleted Message.
+
+    ts: str
+        time when deleted
+
+    deleted_text: str
+        The text what deleted message.
 
     """
     def __init__(self, state: ConnectionState, data: DeletedMessagePayload):
         self.state = state
-        self.channel = data.get("channel")
+        self.channel = self.state.channels[data.get("channel")]
+        self.ts = data.get("ts")
+        self.previous_message = PreviousMessage(self.state, data.get("previous_message"))
+        self.hidden = data.get("hidden")
+        self.deleted_text = self.previous_message.text
 
 
 class ArchivedMessage:
@@ -142,10 +163,20 @@ class ArchivedMessage:
     state : ConnectionState
         ConnectionState
 
-    data : ArchivedMessagePayload
+    ts : str
         The data that was sent in the message.
+
+    user: Member
+        The user who archibed channel
+
+    channel: Channel
+        Archived channel.
 
     """
     def __init__(self, state: ConnectionState, data: ArchivedMessagePayload):
         self.state = state
         self.__data = data
+        self.ts = data.get("ts")
+        self.user = data.get("user")
+        self.channel = self.state.channels[data.get("channel")]
+        self.channel_type = data.get("channel_type")
