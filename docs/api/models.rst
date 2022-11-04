@@ -11,6 +11,9 @@ Models
 Teams
 -----
 
+Team
+~~~~
+
 .. attributetable:: Team
 
 .. autoclass:: Team()
@@ -21,10 +24,16 @@ Teams
 Channels
 --------
 
+Channel
+~~~~~~~
+
 .. attributetable:: Channel
 
 .. autoclass:: Channel()
     :members:
+
+DeletedChannel
+~~~~~~~~~~~~~~
 
 .. attributetable:: DeletedChannel
 
@@ -34,21 +43,32 @@ Channels
 Messages
 --------
 
+Message
+~~~~~~~
+
 .. attributetable:: Message
 
 .. autoclass:: Message()
     :members:
 
+DeletedMessage
+~~~~~~~~~~~~~~
 
 .. attributetable:: DeletedMessage
 
 .. autoclass:: DeletedMessage()
     :members:
 
+JoinMessage
+~~~~~~~~~~~
+
 .. attributetable:: JoinMessage
 
 .. autoclass:: JoinMessage()
     :members:
+
+ArchivedMessage
+~~~~~~~~~~~~~~~
 
 .. attributetable:: ArchivedMessage
 
@@ -57,6 +77,9 @@ Messages
 
 Members
 -------
+
+Member
+~~~~~~
 
 .. attributetable:: Member
 
