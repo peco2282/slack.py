@@ -11,7 +11,7 @@ from typing import (
     Tuple
 )
 
-from .channel import Channel
+from .channel import Channel, DeletedChannel
 from .member import Member
 from .message import (
     Message,
@@ -25,7 +25,6 @@ from .team import Team
 
 if TYPE_CHECKING:
     from .httpclient import HTTPClient
-    from .channel import DeletedChannel
 
 
 _logger = logging.getLogger(__name__)
@@ -63,7 +62,7 @@ class ConnectionState:
         Dict[str, Channel],
         Dict[str, Member]
     ]:
-        teams = await self.http.request(
+        teams: Dict[str, Any] = await self.http.request(
             Route("GET", "auth.teams.list", self.http.bot_token)
         )
         for team in teams["teams"]:
@@ -78,7 +77,7 @@ class ConnectionState:
         await asyncio.sleep(0.2)
         for team in teams["teams"]:
             team_id = team["id"]
-            channels = await self.http.request(
+            channels: Dict[str, Any] = await self.http.request(
                 Route("GET", "conversations.list", self.http.bot_token),
                 data={
                     "team": team_id
@@ -86,7 +85,7 @@ class ConnectionState:
             )
             self.channels = {ch["id"]: Channel(state=self, data=ch) for ch in channels["channels"]}
 
-        members = await self.http.request(
+        members: Dict[str, Any] = await self.http.request(
             Route("GET", "users.list", self.http.bot_token)
         )
         for member in members["members"]:

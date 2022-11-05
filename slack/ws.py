@@ -107,7 +107,7 @@ class SlackWebSocket:
             The future object is being returned.
 
         """
-        event_type: str = None
+        event_type: str = ""
         if data.get("type") == "hello":
             try:
                 func = self._slack_parsers["hello"]
@@ -135,7 +135,7 @@ class SlackWebSocket:
                 func: Callable = self._slack_parsers[event_type]
 
             except KeyError:
-                _logger.info("%s is not defined.", event_type)
+                _logger.info("%s is not defined. (Undefined Event.)", event_type)
                 pass
 
             else:

@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 
 from .message import Message
 from .route import Route
+from .team import Team
 from .types.channel import (
     Channel as ChannelPayload,
     DeletedChannel as DeletedChannelPayload
@@ -12,7 +13,6 @@ from .types.channel import (
 
 if TYPE_CHECKING:
     from .state import ConnectionState
-
 
 __all__ = (
     "Channel",
@@ -47,11 +47,12 @@ class Channel:
         Who channel create.
 
     """
+
     def __init__(self, state: ConnectionState, data: ChannelPayload):
         self.state = state
         self.id: str = data.get("id")
         self.name = data.get("name")
-        self.team: str = data.get("context_team_id")
+        self.team: Team = self.state.teams[data.get("context_team_id")]
         self.created_at: datetime = datetime.fromtimestamp(float(data.get("created", 0)))
         self.created_by: str = data.get("creator")
         self.overload(data)
@@ -116,6 +117,7 @@ class DeletedChannel:
         ConnectionState
 
     """
+
     def __init__(self, state: ConnectionState, data: DeletedChannelPayload):
         self.state = state
         self.channel = data.get("channel")

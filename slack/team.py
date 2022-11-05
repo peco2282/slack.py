@@ -2,16 +2,16 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+
+from .route import Route
 from .types.team import (
     Icon as IconPayload,
     Team as TeamPayload
 )
 
 if TYPE_CHECKING:
-    from .state import (
-        ConnectionState
-    )
-
+    from .state import ConnectionState
+    from .channel import Channel
 __all__ = (
     "Icon",
     "Team"
@@ -29,6 +29,7 @@ class Icon:
         The data that was sent to the webhook.
 
     """
+
     def __init__(self, state: ConnectionState, team: "Team", data: IconPayload):
         self.data = data
         self.team = team
@@ -55,6 +56,7 @@ class Team:
         Team name.
 
     """
+
     def __init__(self, state: ConnectionState, data: TeamPayload):
         self.state = state
         self.id = data.get("id")
@@ -66,3 +68,16 @@ class Team:
 
     def __repr__(self) -> str:
         return f"<{self.__class__.__name__} id={self.id} name={self.name}>"
+
+    async def create_channel(self, name: str, join: bool = True) -> Channel:
+        channel = await self.state.http.create_channel(
+            Route("POST", "conversations.create", self.state.http.bot_token),
+            {"name": name}
+        )
+        if join:
+            self.state.http.join_channel(
+                Route("POST", "conversations.join", self.state.http.bot_token),
+                {"id": channel["channel"]["id"]}
+            )
+
+        return Channel(self.state, channel["channel"])

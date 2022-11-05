@@ -27,6 +27,7 @@ class HTTPClient:
     bot_token : str
 
     """
+
     def __init__(
             self,
             loop: asyncio.AbstractEventLoop,
@@ -90,11 +91,12 @@ class HTTPClient:
         async with self.__session.request(method, url, **params) as response:
             try:
                 _json = await response.json()
+                print(_json)
                 if _json.get("ok"):
                     return _json
 
                 else:
-                    pass
+                    raise SlackException(_json["error"])
 
             except json.JSONDecodeError:
                 return await response.text()
@@ -145,6 +147,9 @@ class HTTPClient:
             route,
             param
         )
+
+    def join_channel(self, route: Route, param):
+        return self.request(route, param)
 
     async def login(self):
         """It gets a list of teams the bot is on, then gets the info for each team and stores it in a dictionary
