@@ -5,6 +5,8 @@
 
 :warning: This is an alpha version.
 
+[**Document**](https://slack-py.readthedocs.io/en/latest/)
+
 ## example
 ```python
 import slack
