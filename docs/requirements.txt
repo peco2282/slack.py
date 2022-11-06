@@ -1,2 +1,3 @@
 sphinxcontrib_trio
 myst_parser
+aiohttp
