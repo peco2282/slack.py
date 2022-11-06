@@ -6,7 +6,6 @@ import logging
 from typing import TYPE_CHECKING, Dict, Any, Callable
 
 import aiohttp
-import requests
 
 if TYPE_CHECKING:
     from .client import Client
