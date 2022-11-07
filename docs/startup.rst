@@ -18,16 +18,16 @@ On your Application site.
 3. Click `Generate Token and Scope` button and enter token name.
 4. Copy token
 
-.. image:: ./img/applvl.png
-    :scale: 50%
-    :align: left
+    .. image:: ./img/applvl.png
+        :scale: 50%
+        :align: left
 
 5. Move `OAuth & Permissions` tab.
 6. Add permission `Bot Token Scopes`, `User Token Scopes`.
 7. Reinstall your app to your workspace.
 8. Copy both tokens (User Oauth Token, Bot User Oauth Token).
 
-.. image:: ./img/oauth.png
-    :scale: 50%
-    :align: left
+    .. image:: ./img/oauth.png
+        :scale: 50%
+        :align: left
 
