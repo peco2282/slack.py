@@ -31,3 +31,5 @@ On your Application site.
         :scale: 50%
         :align: left
 
+9. Paste `slack#Client(...)`
+

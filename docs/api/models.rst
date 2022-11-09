@@ -11,12 +11,15 @@ Models
 Teams
 -----
 
-Team
-~~~~
-
 .. attributetable:: Team
 
 .. autoclass:: Team()
+    :members:
+    :inherited-members:
+
+.. attributetable:: Icon
+
+.. autoclass:: Icon()
     :members:
     :inherited-members:
 
@@ -24,13 +27,11 @@ Team
 Channels
 --------
 
-Channel
-~~~~~~~
-
 .. attributetable:: Channel
 
 .. autoclass:: Channel()
     :members:
+    :inherited-members:
 
 DeletedChannel
 ~~~~~~~~~~~~~~
@@ -39,49 +40,41 @@ DeletedChannel
 
 .. autoclass:: DeletedChannel()
     :members:
+    :inherited-members:
 
 Messages
 --------
-
-Message
-~~~~~~~
 
 .. attributetable:: Message
 
 .. autoclass:: Message()
     :members:
-
-DeletedMessage
-~~~~~~~~~~~~~~
+    :inherited-members:
 
 .. attributetable:: DeletedMessage
 
 .. autoclass:: DeletedMessage()
     :members:
-
-JoinMessage
-~~~~~~~~~~~
+    :inherited-members:
 
 .. attributetable:: JoinMessage
 
 .. autoclass:: JoinMessage()
     :members:
-
-ArchivedMessage
-~~~~~~~~~~~~~~~
+    :inherited-members:
 
 .. attributetable:: ArchivedMessage
 
 .. autoclass:: ArchivedMessage()
     :members:
+    :inherited-members:
 
 Members
 -------
-
-Member
-~~~~~~
 
 .. attributetable:: Member
 
 .. autoclass:: Member()
     :members:
+    :inherited-members:
+
