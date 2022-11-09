@@ -21,18 +21,41 @@ __all__ = (
 class Icon:
     """This function is used to initialize the Icon class
 
-    Parameters
+    Attributes
     ----------
     team : :class:`~Team`
         The team that the icon is for.
-    data : :class:`IconPayload`
-        The data that was sent to the webhook.
+
+    image_default: :class:`bool`
+
+    image_34: :class:`str`
+        image url.
+
+    image_44: :class:`str`
+
+    image_68: :class:`str`
+
+    image_88: :class:`str`
+
+    image_102: :class:`str`
+
+    image_230: :class:`str`
+
+    image_132: :class:`str`
 
     """
 
     def __init__(self, state: ConnectionState, team: "Team", data: IconPayload):
-        self.data = data
-        self.team = team
+        self.state = state
+        self.team: Team = team
+        self.image_default: bool = data.get("image_default")
+        self.image_34: str = data.get("image_34")
+        self.image_44: str = data.get("image_44")
+        self.image_68: str = data.get("image_68")
+        self.image_88: str = data.get("image_88")
+        self.image_102: str = data.get("image_102")
+        self.image_230: str = data.get("image_230")
+        self.image_132: str = data.get("image_132")
 
 
 class Team:
@@ -49,7 +72,7 @@ class Team:
     url: :class:`bool`
         team link.
 
-    icon: :class:`Icon`
+    icon: :class:`~Icon`
         Team icon data.
 
     name: :class:`str`

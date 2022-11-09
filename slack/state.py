@@ -8,7 +8,10 @@ from typing import (
     Callable,
     Any,
     TYPE_CHECKING,
-    Tuple
+    Tuple,
+    Set,
+    Optional,
+    TypeVar
 )
 
 from .channel import Channel, DeletedChannel
@@ -29,13 +32,13 @@ if TYPE_CHECKING:
 
 _logger = logging.getLogger(__name__)
 
+Parsers = TypeVar("Parsers", bound=Dict[str, Callable[[Optional[Dict[str, Any]]], None]])
+
 
 class ConnectionState:
     """
 
     """
-    _parsers: Dict[str, Callable[[Dict[str, Any]], None]]
-
     def __init__(
             self,
             dispatch: Callable[..., None],
@@ -48,7 +51,8 @@ class ConnectionState:
         self.loop: asyncio.AbstractEventLoop = loop
         self.dispatch: Callable[..., None] = dispatch
         self.handlers: Dict[str, Callable] = handlers
-        parsers: Dict[str, Callable]
+        self.all_events: Set[str] = set()
+        parsers: Parsers
         self.parsers = parsers = {}
         self.teams: Dict[str, Team] = {}
         self.channels: Dict[str, Channel] = {}
@@ -94,6 +98,7 @@ class ConnectionState:
         return self.teams, self.channels, self.members
 
     def parse_hello(self, *args, **kwargs):
+        self.all_events.add("on_ready")
         self.dispatch("ready")
 
     def parse_message(self, payload: Dict[str, Any]) -> None:
@@ -107,6 +112,7 @@ class ConnectionState:
         """
         event = payload["event"]
         message = Message(state=self, data=event)
+        self.all_events.add("on_message")
         self.dispatch("message", message)
 
     def parse_channel_created(self, payload: Dict[str, Any]) -> None:
@@ -121,6 +127,7 @@ class ConnectionState:
         event = payload['event']
         ch_data = event['channel']
         channel = Channel(state=self, data=ch_data)
+        self.all_events.add("on_channel_create")
         self.dispatch("channel_create", channel)
 
     def parse_channel_deleted(self, payload: Dict[str, Any]) -> None:
@@ -134,6 +141,7 @@ class ConnectionState:
         """
         event = payload['event']
         channel = DeletedChannel(state=self, data=event)
+        self.all_events.add("on_channel_delete")
         self.dispatch("channel_delete", channel)
 
     def parse_channel_purpose(self, payload: Dict[str, Any]) -> None:
@@ -147,6 +155,7 @@ class ConnectionState:
         """
         event = payload['event']
         message = PurposeMessage(state=self, data=event)
+        self.all_events.add("on_channel_purpose")
         self.dispatch("channel_purpose", message)
 
     def parse_message_deleted(self, payload: Dict[str, Any]) -> None:
@@ -160,6 +169,7 @@ class ConnectionState:
         """
         event = payload['event']
         message = DeletedMessage(state=self, data=event)
+        self.all_events.add("on_message_delete")
         self.dispatch("message_delete", message)
 
     def parse_channel_joined(self, payload: Dict[str, Any]) -> None:
@@ -173,6 +183,7 @@ class ConnectionState:
         """
         event = payload['event']
         message = JoinMessage(state=self, data=event)
+        self.all_events.add("on_channel_join")
         self.dispatch("channel_join", message)
 
     def parse_channel_archive(self, payload: Dict[str, Any]) -> None:
@@ -186,6 +197,7 @@ class ConnectionState:
         """
         event = payload['event']
         message = ArchivedMessage(state=self, data=event)
+        self.all_events.add("on_channel_archive")
         self.dispatch("channel_archive", message)
 
     def parse_message_changed(self, payload: Dict[str, Any]) -> None:
@@ -200,4 +212,5 @@ class ConnectionState:
         event = payload['event']
         before_message = Message(state=self, data=event['previous_message'])
         after_message = Message(state=self, data=event['message'])
+        self.all_events.add("on_message_update")
         self.dispatch("message_update", before_message, after_message)

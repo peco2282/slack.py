@@ -3,6 +3,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import TYPE_CHECKING
 
+from .member import Member
 from .message import Message
 from .route import Route
 from .team import Team
@@ -28,9 +29,6 @@ class Channel:
 
     Attributes
     ----------
-    state : :class:`ConnectionState`
-        The connection state.
-
     id : :class:`str`
         Channel ID.
 
@@ -43,7 +41,7 @@ class Channel:
     created_at: :class:`datetime`
         When create this channel.
 
-    created_by: :class:`str`
+    created_by: :class:`Member`
         Who channel create.
 
     """
@@ -54,7 +52,7 @@ class Channel:
         self.name = data.get("name")
         self.team: Team = self.state.teams[data.get("context_team_id")]
         self.created_at: datetime = datetime.fromtimestamp(float(data.get("created", 0)))
-        self.created_by: str = data.get("creator")
+        self.created_by: Member = self.state.members[data.get("creator")]
         self.overload(data)
 
     def __repr__(self) -> str:
@@ -68,11 +66,12 @@ class Channel:
 
         Parameters
         ----------
-        text : str
+        text : :class:`str`
             The text of the message to send.
 
         Returns
         -------
+        :class:`~Message`
             A Message object.
 
         """
@@ -87,6 +86,19 @@ class Channel:
         return Message(state=self.state, data=message["message"])
 
     async def send_as_user(self, text: str):
+        """
+
+        Parameters
+        ----------
+        text: :class:`str`
+            Message you want to send by your.
+
+        Returns
+        -------
+        :class:`~Message`
+            A Message object.
+
+        """
         param = {
             "channel": self.id,
             "text": text

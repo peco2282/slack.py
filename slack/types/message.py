@@ -124,15 +124,8 @@ class Message(TypedDict):
     edited_ts: str
 
 
-class JoinMessage(TypedDict):
-    type: str
+class JoinMessage(Message):
     subtype: str
-    ts: str
-    user: str
-    text: str
-    channel: str
-    event_ts: str
-    channel_type: str
 
 
 class PurposeMessage(JoinMessage):
