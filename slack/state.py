@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import datetime
 import inspect
 import logging
 from typing import (
@@ -29,16 +30,48 @@ from .team import Team
 if TYPE_CHECKING:
     from .httpclient import HTTPClient
 
-
 _logger = logging.getLogger(__name__)
 
 Parsers = TypeVar("Parsers", bound=Dict[str, Callable[[Optional[Dict[str, Any]]], None]])
+
+
+class ReactionEventType:
+    """
+    Attributes
+    ----------
+    type: :class:`str`
+        Reaction type.
+
+    reaction: :class:`str`
+        Reaction name.
+
+    file: :class:`Optional[str]`
+        File ID(optional).
+
+    file_comment: :class:`Optional[str]`
+        File comment(optional).
+
+    channel: :class:`~Channel`
+        Channel data(optional).
+
+    timestamp: :class:`datetime.datetime`
+        Message created at.
+
+    """
+    def __init__(self, _type: str, state: "ConnectionState", payload: Dict[str, str]):
+        self.type: str = _type
+        self.reaction: str = ""
+        self.file: Optional[str] = payload.get("file")
+        self.file_comment: Optional[str] = payload.get("file_comment")
+        self.channel: Optional[Channel] = state.channels.get(payload.get("channel", ""))
+        self.timestamp: Optional[datetime.datetime] = datetime.datetime.fromtimestamp(float(payload.get("ts")))
 
 
 class ConnectionState:
     """
 
     """
+
     def __init__(
             self,
             dispatch: Callable[..., None],
@@ -214,3 +247,62 @@ class ConnectionState:
         after_message = Message(state=self, data=event['message'])
         self.all_events.add("on_message_update")
         self.dispatch("message_update", before_message, after_message)
+
+    def parse_channel_rename(self, payload: Dict[str, Any]):
+        event = payload["event"]
+        channel_data = event["channel"]
+        channel = self.channels[channel_data["id"]]
+        _channel = channel
+        _channel.name = channel_data["name"]
+        self.all_events.add("on_channel_rename")
+        self.dispatch("channel_rename", channel, _channel)
+
+    def parse_channel_unarchive(self, payload: Dict[str, Any]):
+        channel = self.channels[payload["channel"]]
+        user = self.members[payload["user"]]
+        self.all_events.add("on_channel_unarchive")
+        self.dispatch("channel_unarchive", channel, user)
+
+    def parse_member_joined_channel(self, payload: Dict[str, Any]):
+        channel = self.channels[payload["channel"]]
+        user = self.members[payload["user"]]
+        inviter = self.members[payload["inviter"]]
+        self.all_events.add("on_member_join")
+        self.dispatch("member_join", channel, user, inviter)
+
+    def parse_member_left_channel(self, payload: Dict[str, Any]):
+        user = self.members[payload["user"]]
+        channel = self.channels[payload["channel"]]
+        self.all_events.add("on_member_left")
+        self.dispatch("member_left", channel, user)
+
+    def parse_reaction_added(self, payload: Dict[str, Any]):
+        user: Member = self.members[payload.get("user", "")]
+        _type: str = payload["item"]["type"]
+        item_user: Member = self.members.get(payload.get("item_user", ""))
+
+        react_type = ReactionEventType(_type, self, payload["item"])
+        react_type.reaction = payload["reaction"]
+
+        self.all_events.add("on_reaction_add")
+        self.dispatch("reaction_add", user, item_user, react_type)
+
+    def parse_reaction_removed(self, payload: Dict[str, Any]):
+
+        user: Member = self.members[payload.get("user", "")]
+        _type: str = payload["item"]["type"]
+        item_user: Member = self.members.get(payload.get("item_user", ""))
+
+        react_type = ReactionEventType(_type, self, payload["item"])
+        react_type.reaction = payload["reaction"]
+
+        self.all_events.add("on_reaction_remove")
+        self.dispatch("reaction_remove", user, item_user, react_type)
+
+    def parse_pin_added(self, payload: Dict[str, Any]):
+        self.all_events.add("pin_add")
+        self.dispatch("pin_add")
+
+    def parse_pin_removed(self, payload: Dict[str, Any]):
+        self.all_events.add("pin_remove")
+        self.dispatch("pin_remove")
