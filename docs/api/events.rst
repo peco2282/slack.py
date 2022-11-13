@@ -68,3 +68,51 @@ Channels
     :param channel: The deleted channel.
     :type channel: :class:`DeletedChannel`
 
+.. py:function:: on_channel_rename(before, after)
+
+    Called whenever channel was renamed.
+
+    :param before: The renamed channel(before).
+    :type before: :class:`Channel`
+    :param after: The renamed channel(after).
+    :type after: :class:`Channel`
+
+.. py:function:: on_channel_unarchive(channel, user)
+
+    Called whenever channel was unarcchived.
+
+    :param channel: The unarchived channel.
+    :type channel: :class:`Channel`
+    :param user: The member who channel unarchive.
+    :type user: :class:`Member`
+
+.. py:function:: on_member_join(channel, user)
+
+    Called whenever member joined channel.
+
+    :param channel: The member joined channel.
+    :type channel: :class:`Channel`
+    :param user: The joined member.
+    :type user: :class:`Member`
+
+.. py:function:: on_reaction_add(user, item_user, react_type)
+
+    Called whenever reaction added.
+
+    :param user: The reacted member.
+    :type user: :class:`Member`
+    :param item_user: The reaction owner.
+    :type item_user: :class:`Member`
+    :param react_type: The reaction data.
+    :type react_type: :class:`ReactionEventType`
+
+.. py:function:: on_reaction_remove(user, item_user, react_type)
+
+    Called whenever reaction was removed.
+
+    :param user: The reacted member.
+    :type user: :class:`Member`
+    :param item_user: The reaction owner.
+    :type item_user: :class:`Member`
+    :param react_type: The reaction data.
+    :type react_type: :class:`ReactionEventType`

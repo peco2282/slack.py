@@ -78,3 +78,10 @@ Members
     :members:
     :inherited-members:
 
+Reaction-Event
+--------------
+
+.. attributetable:: ReactionEventType
+
+.. autoclass:: ReactionEventType()
+    :members:
