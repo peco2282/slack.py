@@ -51,4 +51,9 @@ napoleon_numpy_docstring = True
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
 html_theme = 'basic'
+
+rst_prolog = """
+.. |coroutine| replace:: This function is a *coroutine*
+"""
+
 html_static_path = ['_static']
