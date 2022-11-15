@@ -1,6 +1,6 @@
 *.json
 test.py
-example/
+test/
 sample/
 
 ### Python template

@@ -1,9 +1,10 @@
 # An API wrapper with Slack written in Python.
 
 ## Key feature
-- Modern Pythonic API using async and await.
+- Modern Pythonic API using `async` and `await`.
+- API and interactive components of the platform  by utilizing websockets.
 
-:warning: This is an alpha version.
+[//]: # (:warning: This is an alpha version.)
 
 [**Document**](https://slack-py.readthedocs.io/en/latest/)
 

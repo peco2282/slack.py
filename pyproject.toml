@@ -21,3 +21,7 @@ packages = [
 
 [tool.setuptools.dynamic]
 dependencies = { file = "requirements.txt" }
+
+[project.urls]
+Source = "https://github.com/peco2282/slack.py"
+Documentation = "https://slack-py.readthedocs.io/en/latest/"
