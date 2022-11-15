@@ -62,7 +62,9 @@ class Channel:
         pass
 
     async def send(self, text: str) -> Message:
-        """It sends a message to a channel.
+        """|coroutine|
+
+        It sends a message to a channel.
 
         Parameters
         ----------
@@ -86,7 +88,7 @@ class Channel:
         return Message(state=self.state, data=message["message"])
 
     async def send_as_user(self, text: str):
-        """
+        """|coroutine|
 
         Parameters
         ----------

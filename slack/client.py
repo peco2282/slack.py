@@ -3,6 +3,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import signal
+import traceback
 from typing import (
     List,
     Dict,
@@ -168,7 +169,7 @@ class Client:
             raise TypeError("event must be coroutine function.")
 
         setattr(self, coro.__name__, coro)
-        _logger.info("%s was set", coro.__name__)
+        _logger.info("%s event was set", coro.__name__)
         self.events.add(coro.__name__)
         return coro
 
@@ -197,8 +198,8 @@ class Client:
             loop.add_signal_handler(signal.SIGINT, loop.stop)
             loop.add_signal_handler(signal.SIGTERM, loop.stop)
 
-        except:
-            pass
+        except NotImplementedError as nie:
+            _logger.error(traceback.TracebackException.from_exception(nie))
 
         async def runner() -> None:
             try:
@@ -220,7 +221,7 @@ class Client:
 
         if len(_invalid) >= 1:
             _logger.warning(
-                "{} event{} name invalid {}.".format(
+                "{} event{} name invalid. event name is {}.".format(
                     len(_invalid),
                     "" if len(_invalid) == 1
                     else "s", ", ".join(

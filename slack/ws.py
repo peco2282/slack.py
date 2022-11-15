@@ -106,7 +106,6 @@ class SlackWebSocket:
             The future object is being returned.
 
         """
-        event_type: str = ""
         if data.get("type") == "hello":
             try:
                 func = self._slack_parsers["hello"]
@@ -118,7 +117,7 @@ class SlackWebSocket:
                 func()
 
         else:
-            if not data.get("ok", True):
+            if not data.get("ok", False):
                 return
             payload: Dict[str, Any] = data.get("payload")
             event: Dict[str, Any] = payload.get("event")
