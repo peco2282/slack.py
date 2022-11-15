@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(
-    name='slack.py',
+    name='wsslack.py',
     version='1.0.0',
     packages=[
         'slack',

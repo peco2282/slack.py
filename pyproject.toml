@@ -1,5 +1,5 @@
 [project]
-name = "slack.py"
+name = "wsslack.py"
 authors = ["peco2282"]
 description = "A Python wrapper for slack"
 readme = "README.md"

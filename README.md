@@ -7,6 +7,13 @@
 
 [**Document**](https://slack-py.readthedocs.io/en/latest/)
 
+## Install
+
+```shell
+$ pip install wsslack.py
+```
+
+
 ## example
 ```python
 import slack

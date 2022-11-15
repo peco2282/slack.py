@@ -1,6 +1,7 @@
 *.json
 test.py
 example/
+sample/
 
 ### Python template
 # Byte-compiled / optimized / DLL files

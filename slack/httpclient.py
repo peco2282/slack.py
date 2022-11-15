@@ -91,7 +91,6 @@ class HTTPClient:
         async with self.__session.request(method, url, **params) as response:
             try:
                 _json = await response.json()
-                print(_json)
                 if _json.get("ok"):
                     return _json
 

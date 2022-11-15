@@ -13,8 +13,8 @@
         continue;
       }
 
-      if(key.startsWith('slack.ext.')) {
-        key = key.substr(12); // discord.ext.
+      if(key.startsWith('slack.commands.')) {
+        key = key.substr(15); // discord.ext.
       }
 
       if(el.textContent.indexOf('()') !== -1) {

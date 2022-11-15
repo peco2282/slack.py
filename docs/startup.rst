@@ -3,8 +3,7 @@ Startup for create Slack APP
 
 Creating App
 ------------
-1. Log in `Slack API page <https://api.slack.com/apps/>`_
-and click `Create new app` button.
+1. Log in `Slack API page <https://api.slack.com/apps/>`_ and click `Create new app` button.
 2. Select `From scratch`.
 3. Enter your new app name and select install workspace.
 

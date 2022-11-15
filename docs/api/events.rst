@@ -3,6 +3,23 @@
 Event Reference
 ===============
 
+.. note:: Events usage.
+
+    .. code-block:: python
+
+        import slack
+
+        client = slack.Client(...)
+
+        @client.event
+        async def on_message_update(before: slack.Message, after: slack.Message):  # Event name.
+            print(before.content, after.content)
+            # Statements...
+
+
+Ready
+-----
+
 .. py:function:: on_ready()
 
     Called whenever bow is ready.
