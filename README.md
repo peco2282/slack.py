@@ -1,3 +1,6 @@
+![PyPI](https://img.shields.io/pypi/v/wsslack.py)
+![PyPI - License](https://img.shields.io/pypi/l/wsslack.py)
+
 # An API wrapper with Slack written in Python.
 
 ## Key feature
