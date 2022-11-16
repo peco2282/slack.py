@@ -22,7 +22,7 @@ Ready
 
 .. py:function:: on_ready()
 
-    Called whenever bow is ready.
+    Called whenever bot is ready.
 
 Messages
 --------
