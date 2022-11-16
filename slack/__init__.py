@@ -8,4 +8,4 @@ from .state import *
 from .team import *
 from .ws import *
 
-version = "1.0.0"
+version = "1.0.1"
