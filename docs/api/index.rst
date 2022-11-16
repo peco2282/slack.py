@@ -5,7 +5,7 @@
 
 .. toctree::
    :caption: Table of Contents
-   :maxdepth: 1
+   :maxdepth: 2
 
    clients
    models

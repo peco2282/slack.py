@@ -21,18 +21,19 @@ release = '1.0.0'
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
 extensions = [
-    "builder",
+    # "builder",
     "sphinx.ext.autodoc",
     "sphinx.ext.extlinks",
     "sphinx.ext.intersphinx",
     "sphinx.ext.napoleon",
     "sphinxcontrib_trio",
-    "details",
-    "exception_hierarchy",
+    # "details",
+    # "exception_hierarchy",
     "attributetable",
-    "resourcelinks",
-    "nitpick_file_ignorer",
+    # "resourcelinks",
+    # "nitpick_file_ignorer",
     "myst_parser",
+    # "helloworld"
 ]
 master_doc = "index"
 pygments_style = "friendly"
