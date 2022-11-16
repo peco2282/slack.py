@@ -48,11 +48,11 @@ class Client:
     Attributes
     -----------
     user_token: :class:`str`
-        The connector to use for connection pooling.
+        The yourself token. It must be start 'xoxp-...'
     bot_token: :class:`str`
-        Proxy URL.
+        The bot token. It must be start 'xoxb-...'
     token: :class:`str`
-        Integer starting at ``0`` and less than :attr:`.shard_count`.
+        App-level token. It is startwith 'xapp-...'
 
     loop: Optional[:class:`asyncio.AbstractEventLoop`]
         The :class:`asyncio.AbstractEventLoop` to use for asynchronous operations.
