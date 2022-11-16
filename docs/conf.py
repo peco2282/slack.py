@@ -27,11 +27,11 @@ extensions = [
     "sphinx.ext.intersphinx",
     "sphinx.ext.napoleon",
     "sphinxcontrib_trio",
-    # "details",
-    # "exception_hierarchy",
+    "details",
+    "exception_hierarchy",
     "attributetable",
-    # "resourcelinks",
-    # "nitpick_file_ignorer",
+    "resourcelinks",
+    "nitpick_file_ignorer",
     "myst_parser",
     # "helloworld"
 ]
