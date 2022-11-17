@@ -80,6 +80,8 @@ docs/_build/
 # PyBuilder
 .pybuilder/
 target/
+.idea
+.fleet
 
 # Jupyter Notebook
 .ipynb_checkpoints
@@ -143,3 +145,5 @@ dmypy.json
 # Cython debug symbols
 cython_debug/
 
+/.fleet/
+/.idea/
