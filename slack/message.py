@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 from .route import Route
 from .member import Member
@@ -47,7 +47,7 @@ class Message:
         Message created at.
 
     """
-    def __init__(self, state: ConnectionState, data: MessagePayload):
+    def __init__(self, state: ConnectionState, data: Optional[MessagePayload] = None):
         self.state = state
         self.team_id = data.get("team")
         self.id = data.get("ts")
