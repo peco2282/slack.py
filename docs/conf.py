@@ -21,7 +21,7 @@ release = '1.0.0'
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
 extensions = [
-    # "builder",
+    "builder",
     "sphinx.ext.autodoc",
     "sphinx.ext.extlinks",
     "sphinx.ext.intersphinx",
@@ -33,7 +33,6 @@ extensions = [
     "resourcelinks",
     "nitpick_file_ignorer",
     "myst_parser",
-    # "helloworld"
 ]
 master_doc = "index"
 pygments_style = "friendly"
