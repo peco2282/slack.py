@@ -11,7 +11,8 @@ for slack.
 
 
 .. toctree::
-   :maxdepth: 1
+    :maxdepth: 1
 
-   startup.rst
-   api/index.rst
+    startup.rst
+    api/index.rst
+    commands/index.rst
