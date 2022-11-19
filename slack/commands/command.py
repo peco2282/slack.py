@@ -8,7 +8,7 @@ from .context import Context
 from ..message import Message
 
 __all__ = (
-    "Bot",
+    "Client",
     "Command",
 )
 
@@ -62,7 +62,7 @@ class Command(Generic[P, T]):
 
     async def invoke(self, ctx: Context):
         occur = _occur(self.func)
-        await occur(*ctx.args, **ctx.kwargs)
+        await occur(ctx, *ctx.args, **ctx.kwargs)
 
 
 def command(name: Optional[str], **kwargs):
@@ -72,7 +72,7 @@ def command(name: Optional[str], **kwargs):
     return decorator
 
 
-class Bot(slack.Client):
+class Client(slack.Client):
     """
     This is :class:`~slack.Client`'s subclass.
 
@@ -114,15 +114,14 @@ class Bot(slack.Client):
             # self.dispatch("command", ctx)
 
             try:
-                await ctx.invoke(self.commands[ctx.name])
                 await ctx.command.invoke(ctx)
 
-            except AttributeError as attr:
-                # self.dispatch("command_error", ctx, attr)
+            except AttributeError:
                 pass
 
             except Exception as exc:
                 traceback.TracebackException.from_exception(exc)
+                self.dispatch("command_error", ctx, exc)
 
     async def process_commands(self, message: Message):
         content = message.content
