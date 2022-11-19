@@ -8,7 +8,7 @@ from .context import Context
 from ..message import Message
 
 __all__ = (
-    "Client",
+    "Bot",
     "Command",
 )
 
@@ -72,14 +72,17 @@ def command(name: Optional[str], **kwargs):
     return decorator
 
 
-class Client(slack.Client):
+class Bot(slack.Client):
     """
     This is :class:`~slack.Client`'s subclass.
 
     Attributes
     ----------
     prefix: :class:`str`
+        Command-prefix.
 
+    commands: :class:`Dict[str, Command]`
+        command-name: Command-Obj.
     """
 
     def __init__(
@@ -98,6 +101,16 @@ class Client(slack.Client):
         self.prefix = str(prefix)
 
     def command(self, name: str = None, **kwargs):
+        """
+        Register command of your client-object.
+
+        Parameters
+        ----------
+        name: :class:`str`
+            command name.
+            If you don't set, use function name.
+
+        """
         def decorator(func):
             result = command(name, **kwargs)(func)
             self.add_command(result)

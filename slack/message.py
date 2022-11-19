@@ -58,7 +58,8 @@ class Message:
 
     @property
     def channel(self) -> Channel:
-        """
+        """Message channel data.
+
         Returns
         -------
         :class:`~Channel`
@@ -69,7 +70,8 @@ class Message:
 
     @property
     def author(self) -> Member:
-        """
+        """Message author.
+
         Returns
         -------
         :class:`~Member`
@@ -80,7 +82,7 @@ class Message:
 
     @property
     def team(self) -> Team:
-        """
+        """Message team.
         Returns
         -------
         :class:`~Team`
@@ -109,11 +111,6 @@ class Message:
 class JoinMessage(Message):
     """This function is a constructor for the JoinMessage class. It takes in a ConnectionState and a JoinMessagePayload as
     parameters and sets the author of the message to the user in the JoinMessagePayload
-
-    Attributes
-    ----------
-    state : :class:`ConnectionState`
-        The ConnectionState object that represents the current state of the connection.
 
     """
     def __init__(self, state: ConnectionState, data: JoinMessagePayload):

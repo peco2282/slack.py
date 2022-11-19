@@ -93,6 +93,22 @@ class Team:
         return f"<{self.__class__.__name__} id={self.id} name={self.name}>"
 
     async def create_channel(self, name: str, join: bool = True) -> Channel:
+        """
+        Create new channel.
+
+        Parameters
+        ----------
+        name: :class:`str`
+            new channel name.
+
+        join: :calss:`bool`
+            is bot join.
+
+        Returns
+        -------
+        :class:`Channel`
+            Return created channel.
+        """
         channel = await self.state.http.create_channel(
             Route("POST", "conversations.create", self.state.http.bot_token),
             {"name": name}

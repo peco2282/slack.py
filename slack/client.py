@@ -109,16 +109,6 @@ class Client:
         return self._ready.set()
 
     def dispatch(self, event: str, *args, **kwargs) -> None:
-        """Dispatch event with any keyword.
-        Parameters
-        ----------
-        event : :class:`str`
-            The event name.
-        args : :class:`Any`
-            params of event action.
-        kwargs : :class:`Any`
-            keyword of event action.
-        """
         method = f"on_{event}"
         listeners = self._listeners.get(event)
         try:
@@ -169,7 +159,6 @@ class Client:
 
         setattr(self, coro.__name__, coro)
         _logger.info("%s event was set", coro.__name__)
-        self.events.add(coro.__name__)
         return coro
 
     def run(self) -> None:

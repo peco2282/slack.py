@@ -17,6 +17,9 @@ Teams
     :members:
     :inherited-members:
 
+Icon
+~~~~
+
 .. attributetable:: Icon
 
 .. autoclass:: Icon()
@@ -45,11 +48,17 @@ DeletedChannel
 Messages
 --------
 
+Message
+~~~~~~~
+
 .. attributetable:: Message
 
 .. autoclass:: Message()
     :members:
     :inherited-members:
+
+DeletedMessage
+~~~~~~~~~~~~~~
 
 .. attributetable:: DeletedMessage
 
@@ -57,11 +66,18 @@ Messages
     :members:
     :inherited-members:
 
+
+JoinMessage
+~~~~~~~~~~~
+
 .. attributetable:: JoinMessage
 
 .. autoclass:: JoinMessage()
     :members:
     :inherited-members:
+
+ArchivedMessage
+~~~~~~~~~~~~~~~
 
 .. attributetable:: ArchivedMessage
 

@@ -118,5 +118,12 @@ class Member:
         return f"<{self.__class__.__name__} id={self.id} name={self.name}>"
 
     @property
-    def mention(self):
+    def mention(self) -> str:
+        """Return member mention.
+
+        Returns
+        -------
+        :class:`str`
+            mention.
+        """
         return f"<@{self.id}>"

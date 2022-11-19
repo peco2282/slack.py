@@ -112,6 +112,18 @@ class Channel:
         return Message(state=self.state, data=message["message"])
 
     async def create_channel(self, name: str):
+        """
+
+        Parameters
+        ----------
+        name: :class:`str`
+            Channel name you want to create.
+
+        Returns
+        -------
+        :class:`Channel`
+            created channel data.
+        """
         param = {
             "name": name.lower().replace(" ", "")
         }

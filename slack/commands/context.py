@@ -12,11 +12,15 @@ class Context(Message):
     """
     Attributes
     ----------
-    command: :class:`Optional[.Command]`
+    message: :class:`.Message`
+        Message object of context.
+
+    prefix: :class:`str`
+        Message prefix.
     """
     def __init__(
             self,
-            client: commands.Client,
+            client: commands.Bot,
             message: Message,
             prefix: str,
             command: Optional[Command] = None,
@@ -35,8 +39,20 @@ class Context(Message):
 
     @property
     def channel(self) -> Channel:
+        """Returns context channel.
+
+        Returns
+        -------
+        :class:`Channel`
+        """
         return self.message.channel
 
     @property
     def team(self) -> Team:
+        """Return context team.
+
+        Returns
+        -------
+        :class:`Team`
+        """
         return self.message.team
