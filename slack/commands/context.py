@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Optional
 
-from slack import Message, commands
+from slack import Message, commands, Channel, Team
 
 if TYPE_CHECKING:
     from .command import Command
@@ -16,7 +16,7 @@ class Context(Message):
     """
     def __init__(
             self,
-            client: commands.Bot,
+            client: commands.Client,
             message: Message,
             prefix: str,
             command: Optional[Command] = None,
@@ -33,5 +33,10 @@ class Context(Message):
         self.prefix = prefix
         self.state = message.state
 
-    async def invoke(self, command, *args, **kwargs):
-        return await command(self, *args, **kwargs)
+    @property
+    def channel(self) -> Channel:
+        return self.message.channel
+
+    @property
+    def team(self) -> Team:
+        return self.message.team
