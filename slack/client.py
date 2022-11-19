@@ -69,7 +69,6 @@ class Client:
             loop: Optional[asyncio.AbstractEventLoop] = None,
             **options
     ):
-        self.events: Set[str, ...] = set()
         self._listeners: Dict[
             str, List[
                 Tuple[
@@ -214,22 +213,6 @@ class Client:
 
         future: asyncio.Task = asyncio.ensure_future(runner(), loop=loop)
         future.add_done_callback(stop_loop)
-        _invalid = []
-        for event in self.events:
-            if event not in self.connection.all_events:
-                _invalid.append(event[3:])
-
-        if len(_invalid) >= 1:
-            _logger.warning(
-                "{} event{} name invalid. event name is {}.".format(
-                    len(_invalid),
-                    "" if len(_invalid) == 1
-                    else "s", ", ".join(
-                        [v for v in _invalid]
-                    )
-                )
-            )
-
 
         try:
             loop.run_forever()
