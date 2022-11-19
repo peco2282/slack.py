@@ -1,7 +1,7 @@
 import asyncio
 import functools
 import traceback
-from typing import Optional, Callable, Generic, TypeVar, ParamSpec
+from typing import Optional, Callable
 
 import slack
 from .context import Context
@@ -12,8 +12,6 @@ __all__ = (
     "Command",
 )
 
-T = TypeVar("T")
-P = ParamSpec("P")
 
 
 def _occur(coro):
@@ -40,7 +38,7 @@ def inject(coro):
     return wrapped
 
 
-class Command(Generic[P, T]):
+class Command:
     """
     Attributes
     ----------
