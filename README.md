@@ -45,3 +45,24 @@ client.run()
 
 ### **on_channel_create**
 ![on_channel_create](https://gyazo.com/40bec93c03343e43dee2180075716d39.png)
+
+## extentional usage.
+If you use app with commands..
+
+```python
+from slack import commands
+
+bot = commands.Bot(..., prefix="!")
+
+@bot.command(name="msg")
+async def message(ctx: commands.Context, *args):
+    await ctx.channel.send("message received!")
+
+@bot.command()
+async def ping(ctx: commands.Context, *args):
+    await ctx.channel.send("pong!")
+```
+
+![msg](https://gyazo.com/38adfa4b18775e894d8c6f47d17d62f3.png)
+
+![ping](https://gyazo.com/0f68ed0f4a125a2220782d703de0f24f.png)
