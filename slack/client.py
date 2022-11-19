@@ -48,7 +48,7 @@ class Client:
     Attributes
     -----------
     user_token: :class:`str`
-        The yourself token. It must be start 'xoxp-...'
+        The your-self token. It must be start 'xoxp-...'
     bot_token: :class:`str`
         The bot token. It must be start 'xoxb-...'
     token: :class:`str`

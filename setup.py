@@ -37,6 +37,5 @@ setup(
     author='peco2282',
     author_email='pecop2282@gmail.com',
     description='An APIwrapper for slack with python.',
-    long_description=long_description,
-    long_description_content_type='text/markdown'
+    long_description_content_type="text/markdown",
 )

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 from .member import Member
 from .message import Message
@@ -52,7 +52,7 @@ class Channel:
         self.name = data.get("name")
         self.team: Team = self.state.teams[data.get("context_team_id")]
         self.created_at: datetime = datetime.fromtimestamp(float(data.get("created", 0)))
-        self.created_by: Member = self.state.members[data.get("creator")]
+        self.created_by: Optional[Member] = self.state.members.get(data.get("creator"))
         self.overload(data)
 
     def __repr__(self) -> str:

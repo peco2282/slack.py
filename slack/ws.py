@@ -117,8 +117,8 @@ class SlackWebSocket:
                 func()
 
         else:
-            if not data.get("ok", False):
-                return
+            # if not data.get("ok") or data.get("ok") is None:
+            #     return
             payload: Dict[str, Any] = data.get("payload")
             event: Dict[str, Any] = payload.get("event")
             event_type: str = event.get("subtype") if event is not None else "undefined event"
