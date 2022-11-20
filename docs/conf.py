@@ -52,6 +52,11 @@ napoleon_numpy_docstring = True
 
 html_theme = 'basic'
 
+intersphinx_mapping = {
+    "py": ("https://docs.python.org/3", None),
+}
+
+
 rst_prolog = """
 .. |coroutine| replace:: This function is a *coroutine*
 """

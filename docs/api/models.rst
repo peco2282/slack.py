@@ -15,7 +15,6 @@ Teams
 
 .. autoclass:: Team()
     :members:
-    :inherited-members:
 
 Icon
 ~~~~
@@ -24,7 +23,6 @@ Icon
 
 .. autoclass:: Icon()
     :members:
-    :inherited-members:
 
 
 Channels
@@ -34,7 +32,6 @@ Channels
 
 .. autoclass:: Channel()
     :members:
-    :inherited-members:
 
 DeletedChannel
 ~~~~~~~~~~~~~~
@@ -55,7 +52,6 @@ Message
 
 .. autoclass:: Message()
     :members:
-    :inherited-members:
 
 DeletedMessage
 ~~~~~~~~~~~~~~
