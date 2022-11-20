@@ -162,6 +162,7 @@ class ConnectionState:
         ch_data = event['channel']
         channel = Channel(state=self, data=ch_data)
         self.all_events.add("on_channel_create")
+        self.channels[channel.id] = channel
         self.dispatch("channel_create", channel)
 
     def parse_channel_deleted(self, payload: Dict[str, Any]) -> None:
@@ -175,6 +176,7 @@ class ConnectionState:
         """
         event = payload['event']
         channel = DeletedChannel(state=self, data=event)
+        del self.channels[channel.channel_id]
         self.all_events.add("on_channel_delete")
         self.dispatch("channel_delete", channel)
 

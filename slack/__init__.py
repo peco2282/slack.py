@@ -1,5 +1,6 @@
 from .channel import *
 from .client import *
+from .errors import *
 from .httpclient import *
 from .member import *
 from .message import *

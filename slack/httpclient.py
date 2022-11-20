@@ -6,14 +6,11 @@ from typing import Any, Dict, TYPE_CHECKING, Optional, Union
 
 import aiohttp
 
+from .errors import RateLimitException, SlackException
 from .route import Route
 
 if TYPE_CHECKING:
     from .ws import SlackWebSocket
-
-
-class SlackException(Exception):
-    pass
 
 
 class HTTPClient:
@@ -95,7 +92,11 @@ class HTTPClient:
                     return _json
 
                 else:
-                    raise SlackException(_json["error"])
+                    if _json.get("error") == "ratelimited":
+                        raise RateLimitException(_json)
+
+                    else:
+                        raise SlackException(_json["error"])
 
             except json.JSONDecodeError:
                 return await response.text()
