@@ -13,7 +13,6 @@ __all__ = (
 )
 
 
-
 def _occur(coro):
     @functools.wraps(coro)
     async def wrapped(*args, **kwargs):
@@ -45,6 +44,7 @@ class Command:
     func: :class:`Callable`
 
     """
+
     def __init__(self, func: Callable, name: Optional[str] = None, *args, **kwargs):
         self.func = func
         self.name = name or func.__name__
@@ -109,6 +109,7 @@ class Bot(slack.Client):
             If you don't set, use function name.
 
         """
+
         def decorator(func):
             result = command(name, **kwargs)(func)
             self.add_command(result)

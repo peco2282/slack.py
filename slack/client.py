@@ -13,9 +13,10 @@ from typing import (
     Coroutine,
     Any,
     Optional,
-    TYPE_CHECKING, Set
+    TYPE_CHECKING
 )
 
+from .errors import TokenTypeException
 from .httpclient import HTTPClient
 from .state import ConnectionState
 from .ws import SlackWebSocket
@@ -51,7 +52,7 @@ class Client:
         The your-self token. It must be start 'xoxp-...'
     bot_token: :class:`str`
         The bot token. It must be start 'xoxb-...'
-    token: :class:`str`
+    token: :class:Optional[`str`]
         App-level token. It is startwith 'xapp-...'
 
     loop: Optional[:class:`asyncio.AbstractEventLoop`]
@@ -64,7 +65,7 @@ class Client:
             self,
             user_token: str,
             bot_token: str,
-            token: str,
+            token: str = None,
 
             loop: Optional[asyncio.AbstractEventLoop] = None,
             **options
@@ -78,6 +79,15 @@ class Client:
         ] = {}
         if not all([isinstance(t, str) for t in (user_token, bot_token, token)]):
             raise TypeError("All token must be `str`")
+
+        if not user_token.startswith("xoxp-"):
+            raise TokenTypeException("User token must be start `xoxp-`")
+
+        if not bot_token.startswith("xoxb-"):
+            raise TokenTypeException("Application token must be start `xoxb-`")
+
+        if not token and token.startswith("xapp-"):
+            raise TokenTypeException("Token must be start `xapp-`")
 
         self.ws: SlackWebSocket = None
         self.user_token: str = user_token
@@ -136,6 +146,7 @@ class Client:
 
         Returns
         -------
+        :class:`bool`
             The return value is a boolean value.
 
         """
@@ -168,6 +179,9 @@ class Client:
         function should not be used. Use :meth:`start` coroutine
         or :meth:`connect` + :meth:`login`.
         Roughly Equivalent to: ::
+
+        .. codeblock:: python
+
             try:
                 loop.run_until_complete(start(*args, **kwargs))
             except KeyboardInterrupt:
@@ -262,19 +276,6 @@ class Client:
             *args,
             **kwargs
     ) -> asyncio.Task:
-        """
-
-        Parameters
-        ----------
-        coro : :class:`Callable[..., Coroutine[Any, Any, Any]]`
-        event_name : :class:`str`
-        args : :class:`Any`
-        kwargs : :class:`Any`
-
-        Returns
-        -------
-            asyncio.Task
-        """
         wrapped = self._run_event(coro, event_name, *args, **kwargs)
         # Schedules the task
         return asyncio.create_task(wrapped, name=f"with: {event_name}")

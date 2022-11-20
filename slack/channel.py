@@ -111,40 +111,31 @@ class Channel:
         )
         return Message(state=self.state, data=message["message"])
 
-    async def create_channel(self, name: str):
+    async def archive(self):
         """
+        This channel archive.
 
-        Parameters
-        ----------
-        name: :class:`str`
-            Channel name you want to create.
-
-        Returns
-        -------
-        :class:`Channel`
-            created channel data.
+        .. versionadded 1.3.0
         """
         param = {
-            "name": name.lower().replace(" ", "")
+            "channel": self.id
         }
-        channel = await self.state.http.create_channel(
-            Route("POST", "conversations.create", token=self.state.http.bot_token),
+        await self.state.http.create_channel(
+            Route("POST", "conversations.archive", token=self.state.http.bot_token),
             param
         )
-        return Channel(state=self.state, data=channel["channel"])
-
 
 class DeletedChannel:
     """This function is called when a channel is deleted
 
     Attributes
     ----------
-    state : :class:`ConnectionState`
-        ConnectionState
+    channel_id : :class:`str`
+        deleted channel id.
 
     """
 
     def __init__(self, state: ConnectionState, data: DeletedChannelPayload):
         self.state = state
-        self.channel = data.get("channel")
-        self.ts: datetime = datetime.fromtimestamp(float(data.get("event_ts", "nan")))
+        self.channel_id: str = data.get("channel")
+        self.deleted_at: datetime = datetime.fromtimestamp(float(data.get("event_ts", "nan")))

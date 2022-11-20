@@ -62,23 +62,23 @@ class Message:
 
         Returns
         -------
-        :class:`~Channel`
+        :class:`Channel`
             Message channel.
 
         """
         return self.state.channels[self.channel_id]
 
     @property
-    def author(self) -> Member:
+    def author(self) -> Optional[Member]:
         """Message author.
 
         Returns
         -------
-        :class:`~Member`
+        Optional[:class:`Member`]
             Message author.
 
         """
-        return self.state.members[self.user]
+        return self.state.members.get(self.user)
 
     @property
     def team(self) -> Team:
@@ -135,16 +135,16 @@ class PreviousMessage:
     """
     Attributes
     ----------
-    text: str
+    text: :class:`str`
         Message
 
-    user: Member
+    user: :class:`Member`
         Sent by
 
-    team: Team
+    team: :class:`Team`
         Sent team
 
-    ts: datetime
+    ts: :class:`datetime`
         timestamp
     """
     def __init__(self, state: ConnectionState, data: PreviousMessagePayload):

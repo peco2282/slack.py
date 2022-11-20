@@ -2,7 +2,6 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-
 from .route import Route
 from .types.team import (
     Icon as IconPayload,
@@ -63,9 +62,6 @@ class Team:
 
     Attributes
     ----------
-    state : :class:`~ConnectionState`
-        The connection state.
-
     id : :class:`str`
         Team ID.
 
@@ -101,7 +97,7 @@ class Team:
         name: :class:`str`
             new channel name.
 
-        join: :calss:`bool`
+        join: :class:`bool`
             is bot join.
 
         Returns

@@ -36,10 +36,11 @@ class Profile:
     skype: :class:`str`
         skype user name.
 
-    team: :class:`Team`
+    team: Optional[:class:`Team`]
         team data.
 
     """
+
     def __init__(self, state: ConnectionState, user: "Member", data: ProfilePayload):
         self.state = state
         self.user = user
@@ -75,9 +76,6 @@ class Member:
 
     Attributes
     ----------
-    state : :class:`ConnectionState`
-        The connection state.
-
     id : :class:`str`
         Your user ID.
 
@@ -93,6 +91,8 @@ class Member:
     name: :class:`str`
         Account name.
 
+    bot: :class:`bool`
+        Is bot.
     """
 
     def __init__(self, state: ConnectionState, data: MemberPayload):
@@ -107,11 +107,11 @@ class Member:
         self.tz_offset = data.get("tz_offset")
         self.profile = Profile(state, self, data.get("profile"))
         self.name = data.get("name")
-        self.is_admin = data.get("is_admin", False)
-        self.is_owner = data.get("is_owner")
-        self.bot = data.get("is_bot")
-        self.is_app_user = data.get("is_app_user")
-        self.updated_at = datetime.fromtimestamp(data.get("updated"))
+        self.is_admin: bool = data.get("is_admin", False)
+        self.is_owner: bool = data.get("is_owner")
+        self.bot: bool = data.get("is_bot")
+        self.is_app_user: bool = data.get("is_app_user")
+        self.updated_at = datetime.fromtimestamp(float(data.get("updated", 0)))
         self.is_email_confirmed = data.get("is_email_confirmed")
 
     def __repr__(self) -> str:
