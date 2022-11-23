@@ -85,7 +85,9 @@ class Channel:
             Route("POST", "chat.postMessage", token=self.state.http.bot_token),
             param
         )
-        return Message(state=self.state, data=message["message"])
+        msg = Message(state=self.state, data=message["message"])
+        msg.channel_id = self.id
+        return msg
 
     async def send_as_user(self, text: str):
         """|coroutine|
@@ -124,6 +126,7 @@ class Channel:
             Route("POST", "conversations.archive", token=self.state.http.bot_token),
             param
         )
+
 
 class DeletedChannel:
     """This function is called when a channel is deleted
