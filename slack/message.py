@@ -56,6 +56,9 @@ class Message:
         self.content = data.get("text", "")
         self.created_at: datetime = datetime.fromtimestamp(float(self.id))
 
+    def __repr__(self):
+        return f"<{self.__class__.__name__} id={self.id} channel_id={self.channel_id}>"
+
     @property
     def channel(self) -> Channel:
         """Message channel data.
