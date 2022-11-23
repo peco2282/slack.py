@@ -96,12 +96,12 @@ class Message:
         """
         param = {
             "channel": self.channel_id,
-            "ts": self.id,
+            "ts": self.id
         }
-        self.state.http.delete_message(
+        await self.state.http.delete_message(
             Route(
                 "DELETE",
-                "message.delete",
+                "chat.delete",
                 self.state.http.bot_token
             ),
             param
