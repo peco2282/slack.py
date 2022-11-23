@@ -1,14 +1,23 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Optional, TypeVar, Generic
 
-from slack import Message, commands, Channel, Team
+from typing_extensions import ParamSpec
+
+from slack import Message, commands, Channel, Team, Route
 
 if TYPE_CHECKING:
     from .command import Command
 
+    P = ParamSpec("P")
 
-class Context(Message):
+else:
+    P = TypeVar("P")
+
+BotT = TypeVar("BotT", bound="Bot")
+
+
+class Context(Message, Channel):
     """
     Attributes
     ----------
@@ -27,7 +36,6 @@ class Context(Message):
             *args,
             **kwargs
     ):
-        # super().__init__(message.state)
         self.args = args
         self.kwargs = kwargs
         self.command: Optional[Command] = command
@@ -36,6 +44,8 @@ class Context(Message):
         self.message = message
         self.prefix = prefix
         self.state = message.state
+        self.id = message.id
+        self.channel_id = self.channel.id
 
     @property
     def channel(self) -> Channel:
@@ -56,3 +66,18 @@ class Context(Message):
         :class:`Team`
         """
         return self.message.team
+
+    async def delete(self):
+        param = {
+            "channel": self.channel_id,
+            "ts": self.id
+        }
+        print(param)
+        await self.state.http.delete_message(
+            Route(
+                "DELETE",
+                "chat.delete",
+                self.state.http.bot_token
+            ),
+            param
+        )
