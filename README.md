@@ -9,7 +9,9 @@
 
 [//]: # (:warning: This is an alpha version.)
 
-[**Document**](https://slack-py.readthedocs.io/en/latest/)
+<a href="https://slack-py.readthedocs.io/en/latest/" target="_blank">
+    <strong>Document for slack.py</strong>
+</a>
 
 ## Install
 
