@@ -6,6 +6,7 @@ from typing import Any, Dict, TYPE_CHECKING, Optional, Union
 
 import aiohttp
 
+from .utils import parse_exception
 from .errors import RateLimitException, SlackException
 from .route import Route
 
@@ -96,7 +97,7 @@ class HTTPClient:
                         raise RateLimitException(_json)
 
                     else:
-                        raise SlackException(_json["error"])
+                        parse_exception(_json["error"])
 
             except json.JSONDecodeError:
                 return await response.text()

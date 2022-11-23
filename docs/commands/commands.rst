@@ -35,6 +35,8 @@ Context
 
 Command
 -------
+.. note:: If raise exception in commands object, it will go to `on_command_error(ctx, err)`
+    event.
 
 .. attributetable:: slack.commands.Command
 
