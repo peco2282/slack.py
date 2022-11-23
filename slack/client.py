@@ -162,13 +162,6 @@ class Client:
         else:
             self._schedule_event(coro, method, *args, **kwargs)
 
-        if listeners:
-            removed = []
-            for i, (future, condition) in enumerate(listeners):
-                if future.cancelled():
-                    removed.append(i)
-                    continue
-
     def is_closed(self) -> bool:
         """It returns a boolean value.
 

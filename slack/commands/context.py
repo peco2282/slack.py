@@ -72,7 +72,6 @@ class Context(Message, Channel):
             "channel": self.channel_id,
             "ts": self.id
         }
-        print(param)
         await self.state.http.delete_message(
             Route(
                 "DELETE",

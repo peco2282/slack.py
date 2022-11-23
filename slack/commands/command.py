@@ -72,17 +72,17 @@ def command(name: Optional[str], **kwargs):
 
 class Bot(slack.Client):
     """
-    This is :class:`~slack.Client`'s subclass.
+    This is :class:`slack.Client`'s subclass.
 
     Attributes
     ----------
     prefix: :class:`str`
         Command-prefix.
 
-    commands: :class:`Dict[str, Command]`
+    commands: Dict[str, :class:`Command`]
         command-name: Command-Obj.
-    """
 
+    """
     def __init__(
             self,
             user_token: str,
