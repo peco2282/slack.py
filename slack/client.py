@@ -31,8 +31,35 @@ Coro = TypeVar("Coro", bound=Callable[..., Coroutine[Any, Any, Any]])
 _logger = logging.getLogger(__name__)
 
 
+def cancel_task(loop: asyncio.AbstractEventLoop):
+    tasks = {t for t in asyncio.all_tasks(loop=loop) if not t.done()}
+
+    if not tasks:
+        return
+
+    for task in tasks:
+        task.cancel()
+
+    loop.run_until_complete(asyncio.gather(*tasks, return_exceptions=True))
+
+    for task in tasks:
+        if task.cancelled():
+            continue
+
+        if task.exception() is not None:
+            loop.call_exception_handler(
+                {
+                    "message": "Unhandled exception during Client.run shutdown.",
+                    "exception": task.exception(),
+                    "task": task,
+                }
+            )
+            print("is", task)
+
+
 def result_task(loop: asyncio.AbstractEventLoop):
     try:
+        cancel_task(loop=loop)
         loop.run_until_complete(loop.shutdown_asyncgens())
 
     finally:
@@ -126,7 +153,8 @@ class Client:
             _logger.info("dispatch event %s", method)
 
         except AttributeError as attr:
-            _logger.warning("Attribute Error `%s`", attr)
+            # _logger.warning("Attribute Error `%s`", attr)
+            pass
 
         except Exception as e:
             _logger.error(type(e))
@@ -153,7 +181,8 @@ class Client:
         return self._closed
 
     def event(self, coro: Coro) -> Coro:
-        """`event` is a decorator that takes a coroutine function and sets it as an attribute of the class it's decorating
+        """`event` is a decorator that takes a coroutine function and sets
+         it as an attribute of the class it's decorating.
 
         Parameters
         ----------
