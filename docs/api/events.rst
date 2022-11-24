@@ -1,4 +1,4 @@
-.. py:currentmodule:: slack
+.. currentmodule:: slack
 
 Event Reference
 ===============
@@ -20,14 +20,14 @@ Event Reference
 Ready
 -----
 
-.. py:function:: on_ready()
+.. function:: on_ready()
 
     Called whenever bot is ready.
 
 Messages
 --------
 
-.. py:function:: on_message(message)
+.. function:: on_message(message)
 
     Called whenever a message was sent.
 
@@ -35,7 +35,7 @@ Messages
     :type message: :class:`Message`
 
 
-.. py:function:: on_message_update(before, after)
+.. function:: on_message_update(before, after)
 
     Called whenever a message was updated.
 
@@ -45,7 +45,7 @@ Messages
     :type after: :class:`Message`
 
 
-.. py:function:: on_message_delete(message)
+.. function:: on_message_delete(message)
 
     Called whenever a message was deleted.
 
@@ -53,7 +53,7 @@ Messages
     :type message: :class:`DeletedMessage`
 
 
-.. py:function:: on_channel_join(message)
+.. function:: on_channel_join(message)
 
     Called whenever a message was sent at member was joined.
 
@@ -61,7 +61,7 @@ Messages
     :type message: :class:`JoinMessage`
 
 
-.. py:function:: on_channel_archive(message)
+.. function:: on_channel_archive(message)
 
     Called whenever a channel was archived.
 
@@ -71,21 +71,21 @@ Messages
 Channels
 --------
 
-.. py:function:: on_channel_create(channel)
+.. function:: on_channel_create(channel)
 
     Called whenever channel was created.
 
     :param channel: The created channel.
     :type channel: :class:`Channel`
 
-.. py:function:: on_channel_delete(channel)
+.. function:: on_channel_delete(channel)
 
     Called whenever channel was deleted.
 
     :param channel: The deleted channel.
     :type channel: :class:`DeletedChannel`
 
-.. py:function:: on_channel_rename(before, after)
+.. function:: on_channel_rename(before, after)
 
     Called whenever channel was renamed.
 
@@ -94,7 +94,7 @@ Channels
     :param after: The renamed channel(after).
     :type after: :class:`Channel`
 
-.. py:function:: on_channel_unarchive(channel, user)
+.. function:: on_channel_unarchive(channel, user)
 
     Called whenever channel was unarcchived.
 
@@ -103,7 +103,7 @@ Channels
     :param user: The member who channel unarchive.
     :type user: :class:`Member`
 
-.. py:function:: on_member_join(channel, user)
+.. function:: on_member_join(channel, user)
 
     Called whenever member joined channel.
 
@@ -112,7 +112,7 @@ Channels
     :param user: The joined member.
     :type user: :class:`Member`
 
-.. py:function:: on_reaction_add(user, item_user, react_type)
+.. function:: on_reaction_add(user, item_user, react_type)
 
     Called whenever reaction added.
 
@@ -123,7 +123,7 @@ Channels
     :param react_type: The reaction data.
     :type react_type: :class:`ReactionEventType`
 
-.. py:function:: on_reaction_remove(user, item_user, react_type)
+.. function:: on_reaction_remove(user, item_user, react_type)
 
     Called whenever reaction was removed.
 

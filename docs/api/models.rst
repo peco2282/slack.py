@@ -8,39 +8,6 @@ Models
     Nearly all classes here have slots defined which means that it is
     impossible to have dynamic attributes to the data classes.
 
-Teams
------
-
-.. attributetable:: Team
-
-.. autoclass:: Team()
-    :members:
-
-Icon
-~~~~
-
-.. attributetable:: Icon
-
-.. autoclass:: Icon()
-    :members:
-
-
-Channels
---------
-
-.. attributetable:: Channel
-
-.. autoclass:: Channel()
-    :members:
-
-DeletedChannel
-~~~~~~~~~~~~~~
-
-.. attributetable:: DeletedChannel
-
-.. autoclass:: DeletedChannel()
-    :members:
-    :inherited-members:
 
 Messages
 --------
@@ -80,6 +47,42 @@ ArchivedMessage
 .. autoclass:: ArchivedMessage()
     :members:
     :inherited-members:
+
+
+Channels
+--------
+
+.. attributetable:: Channel
+
+.. autoclass:: Channel()
+    :members:
+
+DeletedChannel
+~~~~~~~~~~~~~~
+
+.. attributetable:: DeletedChannel
+
+.. autoclass:: DeletedChannel()
+    :members:
+    :inherited-members:
+
+Teams
+-----
+
+.. attributetable:: Team
+
+.. autoclass:: Team()
+    :members:
+
+Icon
+~~~~
+
+.. attributetable:: Icon
+
+.. autoclass:: Icon()
+    :members:
+
+
 
 Members
 -------
