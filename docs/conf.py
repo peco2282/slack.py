@@ -7,6 +7,7 @@
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 import os
+import re
 import sys
 
 sys.path.insert(0, os.path.abspath(".."))
@@ -15,7 +16,16 @@ sys.path.append(os.path.abspath("extensions"))
 project = 'slack.py'
 copyright = '2022, peco2282'
 author = 'peco2282'
-release = '1.0.0'
+
+with open("../slack/__init__.py", encoding="utf8") as f:
+    search = re.search(r'^__version__\s*=\s*[\'"]([^\'"]*)[\'"]', f.read(), re.MULTILINE)
+
+    if search is not None:
+        _version = search.group(1)
+
+    else:
+        raise RuntimeError("Could not grab version string")
+release = _version
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
@@ -46,7 +56,8 @@ templates_path = ['_templates']
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
 napoleon_numpy_docstring = True
-
+html_favicon = "./img/icon.ico"
+html_logo = "./img/icon.ico"
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
