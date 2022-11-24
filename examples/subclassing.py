@@ -26,3 +26,6 @@ class MyClient(slack.Client):
 
     async def on_channel_create(self, channel: slack.Channel):
         await channel.send("Hello!")
+
+
+MyClient().run()
