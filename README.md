@@ -10,10 +10,12 @@
 [//]: # (:warning: This is an alpha version.)
 
 <a href="https://slack-py.readthedocs.io/en/latest/" target="_blank">
-    <strong>Document for slack.py</strong>
+    <strong>- Document for slack.py</strong>
 </a>
 
 ## Install
+
+:warning: If you installed `slack_bolt`, you cannot import this package. files may be confrict.
 
 ```shell
 $ pip install wsslack.py
