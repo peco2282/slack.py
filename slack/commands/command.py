@@ -1,16 +1,20 @@
 import asyncio
 import functools
+import logging
 import traceback
-from typing import Optional, Callable
+from typing import Optional, Callable, Dict
 
 import slack
 from .context import Context
+from .. import SlackException
 from ..message import Message
 
 __all__ = (
     "Bot",
     "Command",
 )
+
+_logger = logging.getLogger(__name__)
 
 
 def _occur(coro):
@@ -83,19 +87,20 @@ class Bot(slack.Client):
         command-name: Command-Obj.
 
     """
+
     def __init__(
             self,
             user_token: str,
             bot_token: str,
             token: str,
 
-            prefix: Optional[str] = None,
+            prefix: str,
 
             loop: Optional[asyncio.AbstractEventLoop] = None,
             **optional
     ):
         super().__init__(user_token, bot_token, token, loop, **optional)
-        self.commands = {}
+        self.commands: Dict[str, Command] = {}
         self.prefix = str(prefix)
 
     def command(self, name: str = None, **kwargs):
@@ -127,13 +132,17 @@ class Bot(slack.Client):
 
             try:
                 await ctx.command.invoke(ctx)
+                self.dispatch("command", ctx)
+                self.dispatch("invoke", ctx)
 
             except AttributeError:
                 pass
 
-            except Exception as exc:
-                traceback.TracebackException.from_exception(exc)
+            except SlackException as exc:
                 self.dispatch("command_error", ctx, exc)
+
+            except Exception as exc:
+                _logger.error("%s occured", type(exc), exc_info=exc)
 
     async def process_commands(self, message: Message):
         content = message.content

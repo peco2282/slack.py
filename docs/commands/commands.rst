@@ -24,6 +24,33 @@ Commands Object
 
     If commands was start your prefix and the command was registered, dispatch command-function.
 
+
+Bot
+---
+
+This class need...
+
+- user-token.
+- bot-token.
+- app-token.
+- prefix.
+
+Prefix is a string for command occur.
+If you don't need this, you put `prefix=""`
+
+.. attributetable:: slack.commands.Bot
+
+.. autoclass:: slack.commands.Bot()
+    :members:
+    :inherited-members:
+    :exclude-members: command, event
+
+    .. automethod:: slack.commands.Bot.command(name=None)
+        :decorator:
+
+    .. automethod:: slack.commands.Bot.event()
+        :decorator:
+
 Context
 -------
 
@@ -43,19 +70,3 @@ Command
 .. autoclass:: slack.commands.Command()
     :members:
     :inherited-members:
-
-Bot
----
-
-.. attributetable:: slack.commands.Bot
-
-.. autoclass:: slack.commands.Bot()
-    :members:
-    :inherited-members:
-    :exclude-members: command, event
-
-    .. automethod:: slack.commands.Bot.command(name=None)
-        :decorator:
-
-    .. automethod:: slack.commands.Bot.event()
-        :decorator:

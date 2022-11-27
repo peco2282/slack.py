@@ -92,7 +92,7 @@ class Client:
             self,
             user_token: str,
             bot_token: str,
-            token: str = None,
+            token: str,
 
             loop: Optional[asyncio.AbstractEventLoop] = None,
             **options
@@ -152,12 +152,11 @@ class Client:
             coro: Coro = getattr(self, method)
             _logger.info("dispatch event %s", method)
 
-        except AttributeError as attr:
-            # _logger.warning("Attribute Error `%s`", attr)
+        except AttributeError:
             pass
 
         except Exception as e:
-            _logger.error(type(e))
+            _logger.error("%s occured", type(e), exc_info=e)
 
         else:
             self._schedule_event(coro, method, *args, **kwargs)
@@ -264,18 +263,22 @@ class Client:
 
     async def login(self) -> None:
         """
-        login as bot
+        Login as bot with websocket.
+        Get teams, channels and member data.
         """
         data = await self.http.login()
         self.teams, self.channels, self.members = await self.connection.initialize()
         await self.connect(data.get("url"))
 
     async def close(self) -> None:
+        """Close connection.
+        """
         self._closed = True
 
     async def connect(self, ws_url: str) -> None:
         """
         connect to slack-API
+
         Parameters
         ----------
         ws_url : :class:`str`

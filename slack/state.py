@@ -58,6 +58,7 @@ class ReactionEventType:
         Message created at.
 
     """
+
     def __init__(self, _type: str, state: "ConnectionState", payload: Dict[str, str]):
         self.type: str = _type
         self.reaction: str = ""

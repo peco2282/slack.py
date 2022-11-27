@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Optional, TypeVar, Generic
+from typing import TYPE_CHECKING, Optional, TypeVar
 
 from typing_extensions import ParamSpec
 
