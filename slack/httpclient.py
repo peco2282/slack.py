@@ -6,9 +6,9 @@ from typing import Any, Dict, TYPE_CHECKING, Optional, Union
 
 import aiohttp
 
-from .utils import parse_exception
-from .errors import RateLimitException, SlackException
+from .errors import RateLimitException
 from .route import Route
+from .utils import parse_exception
 
 if TYPE_CHECKING:
     from .ws import SlackWebSocket

@@ -69,10 +69,6 @@ class ReactionEventType:
 
 
 class ConnectionState:
-    """
-
-    """
-
     def __init__(
             self,
             dispatch: Callable[..., None],
