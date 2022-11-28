@@ -50,6 +50,14 @@ class Command:
         self.args = args
         self.kwargs = kwargs
 
+    def __eq__(self, other) -> bool:
+        if isinstance(other, Command):
+            return self.func == other.func
+        return False
+
+    def __repr__(self):
+        return f"<{self.__class__.__name__} name={self.name}>"
+
     # def __new__(cls, *args, **kwargs):
     #     return cls.__new__(cls)
 

@@ -85,6 +85,12 @@ class Team:
         self.email_domain = data.get("email_domain")
         self.icon = Icon(state, self, data.get("icon"))
 
+    def __eq__(self, other) -> bool:
+        if isinstance(other, Team):
+            return self.id == other.id
+
+        return False
+
     def __repr__(self) -> str:
         return f"<{self.__class__.__name__} id={self.id} name={self.name}>"
 

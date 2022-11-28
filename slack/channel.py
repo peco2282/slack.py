@@ -55,6 +55,12 @@ class Channel:
         self.created_by: Optional[Member] = self.state.members.get(data.get("creator"))
         self.overload(data)
 
+    def __eq__(self, other) -> bool:
+        if isinstance(other, Channel):
+            return self.id == other.id
+
+        return False
+
     def __repr__(self) -> str:
         return f"<{self.__class__.__name__} id={self.id} name={self.name}>"
 

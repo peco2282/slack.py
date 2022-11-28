@@ -3,8 +3,8 @@ from __future__ import annotations
 from datetime import datetime
 from typing import TYPE_CHECKING, Optional
 
-from .route import Route
 from .member import Member
+from .route import Route
 
 if TYPE_CHECKING:
     from .team import Team
@@ -47,6 +47,7 @@ class Message:
         Message created at.
 
     """
+
     def __init__(self, state: ConnectionState, data: Optional[MessagePayload] = None):
         self.state = state
         self.team_id = data.get("team")
@@ -55,6 +56,12 @@ class Message:
         self.channel_id = data.get("channel")
         self.content = data.get("text", "")
         self.created_at: datetime = datetime.fromtimestamp(float(self.id))
+
+    def __eq__(self, other) -> bool:
+        if isinstance(other, Message):
+            return self.id == other.id
+
+        return False
 
     def __repr__(self):
         return f"<{self.__class__.__name__} id={self.id} channel_id={self.channel_id}>"
@@ -116,6 +123,7 @@ class JoinMessage(Message):
     parameters and sets the author of the message to the user in the JoinMessagePayload
 
     """
+
     def __init__(self, state: ConnectionState, data: JoinMessagePayload):
         super().__init__(state, data)
 
@@ -129,6 +137,7 @@ class PurposeMessage(JoinMessage):
         The purpose of channel.
 
     """
+
     def __init__(self, state: ConnectionState, data: PurposeMessagePayload):
         super().__init__(state, data)
         self.purpose = data.get("purpose")
@@ -150,6 +159,7 @@ class PreviousMessage:
     ts: :class:`datetime`
         timestamp
     """
+
     def __init__(self, state: ConnectionState, data: PreviousMessagePayload):
         self.state = state
         self.client_msg_id = data.get("client_msg_id")
@@ -177,6 +187,7 @@ class DeletedMessage:
         The text what deleted message.
 
     """
+
     def __init__(self, state: ConnectionState, data: DeletedMessagePayload):
         self.state = state
         self.channel: Channel = self.state.channels[data.get("channel")]
@@ -201,6 +212,7 @@ class ArchivedMessage:
         Archived channel.
 
     """
+
     def __init__(self, state: ConnectionState, data: ArchivedMessagePayload):
         self.state = state
         self.ts = data.get("ts")
