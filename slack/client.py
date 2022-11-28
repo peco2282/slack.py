@@ -100,7 +100,9 @@ class Client:
         self._listeners: Dict[
             str, List[
                 Tuple[
-                    asyncio.Future, Callable[..., bool]
+                    asyncio.Future,
+                    Callable[..., bool],
+                    Optional[float]
                 ]
             ]
         ] = {}
@@ -128,10 +130,9 @@ class Client:
             "ready": self._handle_ready
         }
         self.connection: ConnectionState = self._get_state(**options)
-        self._teams: List[Dict[str, Any]]
-        self.teams: Dict[str, Team] = {}
-        self.channels: Dict[str, Channel] = {}
-        self.members: Dict[str, Member] = {}
+        self._teams: Dict[str, Team] = {}
+        self._channels: Dict[str, Channel] = {}
+        self._members: Dict[str, Member] = {}
 
     def _get_state(self, **options) -> ConnectionState:
         return ConnectionState(
@@ -142,12 +143,47 @@ class Client:
             **options
         )
 
+    @property
+    def teams(self) -> List[Team]:
+        """
+        List of teams.
+
+        Returns
+        -------
+        list[:class:`Team`]
+
+        """
+        return list(self._teams.values())
+
+    @property
+    def channels(self) -> List[Channel]:
+        """
+        List of channels.
+
+        Returns
+        -------
+        list[:class:`Channel`]
+        """
+        return list(self._channels.values())
+
+    @property
+    def members(self) -> List[Member]:
+        """
+        List of members.
+
+        Returns
+        -------
+        list[:class:`Member`]
+
+        """
+        return list(self._members.values())
+
     def _handle_ready(self) -> None:
         return self._ready.set()
 
     def dispatch(self, event: str, *args, **kwargs) -> None:
         method = f"on_{event}"
-        listeners = self._listeners.get(event)
+        # listeners = self._listeners.get(event)
         try:
             coro: Coro = getattr(self, method)
             _logger.info("dispatch event %s", method)
@@ -160,6 +196,31 @@ class Client:
 
         else:
             self._schedule_event(coro, method, *args, **kwargs)
+
+        if not (listeners := self._listeners.get(event)):
+            removed = []
+            future: asyncio.Future
+            condition: Callable[..., bool]
+            timeout: Optional[float]
+            for i, (future, condition), timeout in enumerate(listeners):
+                if future.cancelled():
+                    removed.append(i)
+                    continue
+
+                try:
+                    result = condition(*args)
+                except Exception as exc:
+                    future.set_exception(exc)
+                    removed.append(i)
+                else:
+                    if result:
+                        if len(args) == 0:
+                            future.set_result(None)
+                        elif len(args) == 1:
+                            future.set_result(args[0])
+                    else:
+                        future.set_result(args)
+                    removed.append(i)
 
     def is_closed(self) -> bool:
         """It returns a boolean value.
@@ -267,7 +328,7 @@ class Client:
         Get teams, channels and member data.
         """
         data = await self.http.login()
-        self.teams, self.channels, self.members = await self.connection.initialize()
+        self._teams, self._channels, self._members = await self.connection.initialize()
         await self.connect(data.get("url"))
 
     async def close(self) -> None:
