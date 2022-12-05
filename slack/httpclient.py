@@ -6,9 +6,9 @@ from typing import Any, Dict, TYPE_CHECKING, Optional, Union
 
 import aiohttp
 
-from .utils import parse_exception
-from .errors import RateLimitException, SlackException
+from .errors import RateLimitException
 from .route import Route
+from .utils import parse_exception
 
 if TYPE_CHECKING:
     from .ws import SlackWebSocket
@@ -37,8 +37,8 @@ class HTTPClient:
         self.user_token: str = user_token
         self.token: str = token
         self.bot_token: str = bot_token
-        self.__session: aiohttp.ClientSession = None
-        self.ws: SlackWebSocket = None
+        self.__session: Optional[aiohttp.ClientSession] = None
+        self.ws: SlackWebSocket
 
     async def ws_connect(self, url: str):
         """It connects to a websocket and returns a websocket object

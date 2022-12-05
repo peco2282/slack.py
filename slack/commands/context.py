@@ -17,7 +17,7 @@ else:
 BotT = TypeVar("BotT", bound="Bot")
 
 
-class Context(Message, Channel):
+class Context(Message):
     """
     Attributes
     ----------
@@ -27,6 +27,7 @@ class Context(Message, Channel):
     prefix: :class:`str`
         Message prefix.
     """
+
     def __init__(
             self,
             client: commands.Bot,
