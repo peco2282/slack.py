@@ -81,3 +81,31 @@ class Context(Message):
             ),
             param
         )
+
+    async def send(self, text: str) -> Message:
+        """|coroutine|
+
+        It sends a message to a channel.
+
+        Parameters
+        ----------
+        text : :class:`str`
+            The text of the message to send.
+
+        Returns
+        -------
+        :class:`~Message`
+            A Message object.
+
+        """
+        param = {
+            "channel": self.id,
+            "text": text
+        }
+        message = await self.state.http.send_message(
+            Route("POST", "chat.postMessage", token=self.state.http.bot_token),
+            param
+        )
+        msg = Message(state=self.state, data=message["message"])
+        msg.channel_id = self.id
+        return msg
