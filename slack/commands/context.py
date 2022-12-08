@@ -1,10 +1,16 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Optional, TypeVar
+from typing import TYPE_CHECKING, Optional, TypeVar, overload
 
 from typing_extensions import ParamSpec
 
-from slack import Message, commands, Channel, Team, Route
+from .. import commands
+from ..channel import Channel
+from ..errors import InvalidParamException
+from ..message import Message
+from ..route import Route
+from ..team import Team
+from ..view import ViewFrame
 
 if TYPE_CHECKING:
     from .command import Command
@@ -27,7 +33,6 @@ class Context(Message):
     prefix: :class:`str`
         Message prefix.
     """
-
     def __init__(
             self,
             client: commands.Bot,
@@ -82,30 +87,55 @@ class Context(Message):
             param
         )
 
-    async def send(self, text: str) -> Message:
-        """|coroutine|
+    @overload
+    async def send(
+            self,
+            text: str = ...,
+    ) -> Context:
+        ...
 
-        It sends a message to a channel.
+    @overload
+    async def send(
+            self,
+            view: ViewFrame = ...
+    ) -> Context:
+        ...
+
+    async def send(
+            self,
+            text: Optional[str] = None,
+            view: Optional[ViewFrame] = None
+    ) -> Context:
+        """
 
         Parameters
         ----------
-        text : :class:`str`
-            The text of the message to send.
+        text: Optional[:class:`str`]
+        view: Optional[:class:`View`]
 
         Returns
         -------
-        :class:`~Message`
-            A Message object.
+        :class:`Context`
 
         """
-        param = {
-            "channel": self.id,
-            "text": text
-        }
-        message = await self.state.http.send_message(
-            Route("POST", "chat.postMessage", token=self.state.http.bot_token),
-            param
+        if (text is not None and view is not None) or (text is None and view is None):
+            raise InvalidParamException()
+        if view is not None:
+            message = await self.message.channel.send(
+                view=view
+            )
+
+        elif text is not None:
+            message = await self.message.channel.send(
+                text=text
+            )
+
+        else:
+            raise ValueError()
+
+        return Context(
+            client=self.client,
+            message=message,
+            prefix=self.prefix,
+            command=self.command
         )
-        msg = Message(state=self.state, data=message["message"])
-        msg.channel_id = self.id
-        return msg

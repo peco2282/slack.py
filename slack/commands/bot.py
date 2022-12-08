@@ -3,9 +3,10 @@ import logging
 from typing import Optional, Dict, Callable
 
 import slack
-from slack.commands import Command, Context
-from slack.errors import SlackException
-from slack.message import Message
+from .command import Command
+from .context import Context
+from ..errors import SlackException
+from ..message import Message
 
 _logger = logging.getLogger(__name__)
 
