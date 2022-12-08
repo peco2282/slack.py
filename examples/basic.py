@@ -20,6 +20,7 @@ async def on_message(message: slack.Message):
     if message.content.startswith("!hello"):
         await message.channel.send(f"Hello! {message.author.name}")
 
+
 @client.event
 async def on_channel_create(channel: slack.Channel):
     await channel.send("Hello!")
