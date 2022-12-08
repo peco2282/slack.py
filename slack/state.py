@@ -103,7 +103,7 @@ class ConnectionState:
         teams: Dict[str, Any] = await self.http.request(
             Route("GET", "auth.teams.list", self.http.bot_token)
         )
-        await asyncio.sleep(.5)
+        await asyncio.sleep(0.5)
         for team in teams["teams"]:
             team_id = team["id"]
             info = await self.http.request(
@@ -113,7 +113,7 @@ class ConnectionState:
                 }
             )
             self.teams[team_id] = Team(state=self, data=info["team"])
-            await asyncio.sleep(.2)
+            await asyncio.sleep(0.4)
         await asyncio.sleep(0.5)
         for team in teams["teams"]:
             team_id = team["id"]
@@ -124,7 +124,7 @@ class ConnectionState:
                 }
             )
             self.channels = {ch["id"]: Channel(state=self, data=ch) for ch in channels["channels"]}
-            await asyncio.sleep(0.2)
+            await asyncio.sleep(0.4)
 
         await asyncio.sleep(0.5)
         members: Dict[str, Any] = await self.http.request(

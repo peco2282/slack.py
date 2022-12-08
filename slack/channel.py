@@ -1,16 +1,20 @@
 from __future__ import annotations
 
+import json
+import urllib.parse
 from datetime import datetime
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Optional, overload
 
 from .member import Member
 from .message import Message
 from .route import Route
+from .errors import InvalidParamException
 from .team import Team
 from .types.channel import (
     Channel as ChannelPayload,
     DeletedChannel as DeletedChannelPayload
 )
+from .view import ViewFrame
 
 if TYPE_CHECKING:
     from .state import ConnectionState
@@ -53,44 +57,76 @@ class Channel:
         self.team: Team = self.state.teams[data.get("context_team_id")]
         self.created_at: datetime = datetime.fromtimestamp(float(data.get("created", 0)))
         self.created_by: Optional[Member] = self.state.members.get(data.get("creator"))
-        self.overload(data)
+        # self.overload(data)
 
     def __repr__(self) -> str:
         return f"<{self.__class__.__name__} id={self.id} name={self.name}>"
 
-    def overload(self, data: ChannelPayload):
-        pass
+    @overload
+    async def send(
+            self,
+            text: str
+    ):
+        ...
 
-    async def send(self, text: str) -> Message:
-        """|coroutine|
+    @overload
+    async def send(
+            self,
+            view: ViewFrame
+    ):
+        ...
+
+    async def send(
+            self,
+            text: str = None,
+            view: Optional[ViewFrame] = None
+    ) -> Message:
+        """|coro|
 
         It sends a message to a channel.
 
         Parameters
         ----------
-        text : :class:`str`
+        text : Optional[:class:`str`]
             The text of the message to send.
+
+        view: Optional[:class:`ViewFrame`]
+            The viewframe contain blocks of the message to send.
 
         Returns
         -------
-        :class:`~Message`
+        :class:`Message`
             A Message object.
 
         """
-        param = {
-            "channel": self.id,
-            "text": text
-        }
+        param = query = None
+        if (text is not None) and (view is not None):
+            raise InvalidParamException()
+
+        if text is not None:
+            param = {
+                "channel": self.id,
+                "text": str(text)
+            }
+
+        if view is not None:
+            blocks = json.dumps(view.to_list())
+            query = {
+                "channel": self.id,
+                "blocks": urllib.parse.quote(str(blocks)).replace("%25", "%").replace("%27", "%22")
+            }
+
         message = await self.state.http.send_message(
             Route("POST", "chat.postMessage", token=self.state.http.bot_token),
-            param
+            data=param,
+            query=query
         )
         msg = Message(state=self.state, data=message["message"])
         msg.channel_id = self.id
         return msg
 
     async def send_as_user(self, text: str):
-        """|coroutine|
+        """|coro|
 
         Parameters
         ----------
@@ -109,7 +145,7 @@ class Channel:
         }
         message = await self.state.http.send_message(
             Route(method="POST", endpoint="chat.postMessage", token=self.state.http.user_token),
-            param
+            data=param
         )
         return Message(state=self.state, data=message["message"])
 

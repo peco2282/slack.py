@@ -54,7 +54,6 @@ def cancel_task(loop: asyncio.AbstractEventLoop):
                     "task": task,
                 }
             )
-            print("is", task)
 
 
 def result_task(loop: asyncio.AbstractEventLoop):

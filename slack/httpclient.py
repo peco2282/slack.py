@@ -58,7 +58,9 @@ class HTTPClient:
     async def request(
             self,
             route: Route,
-            data: Optional[Dict[str, Any]] = None
+            data: Optional[Dict[str, Any]] = None,
+            query: Optional[Dict[str, str]] = None,
+            **kwargs
     ) -> Union[
         Dict[str, Any],
         str
@@ -67,6 +69,7 @@ class HTTPClient:
 
         Parameters
         ----------
+        query
         route : Route
         data : Optional[Dict[str, Any]]
 
@@ -77,19 +80,25 @@ class HTTPClient:
         headers = {
             "Authorization": f"Bearer {route.token}",
         }
-        params = {
+        attrs = {
             "headers": headers
         }
         if data is not None:
-            params["data"] = data
+            attrs["data"] = data
+
+        if query is not None:
+            query_url = "&".join(f"{k}={v}" for k, v in query.items())
+            route.url += f"?{query_url}"
 
         method = route.method
+
         url = route.url
 
-        async with self.__session.request(method, url, **params) as response:
+        async with self.__session.request(method, url, **attrs) as response:
             try:
                 _json = await response.json()
-                if _json.get("ok"):
+                is_ok = _json.get("ok")
+                if is_ok is True:
                     return _json
 
                 else:
@@ -102,15 +111,15 @@ class HTTPClient:
             except json.JSONDecodeError:
                 return await response.text()
 
-    def send_message(self, route: Route, param):
+    def send_message(self, route: Route, data=None, query=None):
         """It takes a parameter, and returns a request
 
         Parameters
         ----------
+        query
+        data
         route
             a data to request.
-        param
-            a dictionary of parameters to send to the Slack API.
 
         Returns
         -------
@@ -119,10 +128,11 @@ class HTTPClient:
         """
         return self.request(
             route,
-            param
+            data=data,
+            query=query
         )
 
-    def delete_message(self, route: Route, param):
+    def delete_message(self, route: Route, data):
         """This function deletes a message from a chat
 
         Parameters
@@ -130,7 +140,7 @@ class HTTPClient:
         route
             a data to connect.
 
-        param
+        data
             keyword of send message.
 
         Returns
@@ -140,17 +150,17 @@ class HTTPClient:
         """
         return self.request(
             route,
-            param
+            data=data
         )
 
-    def create_channel(self, route: Route, param):
+    def create_channel(self, route: Route, data):
         return self.request(
             route,
-            param
+            data=data
         )
 
-    def join_channel(self, route: Route, param):
-        return self.request(route, param)
+    def join_channel(self, route: Route, data):
+        return self.request(route, data=data)
 
     async def login(self):
         """It gets a list of teams the bot is on, then gets the info for each team and stores it in a dictionary
