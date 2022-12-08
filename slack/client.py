@@ -78,7 +78,7 @@ class Client:
         The your-self token. It must be start 'xoxp-...'
     bot_token: :class:`str`
         The bot token. It must be start 'xoxb-...'
-    token: :class:Optional[`str`]
+    token: Optional[:class:`str`]
         App-level token. It is startwith 'xapp-...'
 
     loop: Optional[:class:`asyncio.AbstractEventLoop`]

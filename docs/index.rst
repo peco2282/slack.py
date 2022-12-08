@@ -35,3 +35,12 @@ Extensions
     :maxdepth: 1
 
     commands/index.rst
+
+View
+~~~~
+
+.. toctree::
+    :caption: Table of Extensional Contents
+    :maxdepth: 1
+
+    view/index.rst
