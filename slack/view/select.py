@@ -11,6 +11,9 @@ __all__ = (
 
 
 class SelectType(Enum):
+    """
+    Enums of select variety.
+    """
     conversations_select = "conversations_select"
     channels_select = "channels_select"
     users_select = "users_select"
@@ -28,6 +31,25 @@ class SelectType(Enum):
 
 
 class SelectOption(BaseView):
+    """Option for select items.
+
+    Attributes
+    ----------
+    text: :class:`str`
+        Text of select.
+
+    value: :class:`str`
+        Value of select.
+
+    description: Optional[:class:`str`]
+        Text description of select.
+
+    mrkdwn: Optional[:class:`bool`]
+        Markdown or nor.
+
+    emoji: Optional[:class:`bool`]
+        Use emoji or not
+    """
     def __init__(
             self,
             text: str,
@@ -43,6 +65,12 @@ class SelectOption(BaseView):
         self.description = description
 
     def to_dict(self):
+        """Converts this object into a dict.
+        Returns
+        -------
+        Dict[:class:`str`, Dict[:class:`str`, Union[:class:`str`, :class:`bool`]]]
+            A dictionary of :class:`str` field keys bound to the respective value.
+        """
         return {
             "text": {
                 "type": self.mrkdwn,
@@ -59,6 +87,25 @@ class SelectOption(BaseView):
 
 
 class Select(BaseView):
+    """Frame for Select View.
+
+    Attributes
+    ----------
+    action_id: :class:`str`
+        ID for this event occured.
+
+    placeholder: :class:`Placeholder`
+        Placeholder for select.
+
+    options: :class:`SelectOption`
+        Options to selections.
+
+    select_type: :class:`SelectType`
+        Select type of this object.
+
+    initial_text: :class:`str`
+        Initial text for selections.
+    """
     def __init__(
             self,
             action_id: str,
@@ -86,6 +133,12 @@ class Select(BaseView):
         self.initial_text = str(initial_text)
 
     def to_dict(self):
+        """Converts this object into a dict.
+        Returns
+        -------
+        Dict[:class:`str`, Any]
+            A dictionary of :class:`str` field keys bound to the respective value.
+        """
         param = {
             "type": self.select_type,
             "placeholder": self.placeholder.to_dict(),

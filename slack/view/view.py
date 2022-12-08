@@ -39,7 +39,7 @@ class ViewFrame:
 class Label(BaseView):
     """
 
-    Parameters
+    Attributes
     ----------
     text: :class:`str`
     mrkdwn: :class:`str`
@@ -87,11 +87,18 @@ class InputSelect(BaseView):
 
 class Placeholder(BaseView):
     """
-    Parameters
+    This represents placeholder for :class:`Select` or :class:`Input`
+
+    Attributes
     ----------
-    text
-    mrkdwn
-    emoji
+    text: :class:`str`
+        Text for placeholder.
+
+    mrkdwn: :class:`bool`
+        Use markdown or not.
+
+    emoji: :class:`bool`
+        Use emoji or not.
 
     """
 
@@ -106,11 +113,11 @@ class Placeholder(BaseView):
         self.emoji = emoji if isinstance(emoji, bool) else True
 
     def to_dict(self):
-        """
-
+        """Converts this object into a dict.
         Returns
         -------
-
+        Dict[:class:`str`, Union[:class:`str`, :class:`bool`]]
+            A dictionary of :class:`str` field keys bound to the respective value.
         """
         return {
             "type": self.mrkdwn,
@@ -145,11 +152,11 @@ class Button:
         self.url = url
 
     def to_dict(self):
-        """
-
+        """Converts this object into a dict.
         Returns
         -------
-
+        Dict[:class:`str`, Union[:class:`str`, Dict[:class:`str`, Union[:class:`str`, :class:`bool`]]]
+            A dictionary of :class:`str` field keys bound to the respective value.
         """
         param = {
             "type": "button",
@@ -166,9 +173,10 @@ class Button:
 class View(ViewFrame):
     """
 
-    Parameters
+    Attributes
     ----------
-    blocks
+    blocks: List[:class:`BaseView`]
+        Blocks of View.
     """
 
     def __init__(
@@ -186,12 +194,31 @@ class View(ViewFrame):
         return len(self.blocks)
 
     def add_block(self, block: BaseView) -> View:
+        """Add block for self.
+
+        Parameters
+        ----------
+        block: :class:`BaseView`
+
+        Returns
+        -------
+        :class:`View`
+        """
         if getattr(block, "__type__", "") == "__view__":
             self.blocks.append(block)
 
         return self
 
     def to_list(self):
+        """Converts this object into a dict.
+
+        Returns
+        -------
+
+        Dict[:class:`str`, Any]
+            A dictionary of :class:`str` embed field keys bound to the respective value.
+
+        """
         return [
             {
                 "type": "actions",
