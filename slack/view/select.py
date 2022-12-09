@@ -87,7 +87,9 @@ class SelectOption(BaseView):
 
 
 class Select(BaseView):
-    """Frame for Select View.
+    """Represents a UI select menu with a list of custom options.
+
+    .. versionadded:: 1.4.0
 
     Attributes
     ----------
@@ -95,10 +97,11 @@ class Select(BaseView):
         ID for this event occured.
 
     placeholder: :class:`Placeholder`
-        Placeholder for select.
+        Placeholder of select.
 
-    options: :class:`SelectOption`
+    options: List[:class:`SelectOption`]
         Options to selections.
+        Some type must be this attribute to select.
 
     select_type: :class:`SelectType`
         Select type of this object.

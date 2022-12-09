@@ -50,6 +50,8 @@ SelectType
 ViewFrame
 ---------
 
+This is a is a frame of UI block.
+
 View
 ~~~~
 
