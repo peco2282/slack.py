@@ -66,6 +66,7 @@ class SelectOption(BaseView):
 
     def to_dict(self):
         """Converts this object into a dict.
+
         Returns
         -------
         Dict[:class:`str`, Dict[:class:`str`, Union[:class:`str`, :class:`bool`]]]
@@ -137,6 +138,7 @@ class Select(BaseView):
 
     def to_dict(self):
         """Converts this object into a dict.
+
         Returns
         -------
         Dict[:class:`str`, Any]

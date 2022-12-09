@@ -208,6 +208,7 @@ class View(ViewFrame):
         :class:`View`
             Returns self object.
         """
+
         if isinstance(block, BaseView):
             self.blocks.append(block)
 
