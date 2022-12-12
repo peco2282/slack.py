@@ -12,6 +12,15 @@ Models
 BaseView
 --------
 
+View UI blocks
+
+BaseView
+~~~~~~~~
+.. attributetable:: BaseView
+
+.. autoclass:: BaseView()
+    :members:
+
 Placeholder
 ~~~~~~~~~~~
 
@@ -50,7 +59,16 @@ SelectType
 ViewFrame
 ---------
 
-This is a is a frame of UI block.
+This is a frame of UI block.
+
+ViewFrame
+~~~~~~~~~
+
+.. attributetable:: ViewFrame
+
+.. autoclass:: ViewFrame()
+    :members:
+
 
 View
 ~~~~

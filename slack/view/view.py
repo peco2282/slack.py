@@ -21,6 +21,12 @@ if TYPE_CHECKING:
 
 
 class BaseView:
+    """Base class of view object.
+
+    This class carries abstract methods for all components.
+
+    .. versionadded:: 1.4.0
+    """
     def __init_subclass__(cls, *args, **kwargs):
         setattr(cls, "__type__", "__view__")
 
@@ -152,17 +158,19 @@ class View(ViewFrame):
     .. container:: operations
 
         .. describe:: len(x)
+
             Returns the total length of the blocks.
 
         .. describe:: bool(b)
+
             Returns whether this has one or more blocks.
 
     Example:
 
     .. code-block:: python
         select = Select(
-            "action",
-            Placeholder(
+            action_id="action",
+            placeholder=Placeholder(
                 "text", mrkdwn=False, emoji=True),
                 select_type=SelectType.users_select,
                 initial_text="initial"
