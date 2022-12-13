@@ -13,7 +13,7 @@ __all__ = (
 
 from typing import TypeVar, TYPE_CHECKING
 
-from ..errors import InvalidParamException
+from ..errors import InvalidArgumentException
 
 ViewT = TypeVar("ViewT")
 if TYPE_CHECKING:
@@ -125,7 +125,7 @@ class Button:
             url: str = None
     ):
         if not isinstance(label, Label):
-            raise InvalidParamException()
+            raise InvalidArgumentException()
         self.label = label
         self.value = str(value)
         self.action_id = str(action_id)

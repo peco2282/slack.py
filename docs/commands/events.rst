@@ -8,7 +8,7 @@ Event Reference
     Called whenever a command was invoked.
 
     :param ctx: The sended context.
-    :type message: :class:`Context`
+    :type ctx: :class:`Context`
 
 
 .. py:function:: on_invoke(ctx)
@@ -16,13 +16,13 @@ Event Reference
     An alias for `on_command()`.
 
     :param ctx: The sended context.
-    :type message: :class:`Context`
+    :type ctx: :class:`Context`
 
 .. py:function:: on_command_error(ctx, err)
 
     Called whenever error occured.
 
     :param ctx: The sended context.
-    :type message: :class:`Context`
+    :type ctx: :class:`Context`
     :param err: Raised exception from sended context.
     :type err: :class:`Exception`

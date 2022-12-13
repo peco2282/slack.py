@@ -1,7 +1,7 @@
 from enum import Enum
 
 from .view import BaseView, Placeholder
-from ..errors import InvalidParamException
+from ..errors import InvalidArgumentException
 
 __all__ = (
     "SelectType",
@@ -119,7 +119,7 @@ class Select(BaseView):
             initial_text: str = None
     ):
         if not isinstance(placeholder, Placeholder):
-            raise InvalidParamException()
+            raise InvalidArgumentException()
         if options and not isinstance(select_type, SelectType):
             raise ValueError(f"select_type is only SelectType.")
         self.select_type = str(
@@ -156,7 +156,7 @@ class Select(BaseView):
                 SelectType.radio_buttons
         ):
             if len(self.options) <= 1:
-                raise InvalidParamException(
+                raise InvalidArgumentException(
                     "options must 2 or more."
                 )
             param["options"] = [

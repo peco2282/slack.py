@@ -27,9 +27,6 @@ class Bot(slack.Client):
     prefix: :class:`str`
         Command-prefix.
 
-    commands: Dict[str, :class:`Command`]
-        command-name: Command-Obj.
-
     """
 
     def __init__(
@@ -40,12 +37,38 @@ class Bot(slack.Client):
 
             prefix: str,
 
+            logger: logging.Logger = None,
+
             loop: Optional[asyncio.AbstractEventLoop] = None,
             **optional
     ):
         super().__init__(user_token, bot_token, token, loop, **optional)
-        self.commands: Dict[str, Command] = {}
+        self.__commands: Dict[str, Command] = {}
         self.prefix = str(prefix)
+        self._logger = logger or super()._logger
+
+    @property
+    def commands(self) -> Dict[str, Command]:
+        """Return all commands
+
+        Returns
+        -------
+        Dict[`:class:`str`, :class:`Command`]
+        """
+        return self.__commands
+
+    def get_command(self, name: str, /) -> Optional[Command]:
+        """
+
+        Parameters
+        ----------
+        name: :class:`str`
+
+        Returns
+        -------
+        Optional[:class:`Command`]
+        """
+        return self.__commands.get(name)
 
     def command(self, name: str = None, **kwargs):
         """
@@ -68,7 +91,8 @@ class Bot(slack.Client):
 
     def add_command(self, result: Command):
         name = result.name
-        self.commands[name] = result
+        if isinstance(result, Command):
+            self.__commands[name] = result
 
     async def invoke_command(self, ctx: Context):
         if ctx.command:

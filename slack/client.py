@@ -81,6 +81,8 @@ class Client:
     token: Optional[:class:`str`]
         App-level token. It is startwith 'xapp-...'
 
+    logger: :class:`Logger.Logger`
+
     loop: Optional[:class:`asyncio.AbstractEventLoop`]
         The :class:`asyncio.AbstractEventLoop` to use for asynchronous operations.
         Defaults to ``None``, in which case the default event loop is used via
@@ -156,7 +158,7 @@ class Client:
             pass
 
         except Exception as e:
-            _logger.error("%s occured", type(e), exc_info=e)
+            self._logger.error("%s occured", type(e), exc_info=e)
 
         else:
             self._schedule_event(coro, method, *args, **kwargs)

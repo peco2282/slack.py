@@ -6,7 +6,7 @@ from typing_extensions import ParamSpec
 
 from .. import commands
 from ..channel import Channel
-from ..errors import InvalidParamException
+from ..errors import InvalidArgumentException
 from ..message import Message
 from ..route import Route
 from ..team import Team
@@ -119,7 +119,7 @@ class Context(Message):
 
         """
         if (text is not None and view is not None) or (text is None and view is None):
-            raise InvalidParamException()
+            raise InvalidArgumentException()
         if view is not None:
             message = await self.message.channel.send(
                 view=view

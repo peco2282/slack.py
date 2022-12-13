@@ -9,7 +9,7 @@ class TokenTypeException(SlackException):
     pass
 
 
-class InvalidParamException(SlackException):
+class InvalidArgumentException(SlackException):
     pass
 
 
@@ -36,7 +36,7 @@ class BotException(ClientException):
 SlackExceptions = Union[
     SlackException,
     TokenTypeException,
-    InvalidParamException,
+    InvalidArgumentException,
     ForbiddenException,
     RequestException,
     ClientException,

@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, Optional, overload
 from .member import Member
 from .message import Message
 from .route import Route
-from .errors import InvalidParamException
+from .errors import InvalidArgumentException
 from .team import Team
 from .types.channel import (
     Channel as ChannelPayload,
@@ -101,7 +101,7 @@ class Channel:
         """
         param = query = None
         if (text is not None) and (view is not None):
-            raise InvalidParamException()
+            raise InvalidArgumentException()
 
         if text is not None:
             param = {

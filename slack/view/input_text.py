@@ -4,7 +4,7 @@ from typing import Optional
 
 from .select import SelectOption
 from .view import BaseView, Placeholder, Label
-from ..errors import InvalidParamException
+from ..errors import InvalidArgumentException
 
 
 __all__ = (
@@ -115,7 +115,7 @@ class Input(BaseView):
                 InputType.multi_static_select,
         ):
             if len(self.select_options) <= 1:
-                raise InvalidParamException("options must be 2 or more.")
+                raise InvalidArgumentException("options must be 2 or more.")
 
             elem["options"] = [
                 s.to_dict()
