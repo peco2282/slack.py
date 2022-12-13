@@ -91,7 +91,8 @@ class Client:
             self,
             user_token: str,
             bot_token: str,
-            token: str,
+            token: str = None,
+            logger: logging.Logger = None,
 
             loop: Optional[asyncio.AbstractEventLoop] = None,
             **options
@@ -103,7 +104,7 @@ class Client:
                 ]
             ]
         ] = {}
-        if not all([isinstance(t, str) for t in (user_token, bot_token, token)]):
+        if not all([isinstance(t, str) for t in (user_token, bot_token)]):
             raise TypeError("All token must be `str`")
 
         if not user_token.startswith("xoxp-"):
@@ -118,7 +119,7 @@ class Client:
         self.ws: SlackWebSocket = None
         self.user_token: str = user_token
         self.bot_token: str = bot_token
-        self.token: str = token
+        self.token: Optional[str] = token
         self.loop: asyncio.AbstractEventLoop = loop or asyncio.get_event_loop()
         self.http: HTTPClient = HTTPClient(self.loop, user_token=user_token, bot_token=bot_token, token=token)
         self._closed: bool = False
@@ -126,6 +127,7 @@ class Client:
         self._handlers: Dict[str, Callable] = {
             "ready": self._handle_ready
         }
+        self._logger = logger or _logger
         self.connection: ConnectionState = self._get_state(**options)
         self._teams: List[Dict[str, Any]]
         self.teams: Dict[str, Team] = {}
@@ -146,7 +148,6 @@ class Client:
 
     def dispatch(self, event: str, *args, **kwargs) -> None:
         method = f"on_{event}"
-        listeners = self._listeners.get(event)
         try:
             coro: Coro = getattr(self, method)
             _logger.info("dispatch event %s", method)
@@ -189,7 +190,7 @@ class Client:
             raise TypeError("event must be coroutine function.")
 
         setattr(self, coro.__name__, coro)
-        _logger.info("%s event was set", coro.__name__)
+        _logger.info("%s event set", coro.__name__)
         return coro
 
     def run(self) -> None:
@@ -200,8 +201,6 @@ class Client:
         or :meth:`connect` + :meth:`login`.
         Roughly Equivalent to: ::
 
-        .. codeblock:: python
-
             try:
                 loop.run_until_complete(start(*args, **kwargs))
             except KeyboardInterrupt:
@@ -209,6 +208,7 @@ class Client:
                 # cancel all tasks lingering
             finally:
                 loop.close()
+
         .. warning::
             This function must be the last function to call due to the fact that it
             is blocking. That means that registration of events or anything being

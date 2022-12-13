@@ -52,10 +52,7 @@ class Image(BaseView):
             "image_url": self.image_url,
             "alt_text": self.alt_text
         }
-        if self.title and isinstance(
-                self.title,
-                (Label, Title)
-        ):
+        if self.title and isinstance(self.title, Placeholder):
             param["title"] = self.title.to_dict()
 
         return param

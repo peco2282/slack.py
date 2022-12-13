@@ -9,11 +9,13 @@
 
 [//]: # (:warning: This is an alpha version.)
 
-<a href="https://slack-py.readthedocs.io/en/latest/" target="_blank">
-    <strong>- Document for slack.py</strong>
-</a>
+## Document for slack.py
 
-## Install
+- [**Startup**](https://slack-py.readthedocs.io/en/latest/startup.html)
+- [**Core API**](https://slack-py.readthedocs.io/en/latest/api/index.html)
+- [**Command extention**](https://slack-py.readthedocs.io/en/latest/commands/index.html)
+
+## How to install
 
 :warning: If you are installed `slack_bolt`, you cannot import this package. files may be confrict.
 
@@ -22,7 +24,7 @@ $ pip install wsslack.py
 ```
 
 
-## example
+## [example](https://github.com/peco2282/slack.py/tree/main/examples)
 ```python
 import slack
 
