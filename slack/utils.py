@@ -14,8 +14,8 @@ errors: Dict[str, SlackExceptions] = {
     "token_revoked": ClientException("Authentication token is for a deleted user or workspace or the app has been "
                                      "removed when using a user token."),
     "invalid_blocks": InvalidArgumentException("Blocks submitted with this message are not valid"),
-    "invalid_blocks_format": InvalidArgumentException("The blocks is not a valid JSON object or doesn't match the Block "
-                                                   "Kit syntax.")
+    "invalid_blocks_format": InvalidArgumentException("The blocks is not a valid JSON object or doesn't match the "
+                                                      "Block Kit syntax.")
 }
 
 
