@@ -6,7 +6,7 @@ from typing import Any, Dict, TYPE_CHECKING, Optional, Union
 
 import aiohttp
 
-from .errors import RateLimitException
+from .errors import RateLimitException, ForbiddenException
 from .route import Route
 from .utils import parse_exception
 
@@ -98,15 +98,19 @@ class HTTPClient:
             try:
                 _json = await response.json()
                 is_ok = _json.get("ok")
-                if is_ok is True:
-                    return _json
-
-                else:
-                    if _json.get("error") == "ratelimited":
-                        raise RateLimitException(_json)
+                if 300 > response.status >= 200:
+                    if is_ok is True:
+                        return _json
 
                     else:
-                        parse_exception(_json["error"])
+                        if _json.get("error") == "ratelimited":
+                            raise RateLimitException(_json)
+
+                        else:
+                            parse_exception(_json["error"])
+
+                elif response.status == 403:
+                    raise ForbiddenException()
 
             except json.JSONDecodeError:
                 return await response.text()
