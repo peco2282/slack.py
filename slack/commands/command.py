@@ -37,11 +37,9 @@ def inject(coro):
 
 
 class Command:
-    """
-    Attributes
-    ----------
-    func: :class:`Callable`
+    """It's a class that represents a command
 
+    .. versionadded:: 1.2.0
     """
 
     def __init__(self, func: Callable, name: Optional[str] = None, *args, **kwargs):
@@ -54,7 +52,15 @@ class Command:
     #     return cls.__new__(cls)
 
     @property
-    def callback(self):
+    def callback(self) -> Callable:
+        """It returns a function that is stored in the object
+
+        Returns
+        -------
+        :class:`Callable`
+             The function itself.
+
+        """
         return self.func
 
     async def invoke(self, ctx: Context):

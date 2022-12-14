@@ -11,8 +11,9 @@ __all__ = (
 
 
 class SelectType(Enum):
-    """
-    Enums of select variety.
+    """Enums of select variety.
+
+    .. versionadded:: 1.4.0
     """
     conversations_select = "conversations_select"
     channels_select = "channels_select"
@@ -32,6 +33,8 @@ class SelectType(Enum):
 
 class SelectOption(BaseView):
     """Option for select items.
+
+    .. versionadded:: 1.4.0
 
     Attributes
     ----------
@@ -66,6 +69,8 @@ class SelectOption(BaseView):
 
     def to_dict(self):
         """Converts this object into a dict.
+
+        .. versionadded:: 1.4.0
 
         Returns
         -------

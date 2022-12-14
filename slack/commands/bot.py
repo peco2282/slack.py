@@ -22,8 +22,26 @@ class Bot(slack.Client):
     """
     This is :class:`slack.Client`'s subclass.
 
+    .. versionadded:: 1.2.0
+
     Attributes
     ----------
+    user_token: :class:`str`
+        The your-self token. It must be start 'xoxp-...'
+
+    bot_token: :class:`str`
+        The bot token. It must be start 'xoxb-...'
+    token: Optional[:class:`str`]
+        App-level token. It is startwith 'xapp-...'
+
+        .. versionchanged:: 1.4.0
+            To optional.
+
+    logger: :class:`Logger.Logger`
+        Logger object.
+
+        .. versionadded:: 1.4.0
+
     prefix: :class:`str`
         Command-prefix.
 
@@ -45,11 +63,13 @@ class Bot(slack.Client):
         super().__init__(user_token, bot_token, token, loop, **optional)
         self.__commands: Dict[str, Command] = {}
         self.prefix = str(prefix)
-        self._logger = logger or super()._logger
+        self._logger = logger or super().logger
 
     @property
     def commands(self) -> Dict[str, Command]:
         """Return all commands
+
+        .. versionadded:: 1.4.0
 
         Returns
         -------
@@ -58,7 +78,9 @@ class Bot(slack.Client):
         return self.__commands
 
     def get_command(self, name: str, /) -> Optional[Command]:
-        """
+        """Get registered command from name
+
+        .. versionadded:: 1.4.0
 
         Parameters
         ----------

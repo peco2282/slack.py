@@ -7,7 +7,7 @@ from typing_extensions import ParamSpec
 from .. import commands
 from ..channel import Channel
 from ..errors import InvalidArgumentException
-from ..message import Message
+from ..message import Message, DeletedMessage
 from ..route import Route
 from ..team import Team
 from ..view import ViewFrame
@@ -24,11 +24,19 @@ BotT = TypeVar("BotT", bound="Bot")
 
 
 class Context(Message):
-    """
+    """A context is a message that is sent to a handler
+
     Attributes
     ----------
+    client: :class:`Bot`
     message: :class:`.Message`
         Message object of context.
+
+    id: :class:`str`
+        Context ID (equals message ID)
+
+    channel_id: :class:`str`
+        Context channel ID
 
     prefix: :class:`str`
         Message prefix.
@@ -60,6 +68,7 @@ class Context(Message):
         Returns
         -------
         :class:`Channel`
+            Context channel.
         """
         return self.message.channel
 
@@ -70,15 +79,24 @@ class Context(Message):
         Returns
         -------
         :class:`Team`
+            Context team.
         """
         return self.message.team
 
-    async def delete(self):
+    async def delete(self) -> DeletedMessage:
+        """Delete context message.
+
+        Returns
+        -------
+        :class:`DeletedMessage`
+            Data of deleted message.
+
+        """
         param = {
             "channel": self.channel_id,
             "ts": self.id
         }
-        await self.state.http.delete_message(
+        message = await self.state.http.delete_message(
             Route(
                 "DELETE",
                 "chat.delete",
@@ -86,6 +104,7 @@ class Context(Message):
             ),
             param
         )
+        return DeletedMessage(self.state, message.get("message"))
 
     @overload
     async def send(
@@ -106,7 +125,8 @@ class Context(Message):
             text: Optional[str] = None,
             view: Optional[ViewFrame] = None
     ) -> Context:
-        """
+        """Send message.
+        Parameters must required `text or view`.
 
         Parameters
         ----------
@@ -116,7 +136,7 @@ class Context(Message):
         Returns
         -------
         :class:`Context`
-
+            Context object contains message.
         """
         if (text is not None and view is not None) or (text is None and view is None):
             raise InvalidArgumentException()

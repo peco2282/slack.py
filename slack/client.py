@@ -81,7 +81,13 @@ class Client:
     token: Optional[:class:`str`]
         App-level token. It is startwith 'xapp-...'
 
+        .. versionchanged:: 1.4.0
+            To optional.
+
     logger: :class:`Logger.Logger`
+        Logger object.
+
+        .. versionadded:: 1.4.0
 
     loop: Optional[:class:`asyncio.AbstractEventLoop`]
         The :class:`asyncio.AbstractEventLoop` to use for asynchronous operations.
@@ -129,7 +135,7 @@ class Client:
         self._handlers: Dict[str, Callable] = {
             "ready": self._handle_ready
         }
-        self._logger = logger or _logger
+        self.logger = logger or _logger
         self.connection: ConnectionState = self._get_state(**options)
         self._teams: List[Dict[str, Any]]
         self.teams: Dict[str, Team] = {}
@@ -158,7 +164,7 @@ class Client:
             pass
 
         except Exception as e:
-            self._logger.error("%s occured", type(e), exc_info=e)
+            self.logger.error("%s occured", type(e), exc_info=e)
 
         else:
             self._schedule_event(coro, method, *args, **kwargs)
