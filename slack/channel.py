@@ -5,10 +5,11 @@ import urllib.parse
 from datetime import datetime
 from typing import TYPE_CHECKING, Optional, overload
 
+from .utils import ts2time
+from .errors import InvalidArgumentException
 from .member import Member
 from .message import Message
 from .route import Route
-from .errors import InvalidArgumentException
 from .team import Team
 from .types.channel import (
     Channel as ChannelPayload,
@@ -62,6 +63,30 @@ class Channel:
     def __repr__(self) -> str:
         return f"<{self.__class__.__name__} id={self.id} name={self.name}>"
 
+    @property
+    def everyone(self) -> str:
+        """
+
+        .. versionadded:: 1.4.0
+
+        Returns
+        -------
+        :class:`str`
+        """
+        return "<@everyone>"
+
+    @property
+    def here(self) -> str:
+        """
+
+        .. versionadded:: 1.4.0
+
+        Returns
+        -------
+        :class:`str`
+        """
+        return "<@here>"
+
     @overload
     async def send(
             self,
@@ -84,6 +109,9 @@ class Channel:
         """|coro|
 
         It sends a message to a channel.
+
+        .. versionchanged:: 1.4.0
+            Add `view` parameter.
 
         Parameters
         ----------
@@ -135,7 +163,7 @@ class Channel:
 
         Returns
         -------
-        :class:`~Message`
+        :class:`Message`
             A Message object.
 
         """
@@ -149,9 +177,54 @@ class Channel:
         )
         return Message(state=self.state, data=message["message"])
 
-    async def archive(self):
+    async def send_ephemeral(self, text: str, member: Member) -> datetime:
+        """|coro|
+        Send Ephemeral message.
+
+        .. versionadded:: 1.4.0
+
+        Parameters
+        ----------
+        text: :class:`str`
+            The text of the message to send.
+
+        member: :class:`Member`
+            send member.
+
+        Returns
+        -------
+        :class:`datetime`
+            Message posted time.
+
         """
-        This channel archive.
+        if not isinstance(member, Member):
+            raise InvalidArgumentException("`member` parameter must instance `Member` class")
+        param = {
+            "channel": self.id,
+            "text": str(text),
+            "user": member.id
+        }
+        rtn = await self.state.http.send_message(
+            Route(method="POST", endpoint="chat.postEphemeral", token=self.state.http.bot_token),
+            data=param
+        )
+
+        return ts2time(rtn.get("message_ts", "0"))
+
+    async def get_permalink(self, message: Message):
+        if not isinstance(message, Message):
+            raise InvalidArgumentException("`message` parameter must instance `Message` class")
+        rtn = await self.state.http.get_anything(
+            Route("GET", "chat.getPermalink", self.state.http.user_token),
+            data={
+                "message_ts": message.id,
+                "channel": self.id
+            }
+        )
+
+    async def archive(self) -> None:
+        """|coro|
+        This channel archive as user.
 
         .. versionadded 1.3.0
         """
@@ -159,7 +232,7 @@ class Channel:
             "channel": self.id
         }
         await self.state.http.create_channel(
-            Route("POST", "conversations.archive", token=self.state.http.bot_token),
+            Route("POST", "conversations.archive", token=self.state.http.user_token),
             param
         )
 

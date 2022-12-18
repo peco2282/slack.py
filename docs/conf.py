@@ -70,6 +70,8 @@ intersphinx_mapping = {
 
 rst_prolog = """
 .. |coroutine| replace:: This function is a *coroutine*
+.. |coro| replace:: This function is a *coroutine*
+
 """
 
 html_static_path = ['_static']

@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import re
 from typing import Optional, Dict, Callable
 
 import slack
@@ -60,10 +61,17 @@ class Bot(slack.Client):
             loop: Optional[asyncio.AbstractEventLoop] = None,
             **optional
     ):
-        super().__init__(user_token, bot_token, token, loop, **optional)
+        super().__init__(
+            user_token=user_token,
+            bot_token=bot_token,
+            token=token,
+            logger=logger,
+            loop=loop,
+            **optional
+        )
         self.__commands: Dict[str, Command] = {}
         self.prefix = str(prefix)
-        self._logger = logger or super().logger
+        self._logger = logger
 
     @property
     def commands(self) -> Dict[str, Command]:
@@ -116,6 +124,9 @@ class Bot(slack.Client):
         if isinstance(result, Command):
             self.__commands[name] = result
 
+        else:
+            self._logger.warning("%s", result.__class__.__name__, exc_info=TypeError())
+
     async def invoke_command(self, ctx: Context):
         if ctx.command:
             # self.dispatch("command", ctx)
@@ -135,8 +146,11 @@ class Bot(slack.Client):
                 _logger.error("%s occured", type(exc), exc_info=exc)
 
     async def process_commands(self, message: Message):
+        p_pattern = re.compile("^<@[A-z0-9]{8,10}>")
         content = message.content
         ctx = Context(client=self, message=message, prefix=self.prefix)
+        ctx.name = p_pattern.sub("", content).split()[0]
+
         ctx.name = content.split()[0].replace(self.prefix, "")
         ctx.command = self.commands.get(content.split()[0].replace(self.prefix, ""))
         ctx.args = content.split()[1:]
