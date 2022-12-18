@@ -61,12 +61,12 @@ Messages
     :type message: :class:`JoinMessage`
 
 
-.. function:: on_channel_archive(message)
-
-    Called whenever a channel was archived.
-
-    :param message: The sent message when channel was archived.
-    :type message: :class:`ArchivedMessage`
+.. .. function:: on_channel_archive(message)
+..
+.. ..  Called whenever a channel was archived.
+..
+.. ..:param message: The sent message when channel was archived.
+.. ..    :type message: :class:`ArchivedMessage`
 
 Channels
 --------

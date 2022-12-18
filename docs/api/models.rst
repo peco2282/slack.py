@@ -39,15 +39,6 @@ JoinMessage
     :members:
     :inherited-members:
 
-ArchivedMessage
-~~~~~~~~~~~~~~~
-
-.. attributetable:: ArchivedMessage
-
-.. autoclass:: ArchivedMessage()
-    :members:
-    :inherited-members:
-
 
 Channels
 --------

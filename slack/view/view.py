@@ -165,9 +165,8 @@ class View(ViewFrame):
 
             Returns whether this has one or more blocks.
 
-    Example:
+    Example: ::
 
-    .. code-block:: python
         select = Select(
             action_id="action",
             placeholder=Placeholder(

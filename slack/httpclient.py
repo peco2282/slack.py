@@ -166,6 +166,9 @@ class HTTPClient:
     def join_channel(self, route: Route, data):
         return self.request(route, data=data)
 
+    def get_anything(self, route: Route, data):
+        return self.request(route, data=data)
+
     async def login(self):
         """It gets a list of teams the bot is on, then gets the info for each team and stores it in a dictionary
 

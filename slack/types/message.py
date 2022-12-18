@@ -12,6 +12,7 @@ messagesubtype = Literal[
 ]
 
 __all__ = (
+    "_Edited",
     "PreviousMessage",
     "DeletedMessage",
     "Attatchment",
@@ -101,6 +102,11 @@ class Attatchment(TypedDict):
     file_access: str
 
 
+class _Edited(TypedDict):
+    user: str
+    ts: str
+
+
 class Message(TypedDict):
     type: str
     text: str
@@ -119,9 +125,8 @@ class Message(TypedDict):
     event_ts: str
     channel_type: str
     # blocks:
+    edited: Optional[_Edited]
 
-    edited_user: Optional[str]
-    edited_ts: str
 
 
 class JoinMessage(Message):

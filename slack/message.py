@@ -11,7 +11,9 @@ if TYPE_CHECKING:
     from .state import ConnectionState
     from .channel import Channel
 
+# noinspection PyProtectedMember
 from .types.message import (
+    _Edited,
     Message as MessagePayload,
     JoinMessage as JoinMessagePayload,
     PurposeMessage as PurposeMessagePayload,
@@ -25,7 +27,6 @@ __all__ = (
     "JoinMessage",
     "PurposeMessage",
     "DeletedMessage",
-    "ArchivedMessage"
 )
 
 
@@ -48,7 +49,7 @@ class Message:
 
     """
 
-    def __init__(self, state: ConnectionState, data: Optional[MessagePayload] = None):
+    def __init__(self, state: ConnectionState, data: MessagePayload):
         self.state = state
         self.team_id = data.get("team")
         self.id = data.get("ts")
@@ -56,6 +57,11 @@ class Message:
         self.channel_id = data.get("channel")
         self.content = data.get("text", "")
         self.created_at: datetime = datetime.fromtimestamp(float(self.id))
+        self.__edited: Optional[_Edited] = data.get("edited")
+        self.__edited_ts: str = self.__edited.get("ts") if self.__edited else self.id
+        self.__edited_user: Optional[Member] = self.state.members.get(
+            self.__edited.get("user")) if self.__edited else None
+        self.edited_at = datetime.fromtimestamp(float(self.__edited_ts))
 
     def __repr__(self):
         return f"<{self.__class__.__name__} id={self.id} channel_id={self.channel_id}>"
@@ -82,6 +88,7 @@ class Message:
             Message author.
 
         """
+        print(self.user)
         return self.state.members.get(self.user)
 
     @property
@@ -95,14 +102,58 @@ class Message:
         """
         return self.state.teams[self.team_id]
 
-    async def delete(self) -> None:
+    async def edit(self, text: str, is_bot: bool = True):
+        """|coro|
+        Edit sent message.
+
+        .. versionadded:: 1.4.0
+
+        Parameters
+        ----------
+        text: :class:`str`
+            New message.
+
+        is_bot: :class:`bool`
+            If my(Bot) message, True.
+
+        Returns
+        -------
+        :class:`Message`
+            message data with edited timestamp.
+
+        """
+        param = {
+            "channel": self.channel_id,
+            "ts": self.id,
+            "text": str(text)
+        }
+        if is_bot:
+            route = Route("POST", "chat.update", self.state.http.bot_token)
+
+        else:
+            route = Route("POST", "chat.update", self.state.http.user_token)
+        rtn = await self.state.http.send_message(
+            route,
+            data=param
+        )
+        return Message(self.state, rtn["message"])
+
+    async def delete(self) -> DeletedMessage:
         """It deletes a message.
+
+        .. versionchanged:: 1.4.0
+            Return :class:`DeletedMessage`
+
+        Returns
+        -------
+        :class:`DeletedMessage`
+            A DeletedMessage object.
         """
         param = {
             "channel": self.channel_id,
             "ts": self.id
         }
-        await self.state.http.delete_message(
+        rtn = await self.state.http.delete_message(
             Route(
                 "DELETE",
                 "chat.delete",
@@ -110,6 +161,8 @@ class Message:
             ),
             param
         )
+        rtn.pop("ok")
+        return DeletedMessage(self.state, rtn)
 
 
 class JoinMessage(Message):
@@ -168,48 +221,44 @@ class DeletedMessage:
 
     Attributes
     ----------
-    channel : :class:`Channel`
-        The deleted Message.
-
     ts: :class:`datetime`
-        time when deleted
-
-    hidden: :class:`bool`
-        is ephemeral
-
-    deleted_text: :class:`str`
-        The text what deleted message.
-
+        time when deleted.
     """
 
     def __init__(self, state: ConnectionState, data: DeletedMessagePayload):
+        self.__data = data
         self.state = state
-        self.channel: Channel = self.state.channels[data.get("channel")]
         self.ts: datetime = datetime.fromtimestamp(float(data.get("ts")))
-        self.previous_message: PreviousMessage = PreviousMessage(self.state, data.get("previous_message"))
-        self.hidden: bool = data.get("hidden")
-        self.deleted_text: str = self.previous_message.text
+        # self.previous_message: PreviousMessage = PreviousMessage(self.state, data.get("previous_message"))
+        # self.hidden: bool = data.get("hidden", False)
+        # self.deleted_text: str = self.previous_message.text
 
+    @property
+    def channel(self) -> Optional[Channel]:
+        """Deleted message's channel.
 
-class ArchivedMessage:
-    """A constructor for the class.
+        Returns
+        -------
+        Optional[:class:`Channel`]
+        """
+        return self.state.channels.get(self.__data.get("channel"))
 
-    Attributes
-    ----------
-    ts : :class:`datetime`
-        The data that was sent in the message.
+    @property
+    def deleted_at(self) -> datetime:
+        """When deleted.
 
-    user: :class:`Member`
-        The user who archibed channel
+        Returns
+        -------
+        :class:`datetime`
+        """
+        return datetime.fromtimestamp(float(self.__data.get("ts", 0)))
 
-    channel: :class:`Channel`
-        Archived channel.
+    @property
+    def hidden(self):
+        """Is ephemeral.
 
-    """
-
-    def __init__(self, state: ConnectionState, data: ArchivedMessagePayload):
-        self.state = state
-        self.ts = data.get("ts")
-        self.user: Member = self.state.members[data.get("user")]
-        self.channel: Channel = self.state.channels[data.get("channel")]
-        # self.channel_type = data.get("channel_type")
+        Returns
+        -------
+        :class:`bool`
+        """
+        return self.__data.get("hidden", False)

@@ -22,7 +22,6 @@ from .message import (
     JoinMessage,
     PurposeMessage,
     DeletedMessage,
-    ArchivedMessage,
 )
 from .route import Route
 from .team import Team
@@ -226,7 +225,7 @@ class ConnectionState:
         self.all_events.add("on_channel_join")
         self.dispatch("channel_join", message)
 
-    def parse_channel_archive(self, payload: Dict[str, Any]) -> None:
+    # def parse_channel_archive(self, payload: Dict[str, Any]) -> None:
         """This function takes a payload (a dictionary) and returns a message (an object)
 
         Parameters
@@ -235,10 +234,10 @@ class ConnectionState:
             The payload of the event.
 
         """
-        event = payload['event']
-        message = ArchivedMessage(state=self, data=event)
-        self.all_events.add("on_channel_archive")
-        self.dispatch("channel_archive", message)
+        # event = payload['event']
+        # message = ArchivedMessage(state=self, data=event)
+        # self.all_events.add("on_channel_archive")
+        # self.dispatch("channel_archive", message)
 
     def parse_message_changed(self, payload: Dict[str, Any]) -> None:
         """It takes a dictionary of data, and returns a message object
