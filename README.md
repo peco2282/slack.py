@@ -18,7 +18,7 @@
 
 ## How to install
 
-:warning: If you are installed `slack_bolt`, you cannot import this package. files may be confrict.
+:warning: If you have `slack_bolt` installed, you cannot import this package. You may have file conflicts.
 
 ```shell
 $ pip install wsslack.py
