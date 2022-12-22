@@ -18,8 +18,7 @@ from .types.message import (
     JoinMessage as JoinMessagePayload,
     PurposeMessage as PurposeMessagePayload,
     PreviousMessage as PreviousMessagePayload,
-    DeletedMessage as DeletedMessagePayload,
-    ArchivedMessage as ArchivedMessagePayload
+    DeletedMessage as DeletedMessagePayload
 )
 
 __all__ = (
@@ -88,15 +87,15 @@ class Message:
             Message author.
 
         """
-        print(self.user)
         return self.state.members.get(self.user)
 
     @property
     def team(self) -> Team:
         """Message team.
+
         Returns
         -------
-        :class:`~Team`
+        :class:`Team`
             Message team.
 
         """
@@ -163,6 +162,28 @@ class Message:
         )
         rtn.pop("ok")
         return DeletedMessage(self.state, rtn)
+
+    async def reply(self, text: str):
+        """
+
+        Parameters
+        ----------
+        text: :class:`str`
+
+        Returns
+        -------
+        :class:`Message`
+        """
+        param = {
+            "channel": self.channel_id,
+            "ts": self.id,
+            "text": str(text)
+        }
+        rtn = await self.state.http.send_message(
+            Route("POST", "chat.postMessage", self.state.http.bot_token),
+            data=param
+        )
+        return Message(self.state, rtn["message"])
 
 
 class JoinMessage(Message):

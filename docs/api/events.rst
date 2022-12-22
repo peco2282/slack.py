@@ -52,6 +52,13 @@ Messages
     :param message: The deleted message.
     :type message: :class:`DeletedMessage`
 
+.. py:function:: on_mention(message)
+
+    Called whenever mention(s) in message.
+
+    :param message: Sended message.
+    :type message:  :class:`Message`
+
 
 .. function:: on_channel_join(message)
 
@@ -61,12 +68,27 @@ Messages
     :type message: :class:`JoinMessage`
 
 
-.. .. function:: on_channel_archive(message)
-..
-.. ..  Called whenever a channel was archived.
-..
-.. ..:param message: The sent message when channel was archived.
-.. ..    :type message: :class:`ArchivedMessage`
+.. function:: on_reaction_added(author, member, event)
+
+    Called whenever a reaction was added.
+
+    :param author: Reacted message author.
+    :type author: :class:`Member`
+    :param member: Reacted member.
+    :type member: :class:`Member`
+    :param event: Reaction information.
+    :type event: :class:`ReactionEvent`
+
+.. function:: on_reaction_removed(author, member, event)
+
+    Called whenever a reaction was removed.
+
+    :param author: Unreacted message author.
+    :type author: :class:`Member`
+    :param member: Unreacted member.
+    :type membner: :class:`Member`
+    :param event: Reaction information.
+    :type event: :class:`ReactionEvent`
 
 Channels
 --------
@@ -112,24 +134,3 @@ Channels
     :param user: The joined member.
     :type user: :class:`Member`
 
-.. function:: on_reaction_add(user, item_user, react_type)
-
-    Called whenever reaction added.
-
-    :param user: The reacted member.
-    :type user: :class:`Member`
-    :param item_user: The reaction owner.
-    :type item_user: :class:`Member`
-    :param react_type: The reaction data.
-    :type react_type: :class:`ReactionEventType`
-
-.. function:: on_reaction_remove(user, item_user, react_type)
-
-    Called whenever reaction was removed.
-
-    :param user: The reacted member.
-    :type user: :class:`Member`
-    :param item_user: The reaction owner.
-    :type item_user: :class:`Member`
-    :param react_type: The reaction data.
-    :type react_type: :class:`ReactionEventType`

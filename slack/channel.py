@@ -5,7 +5,6 @@ import urllib.parse
 from datetime import datetime
 from typing import TYPE_CHECKING, Optional, overload
 
-from .utils import ts2time
 from .errors import InvalidArgumentException
 from .member import Member
 from .message import Message
@@ -15,6 +14,7 @@ from .types.channel import (
     Channel as ChannelPayload,
     DeletedChannel as DeletedChannelPayload
 )
+from .utils import ts2time
 from .view import ViewFrame
 
 if TYPE_CHECKING:
@@ -121,6 +121,11 @@ class Channel:
         view: Optional[:class:`ViewFrame`]
             The viewframe contain blocks of the message to send.
 
+        Raises
+        ------
+        :class:`InvalidArgumentException`
+            Raise when text and view are in param.
+
         Returns
         -------
         :class:`Message`
@@ -138,6 +143,8 @@ class Channel:
             }
 
         if view is not None:
+            if not issubclass(type(view), ViewFrame):
+                raise InvalidArgumentException("")
             blocks = json.dumps(view.to_list())
             query = {
                 "channel": self.id,

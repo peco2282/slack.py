@@ -292,7 +292,7 @@ class Client:
         """
         while True:
             try:
-                coro = SlackWebSocket.from_client(client=self, ws_url=ws_url)
+                coro = SlackWebSocket.from_client(client=self, ws_url=ws_url, logger=self.logger)
                 self.ws: SlackWebSocket = await asyncio.wait_for(coro, timeout=60.)
                 while True:
                     await self.ws.poll_event()

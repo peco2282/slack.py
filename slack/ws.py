@@ -32,12 +32,13 @@ class SlackWebSocket:
         self.socket = socket
         self.loop = loop
         # self.http = http
+        self.logger: logging.Logger
 
         self._dispatch = lambda *args: None
         self._dispatch_listeners = []
 
     @classmethod
-    async def from_client(cls, client: Client, ws_url: str) -> SlackWebSocket:
+    async def from_client(cls, client: Client, ws_url: str, logger: logging.Logger) -> SlackWebSocket:
         """`from_client` is a class method that takes a `Client` object and a websocket URL and returns a
         `SlackWebSocket` object
 
@@ -49,6 +50,7 @@ class SlackWebSocket:
             The client object that you're using to connect to Slack.
         ws_url
             The URL to connect to.
+        logger : logging.Logger
 
         Returns
         -------
@@ -58,6 +60,7 @@ class SlackWebSocket:
         socket = await client.http.ws_connect(ws_url)
         ws: SlackWebSocket = cls(socket=socket, loop=client.loop)
         ws.token = client.http.token
+        ws.logger = logger
 
         ws._slack_parsers = client.connection.parsers
         await ws.poll_event()
@@ -70,14 +73,16 @@ class SlackWebSocket:
         """
         try:
             msg: aiohttp.WSMessage = await self.socket.receive()
+            with open("log.log", mode="a", encoding="utf8") as f:
+                f.write(str(msg.data) + "\n")
             await self.parse_event(json.loads(msg.data))
 
         except Exception as e:
             raise e
 
-    async def response_event(self, envelope_id: str):
+    async def response_event(self, envelope_id: str, payload: Dict[str, Any]):
         await asyncio.sleep(0.5)
-        await self.socket.send_str(str({"envelope_id": envelope_id}))
+        await self.socket.send_str(str({"envelope_id": envelope_id, "payload": json.dumps(payload)}))
 
     async def parse_event(self, data: Dict[str, Any]) -> None:
         """It takes a dictionary of data, and if the data is a hello event, it prints the data and sets the ready event.
@@ -122,7 +127,7 @@ class SlackWebSocket:
             payload: Dict[str, Any] = data.get("payload")
             event: Dict[str, Any] = payload.get("event")
             event_type: str = event.get("subtype") if event is not None else "undefined event"
-            await self.response_event(data.get("envelope_id"))
+            await self.response_event(data.get("envelope_id"), data)
             if event_type is None:
                 event_type = event.get("type")
 
@@ -138,6 +143,7 @@ class SlackWebSocket:
 
             else:
                 func(payload)
+                _logger.info(f"{event_type} function occuring.")
 
             removed = []
             for index, entry in enumerate(self._dispatch_listeners):

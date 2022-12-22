@@ -43,6 +43,9 @@ JoinMessage
 Channels
 --------
 
+Channel
+~~~~~~~
+
 .. attributetable:: Channel
 
 .. autoclass:: Channel()
@@ -87,7 +90,7 @@ Members
 Reaction-Event
 --------------
 
-.. attributetable:: ReactionEventType
+.. attributetable:: ReactionEvent
 
-.. autoclass:: ReactionEventType()
+.. autoclass:: ReactionEvent()
     :members:

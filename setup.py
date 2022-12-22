@@ -30,7 +30,8 @@ setup(
     packages=[
         'slack',
         'slack.types',
-        'slack.commands'
+        'slack.commands',
+        'slack.view'
     ],
     install_requires=requirements,
     url='https://github.com/peco2282/slack.py',

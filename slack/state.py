@@ -25,6 +25,7 @@ from .message import (
 )
 from .route import Route
 from .team import Team
+from .utils import ts2time
 
 if TYPE_CHECKING:
     from .httpclient import HTTPClient
@@ -34,7 +35,7 @@ _logger = logging.getLogger(__name__)
 Parsers = TypeVar("Parsers", bound=Dict[str, Callable[[Optional[Dict[str, Any]]], None]])
 
 
-class ReactionEventType:
+class ReactionEvent:
     """
     Attributes
     ----------
@@ -44,27 +45,31 @@ class ReactionEventType:
     reaction: :class:`str`
         Reaction name.
 
-    file: :class:`Optional[str]`
+    file: Optional[:class:`str`]
         File ID(optional).
 
-    file_comment: :class:`Optional[str]`
+    file_comment: Optional[:class:`str`]
         File comment(optional).
 
-    channel: :class:`~Channel`
+    channel: :class:`Channel`
         Channel data(optional).
 
     timestamp: :class:`datetime.datetime`
-        Message created at.
+        Reaction added at.
+
+    message_timestamp: :class:`datetime.datetime`
+        Message of reaction added timestamp.
 
     """
 
-    def __init__(self, _type: str, state: "ConnectionState", payload: Dict[str, str]):
+    def __init__(self, _type: str, state: "ConnectionState", event: Dict[str, str]):
         self.type: str = _type
-        self.reaction: str = ""
-        self.file: Optional[str] = payload.get("file")
-        self.file_comment: Optional[str] = payload.get("file_comment")
-        self.channel: Optional[Channel] = state.channels.get(payload.get("channel", ""))
-        self.timestamp: Optional[datetime.datetime] = datetime.datetime.fromtimestamp(float(payload.get("ts")))
+        self.reaction: str = event.get("reaction")
+        self.file: Optional[str] = event.get("item", {}).get("file")
+        self.file_comment: Optional[str] = event.get("file_comment")
+        self.channel: Optional[Channel] = state.channels.get(event.get("item", {}).get("channel", ""))
+        self.timestamp: Optional[datetime.datetime] = datetime.datetime.fromtimestamp(float(event.get("item", {}).get("ts")))
+        self.message_timestamp: Optional[datetime.datetime] = ts2time(event.get("event_ts", 0))
 
 
 class ConnectionState:
@@ -135,7 +140,6 @@ class ConnectionState:
         return self.teams, self.channels, self.members
 
     def parse_hello(self, *args, **kwargs):
-        self.all_events.add("on_ready")
         self.dispatch("ready")
 
     def parse_message(self, payload: Dict[str, Any]) -> None:
@@ -225,7 +229,13 @@ class ConnectionState:
         self.all_events.add("on_channel_join")
         self.dispatch("channel_join", message)
 
-    # def parse_channel_archive(self, payload: Dict[str, Any]) -> None:
+    def parse_app_mention(self, payload: Dict[str, Any]):
+        event = payload['event']
+        message = Message(self, event)
+        message.team_id = payload.get("team")
+        self.dispatch("mention", message)
+
+    def parse_channel_archive(self, payload: Dict[str, Any]) -> None:
         """This function takes a payload (a dictionary) and returns a message (an object)
 
         Parameters
@@ -238,6 +248,7 @@ class ConnectionState:
         # message = ArchivedMessage(state=self, data=event)
         # self.all_events.add("on_channel_archive")
         # self.dispatch("channel_archive", message)
+        ...
 
     def parse_message_changed(self, payload: Dict[str, Any]) -> None:
         """It takes a dictionary of data, and returns a message object
@@ -264,8 +275,9 @@ class ConnectionState:
         self.dispatch("channel_rename", channel, _channel)
 
     def parse_channel_unarchive(self, payload: Dict[str, Any]):
-        channel = self.channels[payload["channel"]]
-        user = self.members[payload["user"]]
+        event = payload["event"]
+        channel = self.channels[event["channel"]]
+        user = self.members[event["user"]]
         self.all_events.add("on_channel_unarchive")
         self.dispatch("channel_unarchive", channel, user)
 
@@ -277,33 +289,33 @@ class ConnectionState:
         self.dispatch("member_join", channel, user, inviter)
 
     def parse_member_left_channel(self, payload: Dict[str, Any]):
-        user = self.members[payload["user"]]
-        channel = self.channels[payload["channel"]]
+        event = payload["event"]
+        user = self.members[event["user"]]
+        channel = self.channels[event["channel"]]
         self.all_events.add("on_member_left")
         self.dispatch("member_left", channel, user)
 
     def parse_reaction_added(self, payload: Dict[str, Any]):
-        user: Member = self.members[payload.get("user", "")]
-        _type: str = payload["item"]["type"]
-        item_user: Member = self.members.get(payload.get("item_user", ""))
+        event = payload['event']
+        user: Member = self.members.get(event.get("user", ""))
+        _type: str = event["item"]["type"]
+        item_user: Member = self.members.get(event.get("item_user", ""))
 
-        react_type = ReactionEventType(_type, self, payload["item"])
-        react_type.reaction = payload["reaction"]
+        react_type = ReactionEvent(_type, self, event)
+        print(user)
 
-        self.all_events.add("on_reaction_add")
-        self.dispatch("reaction_add", user, item_user, react_type)
+        self.dispatch("reaction_added", user, item_user, react_type)
 
     def parse_reaction_removed(self, payload: Dict[str, Any]):
+        event = payload.get("event", {})
+        user: Member = self.members[event.get("user", "")]
+        _type: str = event["item"]["type"]
+        item_user: Member = self.members.get(event.get("item_user", ""))
 
-        user: Member = self.members[payload.get("user", "")]
-        _type: str = payload["item"]["type"]
-        item_user: Member = self.members.get(payload.get("item_user", ""))
-
-        react_type = ReactionEventType(_type, self, payload["item"])
-        react_type.reaction = payload["reaction"]
+        react_type = ReactionEvent(_type, self, event)
 
         self.all_events.add("on_reaction_remove")
-        self.dispatch("reaction_remove", user, item_user, react_type)
+        self.dispatch("reaction_removed", user, item_user, react_type)
 
     def parse_pin_added(self, payload: Dict[str, Any]):
         self.all_events.add("pin_add")
