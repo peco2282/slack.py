@@ -25,7 +25,9 @@ $ pip install wsslack.py
 ```
 
 
-## [example](https://github.com/peco2282/slack.py/tree/main/examples)
+## [Example](https://github.com/peco2282/slack.py/tree/main/examples)
+
+#### [Event References](https://slack-py.readthedocs.io/en/latest/api/events.html)
 ```python
 import slack
 
@@ -53,7 +55,9 @@ client.run()
 ### **on_channel_create**
 ![on_channel_create](https://gyazo.com/40bec93c03343e43dee2180075716d39.png)
 
-## extentional usage.
+## Commands usage.
+
+New style of messaging.
 If you use app with commands..
 
 ```python
