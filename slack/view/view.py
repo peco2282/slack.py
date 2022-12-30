@@ -5,15 +5,14 @@ __all__ = (
     "ViewFrame",
     "View",
     "InputSelect",
-    "Button",
     "Placeholder",
     "Label",
-    "Title"
+    "Title",
+    "ActionView",
+    "SectionView"
 )
 
-from typing import TypeVar, TYPE_CHECKING
-
-from ..errors import InvalidArgumentException
+from typing import TypeVar, TYPE_CHECKING, Union
 
 ViewT = TypeVar("ViewT")
 if TYPE_CHECKING:
@@ -27,6 +26,7 @@ class BaseView:
 
     .. versionadded:: 1.4.0
     """
+
     def __init_subclass__(cls, *args, **kwargs):
         setattr(cls, "__type__", "__view__")
 
@@ -106,52 +106,9 @@ class Placeholder(BaseView):
 Label = Title = Placeholder
 
 
-class Button:
-    """
-
-    Parameters
-    ----------
-    label
-    value
-    action_id
-    url
-    """
-
-    def __init__(
-            self,
-            label: Label,
-            value: str,
-            action_id: str,
-            url: str = None
-    ):
-        if not isinstance(label, Label):
-            raise InvalidArgumentException()
-        self.label = label
-        self.value = str(value)
-        self.action_id = str(action_id)
-        self.url = url
-
-    def to_dict(self):
-        """Converts this object into a dict.
-        Returns
-        -------
-        Dict[:class:`str`, Union[:class:`str`, Dict[:class:`str`, Union[:class:`str`, :class:`bool`]]]
-            A dictionary of :class:`str` field keys bound to the respective value.
-        """
-        param = {
-            "type": "button",
-            "text": self.label.to_dict(),
-            "value": self.value,
-            "action_id": self.action_id
-        }
-        if self.url:
-            param["url"] = str(self.url)
-
-        return param
-
-
 class View(ViewFrame):
     """This is a frame of view block.
+    All blocks contains this instance.
 
     .. versionadded:: 1.4.0
 
@@ -186,13 +143,13 @@ class View(ViewFrame):
 
     def __init__(
             self,
-            *blocks: BaseView
+            *blocks: Union[ActionView, SectionView]
     ):
         self.blocks = [
             b
             for b
             in blocks
-            if isinstance(b, BaseView)
+            if isinstance(b, (ActionView, SectionView))
         ]
 
     def __len__(self) -> int:
@@ -201,12 +158,12 @@ class View(ViewFrame):
     def __bool__(self) -> bool:
         return len(self.blocks) != 0
 
-    def add_block(self, block: BaseView) -> View:
+    def add_block(self, block: Union[ActionView, SectionView]) -> View:
         """Add block to the view object.
 
         Parameters
         ----------
-        block: :class:`BaseView`
+        block: Union[:class:`ActionView`, :class:`SectionView`]
             Add block to this view object.
             Block must be inherit :class:`BaseView`.
 
@@ -216,7 +173,7 @@ class View(ViewFrame):
             Returns self object.
         """
 
-        if isinstance(block, BaseView):
+        if isinstance(block, (ActionView, SectionView)):
             self.blocks.append(block)
 
         return self
@@ -231,12 +188,84 @@ class View(ViewFrame):
 
         """
         return [
-            {
-                "type": "actions",
-                "elements": [
-                    b.to_dict()
-                    for b
-                    in self.blocks
-                ]
-            }
+            b.to_dict()
+            for b
+            in self.blocks
         ]
+
+
+class SectionView(BaseView):
+    """This class create `section` type instance.
+
+    .. versionadded:: 1.4.2
+
+    Attributes
+    ----------
+    block: :class:`BaseView`
+        Component of block. MUst be inherit :class:`BaseView`.
+
+    text: :class:`str`
+        Text of block.
+
+    """
+    def __init__(
+            self,
+            block: BaseView,
+            text: str
+    ):
+        self.block = block
+        self.text = text
+
+    def to_dict(self):
+        """`to_dict` is a function that takes in a `self` object and returns a list of dictionaries
+
+        Returns
+        -------
+            A list of dictionaries.
+
+        """
+        text = {
+            "type": "mrkdwn",
+            "text": str(self.text)
+        }
+        return {
+            "type": "section",
+            "text": text,
+            "accessory":
+                self.block.to_dict()
+                if isinstance(self.block, BaseView)
+                else {}
+        }
+
+
+class ActionView(BaseView):
+    """This class create `action` type instance.
+
+    .. versionadded:: 1.4.2
+
+    Attributes
+    ----------
+    blocks: :class:`BaseView`
+        Component of blocks. MUst be inherit :class:`BaseView`.
+    """
+    def __init__(self, *block: BaseView) -> None:
+        self.blocks = block
+
+    def to_dict(self):
+        """It takes a list of blocks, and returns a dictionary with the key "elements" and the value of a list of dictionaries,
+        where each dictionary is the result of calling the to_dict() method on each block
+
+        Returns
+        -------
+            A dictionary with the key "type" and the value "actions"
+
+        """
+        return {
+            "type": "actions",
+            "elements": [
+                e.to_dict()
+                for e
+                in self.blocks
+                if isinstance(e, BaseView)
+            ]
+        }

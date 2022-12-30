@@ -176,7 +176,7 @@ class Message:
         """
         param = {
             "channel": self.channel_id,
-            "ts": self.id,
+            "thread_ts": self.id,
             "text": str(text)
         }
         rtn = await self.state.http.send_message(

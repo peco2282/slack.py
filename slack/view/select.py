@@ -1,7 +1,12 @@
-from enum import Enum
+from __future__ import annotations
 
+from enum import Enum
+from typing import TYPE_CHECKING
 from .view import BaseView, Placeholder
-from ..errors import InvalidArgumentException
+
+if TYPE_CHECKING:
+    # from .view import Placeholder
+    from ..errors import InvalidArgumentException
 
 __all__ = (
     "SelectType",
@@ -26,6 +31,11 @@ class SelectType(Enum):
     checkboxes = "checkboxes"
     radio_buttons = "radio_buttons"
     timepicker = "timepicker"
+
+    button = "button"
+    link_button = "button"
+    overflow = "overflow"
+    image = "image"
 
     def __str__(self) -> str:
         return self.name
@@ -59,12 +69,12 @@ class SelectOption(BaseView):
             value: str,
             description: str = None,
             mrkdwn: bool = True,
-            emoji: bool = True
+            # emoji: bool = True
     ):
         self.text = str(text)
         self.value = str(value)
         self.mrkdwn = "mrkdwn" if mrkdwn else "plain_text"
-        self.emoji = emoji
+        # self.emoji = emoji
         self.description = description
 
     def to_dict(self):
@@ -81,12 +91,12 @@ class SelectOption(BaseView):
             "text": {
                 "type": self.mrkdwn,
                 "text": self.text,
-                "emoji": self.emoji
+                # "emoji": self.emoji
             },
             "description": {
                 "type": self.mrkdwn,
                 "text": self.text,
-                "emoji": self.emoji
+                # "emoji": self.emoji
             },
             "value": self.value
         }
@@ -118,23 +128,19 @@ class Select(BaseView):
     def __init__(
             self,
             action_id: str,
-            placeholder: Placeholder,
+            /,
             *options: SelectOption,
+            placeholder: Placeholder = None,
             select_type: SelectType = SelectType.static_select,
             initial_text: str = None
     ):
-        if not isinstance(placeholder, Placeholder):
+        if placeholder is not None and not isinstance(placeholder, Placeholder):
             raise InvalidArgumentException()
-        if options and not isinstance(select_type, SelectType):
+        if options is not None and not isinstance(select_type, SelectType):
             raise ValueError(f"select_type is only SelectType.")
-        self.select_type = str(
-            SelectType.static_select
-            if not isinstance(
-                select_type, SelectType
-            )
-            else select_type
-        )
-        if placeholder.mrkdwn is True:
+        self.select_type = select_type if isinstance(select_type, SelectType) else SelectType.static_select
+
+        if placeholder is not None and placeholder.mrkdwn is True:
             placeholder.mrkdwn = False
         self.placeholder = placeholder
         self.action_id = action_id
@@ -150,10 +156,21 @@ class Select(BaseView):
             A dictionary of :class:`str` field keys bound to the respective value.
         """
         param = {
-            "type": self.select_type,
-            "placeholder": self.placeholder.to_dict(),
+            "type": str(self.select_type),
+            # "placeholder": self.placeholder.to_dict(),
             "action_id": self.action_id
         }
+
+        if self.select_type not in (
+            SelectType.radio_buttons,
+            SelectType.checkboxes,
+            SelectType.button,
+            SelectType.image
+        ):
+            if self.placeholder is None:
+                raise InvalidArgumentException(f"`placeholder` must be required {self.select_type}.")
+
+            param["placeholder"] = self.placeholder.to_dict()
 
         if self.select_type in (
                 SelectType.static_select,
@@ -162,7 +179,7 @@ class Select(BaseView):
         ):
             if len(self.options) <= 1:
                 raise InvalidArgumentException(
-                    "options must 2 or more."
+                    f"options must 2 or more. but you put {len(self.options)}."
                 )
             param["options"] = [
                 o.to_dict()

@@ -1,4 +1,11 @@
-from .view import ViewFrame, Button
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+from .view import ViewFrame
+
+if TYPE_CHECKING:
+    from .button import Button
 
 
 class Modal(ViewFrame):

@@ -77,3 +77,19 @@ View
 
 .. autoclass:: View()
     :members:
+
+ActionView
+~~~~~~~~~~
+
+.. py:attribute:: ActionView
+
+.. autoclass:: ActionView()
+    :members:
+
+SectionView
+~~~~~~~~~~~
+
+.. py:attribute:: SectionView
+
+.. autoclass:: SectionView()
+    :members:
