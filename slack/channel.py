@@ -18,6 +18,7 @@ from .utils import ts2time
 from .view import ViewFrame
 
 if TYPE_CHECKING:
+    from .attachment import Attachment, File
     from .state import ConnectionState
 
 __all__ = (
@@ -104,7 +105,8 @@ class Channel:
     async def send(
             self,
             text: str = None,
-            view: Optional[ViewFrame] = None
+            view: Optional[ViewFrame] = None,
+            as_user: bool = False
     ) -> Message:
         """|coro|
 
@@ -120,6 +122,11 @@ class Channel:
 
         view: Optional[:class:`ViewFrame`]
             The viewframe contain blocks of the message to send.
+
+        as_user: :class:`str`
+            Is message send by user or not.
+
+            .. versionadded:: 1.4.2
 
         Raises
         ------
@@ -142,6 +149,9 @@ class Channel:
                 "text": str(text)
             }
 
+        if as_user:
+            param["as_user"] = True
+
         if view is not None:
             if not issubclass(type(view), ViewFrame):
                 raise InvalidArgumentException("")
@@ -162,6 +172,9 @@ class Channel:
 
     async def send_as_user(self, text: str):
         """|coro|
+
+        .. deprecated:: 1.4.2
+            Use :send: func.
 
         Parameters
         ----------
@@ -217,6 +230,36 @@ class Channel:
         )
 
         return ts2time(rtn.get("message_ts", "0"))
+
+    async def send_file(self, attachment: Attachment) -> File:
+        """This function occur sending file.
+
+        Parameters
+        ----------
+        attachment: :class:`Attachment`
+            Your file to send.
+
+        Returns
+        -------
+        :class:`File`
+            Sended data of file.
+        """
+        initial_text = attachment.initial_comment
+
+        param = {
+            "channels": self.id,
+            "title": attachment.title,
+            "filename": attachment.name
+        }
+        if initial_text:
+            param["initial_comment"] = initial_text
+
+        sended = await self.state.http.send_files(
+            Route(method="POST", endpoint="files.upload", token=self.state.http.bot_token),
+            data=param,
+            files=[attachment],
+        )
+        return File(self.state, sended["file"])
 
     async def get_permalink(self, message: Message):
         if not isinstance(message, Message):
