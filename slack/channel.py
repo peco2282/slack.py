@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 import urllib.parse
 from datetime import datetime
-from typing import TYPE_CHECKING, Optional, overload
+from typing import TYPE_CHECKING, Optional, overload, Union, List, Dict
 
 from .errors import InvalidArgumentException
 from .member import Member
@@ -162,6 +162,7 @@ class Channel:
 
     async def send_as_user(self, text: str):
         """|coro|
+        Message is sended by you. not application.
 
         Parameters
         ----------
@@ -184,6 +185,99 @@ class Channel:
         )
         return Message(state=self.state, data=message["message"])
 
+    async def send_schedule(
+            self,
+            text: str,
+            date: Union[datetime, int, float]
+    ) -> Message:
+        """This function is sending scheduled message with UNIX timestamp.
+
+        .. versionadded:: 1.4.2
+
+        Parameters
+        ----------
+        text: :class:`str`
+            Message content.
+
+        date: Optional[:class:`datetime`,:class:`int`:class:`float`]
+            Timestamp when scheduled message sending.
+
+        Returns
+        -------
+        :class:`Message`
+            Message object.
+        """
+        param = {
+            "channel": self.id,
+            "text": str(text)
+        }
+        if isinstance(date, datetime):
+            param["post_at"] = int(date.timestamp())
+
+        elif isinstance(date, (int, float)):
+            param["post_at"] = int(date)
+
+        else:
+            raise InvalidArgumentException("`date` parameter must be `datetime`, `int` or `float`.")
+        resp = await self.state.http.send_message(
+            Route("POST", "chat.scheduleMessage", self.state.http.bot_token),
+            data=param
+        )
+        message = Message(self.state, resp["message"])
+        message.id = resp.get("post_at")
+        message.channel_id = resp.get("channel")
+        message.scheduled_message_id = resp.get("scheduled_message_id")
+        return message
+
+    async def get_scheduled_messages(
+            self,
+            limit: int = None,
+            latest: Union[datetime, int, float] = None,
+            oldest: Union[datetime, int, float] = None
+    ) -> List[Dict[str, Union[str, int]]]:
+        if any(
+                [
+                    isinstance(limit, (int, type(None))),
+                    *[isinstance(
+                        t, (datetime, int, float, type(None))
+                    ) for t in [latest, oldest]]
+                ]
+        ):
+            raise InvalidArgumentException()
+        param = {
+            "channel": self.id
+        }
+        if latest is not None and oldest is not None:
+            if isinstance(latest, datetime):
+                latest = latest.timestamp()
+
+            if isinstance(oldest, datetime):
+                oldest = oldest.timestamp()
+
+            if oldest > latest:
+                latest, oldest = oldest, latest
+
+            param["latest"] = int(latest)
+            param["oldest"] = int(oldest)
+
+        elif latest is not None:
+            if isinstance(latest, datetime):
+                latest = latest.timestamp()
+
+            param["latest"] = int(latest)
+
+        elif oldest is not None:
+            if isinstance(oldest, datetime):
+                oldest = oldest.timestamp()
+
+            param["oldest"] = int(oldest)
+        rtn = await self.state.http.get_anything(
+            Route("GET", "chat.scheduledMessages.list", self.state.http.bot_token),
+            param
+        )
+        messages = [m for m in rtn.get("scheduled_messages", [])]
+        return messages
+
     async def send_ephemeral(self, text: str, member: Member) -> datetime:
         """|coro|
         Send Ephemeral message.
@@ -204,8 +298,10 @@ class Channel:
             Message posted time.
 
         """
+
         if not isinstance(member, Member):
             raise InvalidArgumentException("`member` parameter must instance `Member` class")
+
         param = {
             "channel": self.id,
             "text": str(text),
@@ -234,6 +330,7 @@ class Channel:
         This channel archive as user.
 
         .. versionadded 1.3.0
+
         """
         param = {
             "channel": self.id

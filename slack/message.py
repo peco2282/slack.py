@@ -3,13 +3,14 @@ from __future__ import annotations
 from datetime import datetime
 from typing import TYPE_CHECKING, Optional
 
-from .member import Member
 from .route import Route
 
 if TYPE_CHECKING:
     from .team import Team
     from .state import ConnectionState
     from .channel import Channel
+    from .member import Member
+
 
 # noinspection PyProtectedMember
 from .types.message import (

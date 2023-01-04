@@ -3,11 +3,13 @@ from __future__ import annotations
 from datetime import datetime
 from typing import TYPE_CHECKING, Optional
 
+from .route import Route
 from .team import Team
 from .types.member import (
     Member as MemberPayload,
     Profile as ProfilePayload
 )
+from .message import Message
 
 if TYPE_CHECKING:
     from .state import ConnectionState
@@ -127,3 +129,27 @@ class Member:
             mention.
         """
         return f"<@{self.id}>"
+
+    async def send_dm(self, text: str):
+        """
+
+        .. versionadded:: 1.4.2
+
+        Parameters
+        ----------
+        text: :class:`str`
+            Message you want as DM.
+
+        Returns
+        -------
+        :class:`Message`
+
+        """
+        rtn = await self.state.http.send_message(
+            Route("POST", "chat.postMessage", self.state.http.bot_token),
+            data={
+                "channel": self.id,
+                "text": str(text)
+            }
+        )
+        return Message(self.state, rtn.get("message"))
