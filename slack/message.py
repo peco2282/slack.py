@@ -30,7 +30,7 @@ __all__ = (
 
 
 class Message:
-    """This function is a constructor for the Message class. It takes in two parameters, state and data. The state
+    """This class is a constructor for the Message class. It takes in two parameters, state and data. The state
     parameter is a ConnectionState object, and the data parameter is a MessagePayload object. The function then sets the
     state, team_id, id, author, channel_id, and created_at attributes of the Message object
 
@@ -56,6 +56,7 @@ class Message:
         self.channel_id = data.get("channel")
         self.content = data.get("text", "")
         self.created_at: datetime = datetime.fromtimestamp(float(self.id))
+        self.scheduled_message_id: Optional[str] = None
         self.__edited: Optional[_Edited] = data.get("edited")
         self.__edited_ts: str = self.__edited.get("ts") if self.__edited else self.id
         self.__edited_user: Optional[Member] = self.state.members.get(
