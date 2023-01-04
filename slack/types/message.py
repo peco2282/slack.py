@@ -11,17 +11,6 @@ messagesubtype = Literal[
     "message_deleted"
 ]
 
-__all__ = (
-    "_Edited",
-    "PreviousMessage",
-    "DeletedMessage",
-    "Attatchment",
-    "Message",
-    "JoinMessage",
-    "PurposeMessage",
-    "ArchivedMessage"
-)
-
 
 class ArchivedMessage(TypedDict):
     type: str
@@ -126,7 +115,6 @@ class Message(TypedDict):
     channel_type: str
     # blocks:
     edited: Optional[_Edited]
-
 
 
 class JoinMessage(Message):

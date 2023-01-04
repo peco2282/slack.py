@@ -46,10 +46,10 @@ class ReactionEvent:
         Reaction name.
 
     file: Optional[:class:`str`]
-        File ID(optional).
+        Attachment ID(optional).
 
     file_comment: Optional[:class:`str`]
-        File comment(optional).
+        Attachment comment(optional).
 
     channel: :class:`Channel`
         Channel data(optional).

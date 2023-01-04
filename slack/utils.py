@@ -19,7 +19,7 @@ errors: Dict[str, SlackExceptions] = {
 }
 
 
-def ts2time(time: str) -> datetime:
+def ts2time(time: Union[str, int, float]) -> datetime:
     return datetime.fromtimestamp(float(time))
 
 

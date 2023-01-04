@@ -2,11 +2,12 @@ from __future__ import annotations
 
 import asyncio
 import json
-from typing import Any, Dict, TYPE_CHECKING, Optional, Union
+from typing import Any, Dict, TYPE_CHECKING, Optional, Union, List, IO
 
 import aiohttp
 
-from .errors import RateLimitException, ForbiddenException
+from .attachment import Attachment
+from .errors import RateLimitException, ForbiddenException, RequestException
 from .route import Route
 from .utils import parse_exception
 
@@ -83,6 +84,13 @@ class HTTPClient:
         attrs = {
             "headers": headers
         }
+        is_file = False
+        f: Optional[IO] = None
+        files: Optional[List[Attachment]] = kwargs.get("files")
+        if files is not None:
+            f = open(files[0].fp, mode="rb")
+            data["file"] = f
+
         if data is not None:
             attrs["data"] = data
 
@@ -96,10 +104,19 @@ class HTTPClient:
 
         async with self.__session.request(method, url, **attrs) as response:
             try:
-                _json = await response.json()
+                _json = await response.json(content_type=None)
                 is_ok = _json.get("ok")
                 if 300 > response.status >= 200:
                     if is_ok is True:
+                        if is_file is True:
+                            try:
+                                f.close()
+
+                            except IOError as io:
+                                raise RequestException()
+
+                            finally:
+                                is_file = False
                         return _json
 
                     else:
@@ -114,6 +131,16 @@ class HTTPClient:
 
             except json.JSONDecodeError:
                 return await response.text()
+
+    def send_files(self, route: Route, data: Any, file: Attachment = None, files: List[Attachment] = None):
+        if file is not None:
+            files = [file]
+
+        return self.request(
+            route,
+            data=data,
+            files=files,
+        )
 
     def send_message(self, route: Route, data=None, query=None):
         """It takes a parameter, and returns a request
