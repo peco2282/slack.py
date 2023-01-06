@@ -68,7 +68,8 @@ class ReactionEvent:
         self.file: Optional[str] = event.get("item", {}).get("file")
         self.file_comment: Optional[str] = event.get("file_comment")
         self.channel: Optional[Channel] = state.channels.get(event.get("item", {}).get("channel", ""))
-        self.timestamp: Optional[datetime.datetime] = datetime.datetime.fromtimestamp(float(event.get("item", {}).get("ts")))
+        self.timestamp: Optional[datetime.datetime] = datetime.datetime.fromtimestamp(
+            float(event.get("item", {}).get("ts")))
         self.message_timestamp: Optional[datetime.datetime] = ts2time(event.get("event_ts", 0))
 
 
