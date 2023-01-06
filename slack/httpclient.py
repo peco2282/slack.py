@@ -2,12 +2,13 @@ from __future__ import annotations
 
 import asyncio
 import json
+import traceback
 from typing import Any, Dict, TYPE_CHECKING, Optional, Union, List, IO
 
 import aiohttp
 
 from .attachment import Attachment
-from .errors import RateLimitException, ForbiddenException, RequestException
+from .errors import RateLimitException, ForbiddenException
 from .route import Route
 from .utils import parse_exception
 
@@ -31,12 +32,12 @@ class HTTPClient:
             self,
             loop: asyncio.AbstractEventLoop,
             user_token: str,
-            token: str,
+            token: Optional[str],
             bot_token: str
     ):
         self.loop: asyncio.AbstractEventLoop = loop
         self.user_token: str = user_token
-        self.token: str = token
+        self.token: Optional[str] = token
         self.bot_token: str = bot_token
         self.__session: Optional[aiohttp.ClientSession] = None
         self.ws: SlackWebSocket
@@ -113,7 +114,8 @@ class HTTPClient:
                                 f.close()
 
                             except IOError as io:
-                                raise RequestException()
+                                traceback.format_exception(io)
+                                raise io
 
                             finally:
                                 is_file = False

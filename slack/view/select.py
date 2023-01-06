@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 from .view import BaseView, Placeholder
 
 if TYPE_CHECKING:
@@ -60,14 +60,12 @@ class SelectOption(BaseView):
     mrkdwn: Optional[:class:`bool`]
         Markdown or nor.
 
-    emoji: Optional[:class:`bool`]
-        Use emoji or not
     """
     def __init__(
             self,
             text: str,
             value: str,
-            description: str = None,
+            description: Optional[str] = None,
             mrkdwn: bool = True,
             # emoji: bool = True
     ):
@@ -112,7 +110,7 @@ class Select(BaseView):
     action_id: :class:`str`
         ID for this event occured.
 
-    placeholder: :class:`Placeholder`
+    placeholder: Optional[:class:`Placeholder`]
         Placeholder of select.
 
     options: List[:class:`SelectOption`]
@@ -122,7 +120,7 @@ class Select(BaseView):
     select_type: :class:`SelectType`
         Select type of this object.
 
-    initial_text: :class:`str`
+    initial_text: Optional[:class:`str`]
         Initial text for selections.
     """
     def __init__(
@@ -130,9 +128,9 @@ class Select(BaseView):
             action_id: str,
             /,
             *options: SelectOption,
-            placeholder: Placeholder = None,
+            placeholder: Optional[Placeholder] = None,
             select_type: SelectType = SelectType.static_select,
-            initial_text: str = None
+            initial_text: Optional[str] = None
     ):
         if placeholder is not None and not isinstance(placeholder, Placeholder):
             raise InvalidArgumentException()

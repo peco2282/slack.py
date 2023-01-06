@@ -35,7 +35,7 @@ class Input(BaseView):
             multiline: bool = False,
             placeholder: Optional[Placeholder] = None,
             *select_options: SelectOption,
-            label: Label = None,
+            label: Optional[Label] = None,
             input_type: InputType = InputType.plain_text_input,
             initial_text: Optional[str] = None
     ):

@@ -3,7 +3,7 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
-from typing import TYPE_CHECKING, Dict, Any, Callable
+from typing import TYPE_CHECKING, Dict, Any, Callable, List, Optional
 
 import aiohttp
 
@@ -34,8 +34,10 @@ class SlackWebSocket:
         # self.http = http
         self.logger: logging.Logger
 
+        self.token: str
+
         self._dispatch = lambda *args: None
-        self._dispatch_listeners = []
+        self._dispatch_listeners: List[Any] = []
 
     @classmethod
     async def from_client(cls, client: Client, ws_url: str, logger: logging.Logger) -> SlackWebSocket:
@@ -113,7 +115,7 @@ class SlackWebSocket:
         """
         if data.get("type") == "hello":
             try:
-                func = self._slack_parsers["hello"]
+                func: Callable = self._slack_parsers["hello"]
 
             except KeyError:
                 pass
@@ -124,10 +126,10 @@ class SlackWebSocket:
         else:
             # if not data.get("ok") or data.get("ok") is None:
             #     return
-            payload: Dict[str, Any] = data.get("payload")
-            event: Dict[str, Any] = payload.get("event")
-            event_type: str = event.get("subtype") if event is not None else "undefined event"
-            await self.response_event(data.get("envelope_id"), data)
+            payload: Dict[str, Any] = data["payload"]
+            event: Optional[Dict[str, Any]] = payload.get("event")
+            event_type: Optional[str] = event.get("subtype") if event is not None else None
+            await self.response_event(data["envelope_id"], data)
             if event_type is None:
                 event_type = event.get("type")
 
@@ -147,7 +149,8 @@ class SlackWebSocket:
 
             removed = []
             for index, entry in enumerate(self._dispatch_listeners):
-                future = entry.future
+
+                future: asyncio.Future = entry.future
                 if future.cancelled():
                     removed.append(index)
                     continue

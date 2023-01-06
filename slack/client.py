@@ -16,7 +16,7 @@ from typing import (
     TYPE_CHECKING
 )
 
-from .errors import TokenTypeException
+from .errors import TokenTypeException, InvalidArgumentException
 from .httpclient import HTTPClient
 from .state import ConnectionState
 from .ws import SlackWebSocket
@@ -84,7 +84,7 @@ class Client:
         .. versionchanged:: 1.4.0
             To optional.
 
-    logger: :class:`Logger.Logger`
+    logger: Optional[:class:`Logger.Logger`]
         Logger object.
 
         .. versionadded:: 1.4.0
@@ -99,8 +99,9 @@ class Client:
             self,
             user_token: str,
             bot_token: str,
-            token: str = None,
-            logger: logging.Logger = None,
+
+            token: Optional[str] = None,
+            logger: Optional[logging.Logger] = None,
 
             loop: Optional[asyncio.AbstractEventLoop] = None,
             **options
@@ -115,16 +116,19 @@ class Client:
         if not all([isinstance(t, str) for t in (user_token, bot_token)]):
             raise TypeError("All token must be `str`")
 
-        if not user_token.startswith("xoxp-"):
+        if user_token is not None and not user_token.startswith("xoxp-"):
             raise TokenTypeException("User token must be start `xoxp-`")
 
-        if not bot_token.startswith("xoxb-"):
+        if bot_token is not None and not bot_token.startswith("xoxb-"):
             raise TokenTypeException("Application token must be start `xoxb-`")
 
-        if not token and token.startswith("xapp-"):
+        if (user_token is None) and (bot_token is None):
+            raise InvalidArgumentException("`user_token` and `bot_token` are required.")
+
+        if token is not None and not token.startswith("xapp-"):
             raise TokenTypeException("Token must be start `xapp-`")
 
-        self.ws: SlackWebSocket = None
+        self.ws: SlackWebSocket
         self.user_token: str = user_token
         self.bot_token: str = bot_token
         self.token: Optional[str] = token

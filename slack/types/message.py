@@ -110,9 +110,9 @@ class Message(TypedDict):
     # subtype: str
     event_ts: str
     channel_type: str
-    channel: str
-    event_ts: str
-    channel_type: str
+    # channel: str
+    # event_ts: str
+    # channel_type: str
     # blocks:
     edited: Optional[_Edited]
 

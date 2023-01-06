@@ -56,7 +56,7 @@ class Channel:
         self.state = state
         self.id: str = data.get("id")
         self.name = data.get("name")
-        self.team: Team = self.state.teams[data.get("context_team_id")]
+        self.team: Team = self.state.teams.get(data.get("context_team_id"), "")
         self.created_at: datetime = datetime.fromtimestamp(float(data.get("created", 0)))
         self.created_by: Optional[Member] = self.state.members.get(data.get("creator"))
         # self.overload(data)
@@ -244,9 +244,9 @@ class Channel:
 
     async def get_scheduled_messages(
             self,
-            limit: int = None,
-            latest: Union[datetime, int, float] = None,
-            oldest: Union[datetime, int, float] = None
+            limit: Optional[int] = None,
+            latest: Optional[datetime, int, float] = None,
+            oldest: Optional[datetime, int, float] = None
     ) -> List[Dict[str, Union[str, int]]]:
         if any(
                 [

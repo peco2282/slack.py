@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 from .route import Route
 from .types.team import (
@@ -47,14 +47,14 @@ class Icon:
     def __init__(self, state: ConnectionState, team: "Team", data: IconPayload):
         self.state = state
         self.team: Team = team
-        self.image_default: bool = data.get("image_default")
-        self.image_34: str = data.get("image_34")
-        self.image_44: str = data.get("image_44")
-        self.image_68: str = data.get("image_68")
-        self.image_88: str = data.get("image_88")
-        self.image_102: str = data.get("image_102")
-        self.image_230: str = data.get("image_230")
-        self.image_132: str = data.get("image_132")
+        self.image_default: Optional[bool] = data.get("image_default")
+        self.image_34: Optional[str] = data.get("image_34")
+        self.image_44: Optional[str] = data.get("image_44")
+        self.image_68: Optional[str] = data.get("image_68")
+        self.image_88: Optional[str] = data.get("image_88")
+        self.image_102: Optional[str] = data.get("image_102")
+        self.image_230: Optional[str] = data.get("image_230")
+        self.image_132: Optional[str] = data.get("image_132")
 
 
 class Team:
@@ -83,7 +83,7 @@ class Team:
         self.url = data.get("url")
         self.domain = data.get("domain")
         self.email_domain = data.get("email_domain")
-        self.icon = Icon(state, self, data.get("icon"))
+        self.icon: Icon = Icon(state, self, data.get("icon", {}))
 
     def __repr__(self) -> str:
         return f"<{self.__class__.__name__} id={self.id} name={self.name}>"

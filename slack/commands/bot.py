@@ -56,7 +56,7 @@ class Bot(slack.Client):
 
             prefix: str,
 
-            logger: logging.Logger = None,
+            logger: Optional[logging.Logger] = None,
 
             loop: Optional[asyncio.AbstractEventLoop] = None,
             **optional
@@ -100,7 +100,7 @@ class Bot(slack.Client):
         """
         return self.__commands.get(name)
 
-    def command(self, name: str = None, **kwargs):
+    def command(self, name: Optional[str] = None, **kwargs):
         """
         Register command of your client-object.
 

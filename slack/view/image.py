@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Optional
 
 from .view import BaseView
 
@@ -25,7 +25,7 @@ class Image(BaseView):
     alt_text: :class:`str`
         Description of this image.
 
-    title: :class:`str`
+    title: Optional[:class:`str`]
         Title of this image.
 
     """
@@ -33,7 +33,7 @@ class Image(BaseView):
             self,
             image_url: str,
             alt_text: str,
-            title: Placeholder = None
+            title: Optional[Placeholder] = None
     ):
         self.image_url = str(image_url)
         self.alt_text = str(alt_text)

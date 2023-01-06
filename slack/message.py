@@ -101,7 +101,7 @@ class Message:
             Message team.
 
         """
-        return self.state.teams[self.team_id]
+        return self.state.teams.get(self.team_id)
 
     async def edit(self, text: str, is_bot: bool = True):
         """|coro|
