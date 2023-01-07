@@ -69,7 +69,7 @@ class ReactionEvent:
         self.file_comment: Optional[str] = event.get("file_comment")
         self.channel: Optional[Channel] = state.channels.get(event.get("item", {}).get("channel", ""))
         self.timestamp: Optional[datetime.datetime] = datetime.datetime.fromtimestamp(
-            float(event.get("item", {}).get("ts")))
+            float(event.get("item", {}).get("ts", 0)))
         self.message_timestamp: Optional[datetime.datetime] = ts2time(event.get("event_ts", 0))
 
 
@@ -105,36 +105,56 @@ class ConnectionState:
         Dict[str, Channel],
         Dict[str, Member]
     ]:
+        # Request installed team ids.
         teams: Dict[str, Any] = await self.http.request(
             Route("GET", "auth.teams.list", self.http.bot_token)
         )
         await asyncio.sleep(0.5)
+
+        # Request team data.
+        team_tasks = []
         for team in teams["teams"]:
             team_id = team["id"]
-            info = await self.http.request(
-                Route("GET", "team.info", self.http.bot_token),
-                data={
-                    "team": team_id
-                }
+            team_tasks.append(
+                asyncio.ensure_future(
+                    self.http.request(
+                        Route("GET", "team.info", self.http.bot_token),
+                        data={"team": team_id}
+                    )
+                )
             )
-            self.teams[team_id] = Team(state=self, data=info["team"])
-            await asyncio.sleep(0.4)
-        await asyncio.sleep(0.5)
-        for team in teams["teams"]:
-            team_id = team["id"]
-            channels: Dict[str, Any] = await self.http.request(
-                Route("GET", "conversations.list", self.http.bot_token),
-                data={
-                    "team": team_id
-                }
-            )
-            self.channels = {ch["id"]: Channel(state=self, data=ch) for ch in channels["channels"]}
-            await asyncio.sleep(0.4)
+        _teams = await asyncio.gather(*team_tasks, return_exceptions=True)
+
+        # Serialize Team class.
+        for team in _teams[0]["team"]:
+            self.teams[team["id"]] = Team(self, team)
 
         await asyncio.sleep(0.5)
+
+        # Request channel data from team id.
+        channel_tasks = []
+        for team in teams["teams"]:
+            team_id = team["id"]
+            channel_tasks.append(
+                asyncio.ensure_future(
+                    self.http.request(
+                        Route("GET", "conversations.list", self.http.bot_token),
+                        data={"team": team_id}
+                    )
+                )
+            )
+        _channels = await asyncio.gather(*channel_tasks, return_exceptions=True)
+        # Selialize Channel class.
+        for ch in _channels[0]["channels"]:
+            self.channels[ch["id"]] = Channel(self, ch)
+
+        await asyncio.sleep(0.5)
+
+        # Request member data.
         members: Dict[str, Any] = await self.http.request(
             Route("GET", "users.list", self.http.bot_token)
         )
+        # Serialize Member class.
         for member in members["members"]:
             self.members[member["id"]] = Member(state=self, data=member)
 
