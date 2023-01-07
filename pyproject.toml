@@ -20,7 +20,9 @@ docs = [
 [tool.setuptools]
 packages = [
     "slack",
-    "slack.types"
+    "slack.types",
+    "slack.commands",
+    "slack.view"
 ]
 
 [tool.setuptools.dynamic]

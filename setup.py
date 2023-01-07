@@ -2,8 +2,8 @@ import re
 
 from setuptools import setup
 
-long_description = ''
-version = ''
+long_description: str = ""
+version: str = ""
 
 with open("README.md", encoding="utf8") as f:
     long_description = f.read()
