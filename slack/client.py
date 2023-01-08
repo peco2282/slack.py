@@ -106,13 +106,7 @@ class Client:
             loop: Optional[asyncio.AbstractEventLoop] = None,
             **options
     ):
-        self._listeners: Dict[
-            str, List[
-                Tuple[
-                    asyncio.Future, Callable[..., bool]
-                ]
-            ]
-        ] = {}
+
         if not all([isinstance(t, str) for t in (user_token, bot_token)]):
             raise TypeError("All token must be `str`")
 
@@ -128,7 +122,7 @@ class Client:
         if token is not None and not token.startswith("xapp-"):
             raise TokenTypeException("Token must be start `xapp-`")
 
-        self.ws: SlackWebSocket
+        self.ws: Optional[SlackWebSocket] = None
         self.user_token: str = user_token
         self.bot_token: str = bot_token
         self.token: Optional[str] = token
@@ -142,9 +136,9 @@ class Client:
         self.logger = logger or _logger
         self.connection: ConnectionState = self._get_state(**options)
         self._teams: List[Dict[str, Any]]
-        self.teams: Dict[str, Team] = {}
-        self.channels: Dict[str, Channel] = {}
-        self.members: Dict[str, Member] = {}
+        self._teams: Dict[str, Team] = {}
+        self._channels: Dict[str, Channel] = {}
+        self._members: Dict[str, Member] = {}
 
     def _get_state(self, **options) -> ConnectionState:
         return ConnectionState(
@@ -154,6 +148,41 @@ class Client:
             handlers=self._handlers,
             **options
         )
+
+    @property
+    def teams(self) -> List[Team]:
+        """
+        List of teams.
+
+        Returns
+        -------
+        list[:class:`Team`]
+
+        """
+        return list(self._teams.values())
+
+    @property
+    def channels(self) -> List[Channel]:
+        """
+        List of channels.
+
+        Returns
+        -------
+        list[:class:`Channel`]
+        """
+        return list(self._channels.values())
+
+    @property
+    def members(self) -> List[Member]:
+        """
+        List of members.
+
+        Returns
+        -------
+        list[:class:`Member`]
+
+        """
+        return list(self._members.values())
 
     def _handle_ready(self) -> None:
         return self._ready.set()
@@ -243,6 +272,7 @@ class Client:
                 if not self.is_closed():
                     await self.close()
 
+        # noinspection PyUnusedLocal
         def stop_loop(f) -> None:
             loop.stop()
 
@@ -278,7 +308,7 @@ class Client:
         Get teams, channels and member data.
         """
         data = await self.http.login()
-        self.teams, self.channels, self.members = await self.connection.initialize()
+        self._teams, self._channels, self._members = await self.connection.initialize()
         await self.connect(data.get("url"))
 
     async def close(self) -> None:
@@ -334,6 +364,7 @@ class Client:
             await self.on_error(event_name, exc, *args, **kwargs)
             raise exc
 
+    # noinspection PyUnusedLocal
     async def on_error(self, event_name, exc: Exception, *args, **kwargs) -> None:
         """It prints the name of the event that raised the exception, the name of the exception, and the name of the
         class that the event is in.

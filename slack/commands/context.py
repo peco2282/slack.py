@@ -41,6 +41,7 @@ class Context(Message):
     prefix: :class:`str`
         Message prefix.
     """
+
     def __init__(
             self,
             client: commands.Bot,
@@ -60,6 +61,14 @@ class Context(Message):
         self.state = message.state
         self.id = message.id
         self.channel_id = self.channel.id
+
+    def __eq__(self, other) -> bool:
+        if isinstance(other, Context):
+            return self.command.func == other.command.func
+        return False
+
+    def __repr__(self) -> str:
+        return f"<{self.__class__.__name__} id{self.id}>"
 
     @property
     def channel(self) -> Channel:

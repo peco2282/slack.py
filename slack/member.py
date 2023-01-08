@@ -107,14 +107,20 @@ class Member:
         self.tz = data.get("tz")
         self.tz_label = data.get("tz_label")
         self.tz_offset = data.get("tz_offset")
-        self.profile = Profile(state, self, data.get("profile"))
+        self.profile: Profile = Profile(state, self, data.get("profile", {}))
         self.name = data.get("name")
         self.is_admin: bool = data.get("is_admin", False)
         self.is_owner: bool = data.get("is_owner")
         self.bot: bool = data.get("is_bot")
         self.is_app_user: bool = data.get("is_app_user")
         self.updated_at = datetime.fromtimestamp(float(data.get("updated", 0)))
-        self.is_email_confirmed = data.get("is_email_confirmed")
+        self.is_email_confirmed: bool = data.get("is_email_confirmed")
+
+    def __eq__(self, other) -> bool:
+        if isinstance(other, Member):
+            return self.id == other.id
+
+        return False
 
     def __repr__(self) -> str:
         return f"<{self.__class__.__name__} id={self.id} name={self.name}>"

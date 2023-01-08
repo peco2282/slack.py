@@ -11,7 +11,6 @@ if TYPE_CHECKING:
     from .channel import Channel
     from .member import Member
 
-
 # noinspection PyProtectedMember
 from .types.message import (
     _Edited,
@@ -49,13 +48,13 @@ class Message:
 
     """
 
-    def __init__(self, state: ConnectionState, data: MessagePayload):
+    def __init__(self, state: ConnectionState, data: Optional[MessagePayload] = None):
         self.state = state
         self.team_id = data.get("team")
         self.id = data.get("ts")
-        self.user = data.get("user")
-        self.channel_id = data.get("channel")
-        self.content = data.get("text", "")
+        self.user_id: str = data.get("user")
+        self.channel_id: str = data.get("channel")
+        self.content: str = data.get("text", "")
         self.created_at: datetime = datetime.fromtimestamp(float(self.id))
         self.scheduled_message_id: Optional[str] = None
         self.__edited: Optional[_Edited] = data.get("edited")
@@ -63,6 +62,12 @@ class Message:
         self.__edited_user: Optional[Member] = self.state.members.get(
             self.__edited.get("user")) if self.__edited else None
         self.edited_at = datetime.fromtimestamp(float(self.__edited_ts))
+
+    def __eq__(self, other) -> bool:
+        if isinstance(other, Message):
+            return self.id == other.id
+
+        return False
 
     def __repr__(self):
         return f"<{self.__class__.__name__} id={self.id} channel_id={self.channel_id}>"
@@ -89,7 +94,7 @@ class Message:
             Message author.
 
         """
-        return self.state.members.get(self.user)
+        return self.state.members.get(self.user_id)
 
     @property
     def team(self) -> Team:
@@ -285,3 +290,26 @@ class DeletedMessage:
         :class:`bool`
         """
         return self.__data.get("hidden", False)
+
+
+class ArchivedMessage:
+    """A constructor for the class.
+
+    Attributes
+    ----------
+    ts : :class:`datetime`
+        The data that was sent in the message.
+
+    user: :class:`Member`
+        The user who archibed channel
+
+    channel: :class:`Channel`
+        Archived channel.
+
+    """
+    def __init__(self, state: ConnectionState, data: ArchivedMessagePayload):
+        self.state = state
+        self.ts = data.get("ts")
+        self.user: Member = self.state.members[data.get("user")]
+        self.channel: Channel = self.state.channels[data.get("channel")]
+        # self.channel_type = data.get("channel_type")
