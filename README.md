@@ -21,7 +21,11 @@
 :warning: If you have `slack_bolt` installed, you cannot import this package. You may have file conflicts.
 
 ```shell
+# stable
 $ pip install wsslack.py
+
+# latest
+$ pip install git+https://github.com/peco2282/slack.py
 ```
 
 
