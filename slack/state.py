@@ -122,8 +122,8 @@ class ConnectionState:
         _teams = await asyncio.gather(*team_tasks, return_exceptions=True)
 
         # Serialize Team class.
-        for team in _teams[0]["team"]:
-            self.teams[team["id"]] = Team(self, team)
+        for team in _teams:
+            self.teams[team["team"]["id"]] = Team(self, team)
 
         await asyncio.sleep(0.5)
 
@@ -141,8 +141,9 @@ class ConnectionState:
             )
         _channels = await asyncio.gather(*channel_tasks, return_exceptions=True)
         # Selialize Channel class.
-        for ch in _channels[0]["channels"]:
-            self.channels[ch["id"]] = Channel(self, ch)
+        for chs in _channels:
+            for ch in chs["channels"]:
+                self.channels[ch["id"]] = Channel(self, ch)
 
         await asyncio.sleep(0.5)
 

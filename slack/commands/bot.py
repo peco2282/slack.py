@@ -1,16 +1,15 @@
 import asyncio
 import logging
 import re
-from typing import Optional, Dict, Callable, TYPE_CHECKING, List, Tuple, Any, Union
+from typing import Optional, Dict, Callable, List, Tuple, Any, Union
 
 import slack
+from .command import Command
 from .context import Context
 from ..errors import SlackException
 from ..message import Message
 
 _logger = logging.getLogger(__name__)
-if TYPE_CHECKING:
-    from .command import Command
 
 
 def command(name: Optional[str], **kwargs):
@@ -46,9 +45,6 @@ class Bot(slack.Client):
 
     prefix: :class:`str`
         Command-prefix.
-
-    commands: Dict[str, :class:`Command`]
-        command-name: Command-Obj.
 
     """
 
