@@ -52,9 +52,9 @@ class Message:
         self.state = state
         self.team_id = data.get("team")
         self.id = data.get("ts")
-        self.user = data.get("user")
-        self.channel_id = data.get("channel")
-        self.content = data.get("text", "")
+        self.user_id: str = data.get("user")
+        self.channel_id: str = data.get("channel")
+        self.content: str = data.get("text", "")
         self.created_at: datetime = datetime.fromtimestamp(float(self.id))
 
     def __eq__(self, other) -> bool:
@@ -88,7 +88,7 @@ class Message:
             Message author.
 
         """
-        return self.state.members.get(self.user)
+        return self.state.members.get(self.user_id)
 
     @property
     def team(self) -> Team:

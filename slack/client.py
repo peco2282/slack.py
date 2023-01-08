@@ -7,7 +7,6 @@ import traceback
 from typing import (
     List,
     Dict,
-    Tuple,
     Callable,
     TypeVar,
     Coroutine,
@@ -97,15 +96,7 @@ class Client:
             loop: Optional[asyncio.AbstractEventLoop] = None,
             **options
     ):
-        self._listeners: Dict[
-            str, List[
-                Tuple[
-                    asyncio.Future,
-                    Callable[..., bool],
-                    Optional[float]
-                ]
-            ]
-        ] = {}
+
         if not all([isinstance(t, str) for t in (user_token, bot_token, token)]):
             raise TypeError("All token must be `str`")
 
@@ -118,7 +109,7 @@ class Client:
         if not token and token.startswith("xapp-"):
             raise TokenTypeException("Token must be start `xapp-`")
 
-        self.ws: SlackWebSocket = None
+        self.ws: Optional[SlackWebSocket] = None
         self.user_token: str = user_token
         self.bot_token: str = bot_token
         self.token: str = token
@@ -197,31 +188,6 @@ class Client:
         else:
             self._schedule_event(coro, method, *args, **kwargs)
 
-        if not (listeners := self._listeners.get(event)):
-            removed = []
-            future: asyncio.Future
-            condition: Callable[..., bool]
-            timeout: Optional[float]
-            for i, (future, condition), timeout in enumerate(listeners):
-                if future.cancelled():
-                    removed.append(i)
-                    continue
-
-                try:
-                    result = condition(*args)
-                except Exception as exc:
-                    future.set_exception(exc)
-                    removed.append(i)
-                else:
-                    if result:
-                        if len(args) == 0:
-                            future.set_result(None)
-                        elif len(args) == 1:
-                            future.set_result(args[0])
-                    else:
-                        future.set_result(args)
-                    removed.append(i)
-
     def is_closed(self) -> bool:
         """It returns a boolean value.
 
@@ -293,6 +259,7 @@ class Client:
                 if not self.is_closed():
                     await self.close()
 
+        # noinspection PyUnusedLocal
         def stop_loop(f) -> None:
             loop.stop()
 
@@ -384,6 +351,7 @@ class Client:
             await self.on_error(event_name, exc, *args, **kwargs)
             raise exc
 
+    # noinspection PyUnusedLocal
     async def on_error(self, event_name, exc: Exception, *args, **kwargs) -> None:
         """It prints the name of the event that raised the exception, the name of the exception, and the name of the
         class that the event is in.

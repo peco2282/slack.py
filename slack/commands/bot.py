@@ -1,14 +1,17 @@
+from __future__ import annotations
+
 import asyncio
 import logging
-import re
-from typing import Optional, Dict, Callable
+from typing import Optional, Dict, Callable, TYPE_CHECKING, List, Tuple, Any, Union
 
 import slack
-from slack.commands import Command, Context
-from slack.errors import SlackException
-from slack.message import Message
+from .context import Context
+from ..errors import SlackException
+from ..message import Message
 
 _logger = logging.getLogger(__name__)
+if TYPE_CHECKING:
+    from .command import Command
 
 
 def command(name: Optional[str], **kwargs):
@@ -46,6 +49,15 @@ class Bot(slack.Client):
         super().__init__(user_token, bot_token, token, loop, **optional)
         self.commands: Dict[str, Command] = {}
         self.prefix = str(prefix)
+        self._listeners: Dict[
+            str, List[
+                Tuple[
+                    asyncio.Future,
+                    Callable[..., bool],
+                    Optional[float]
+                ]
+            ]
+        ] = {}
 
     def command(self, name: str = None, **kwargs):
         """
@@ -73,7 +85,7 @@ class Bot(slack.Client):
     def wait_for(
             self,
             event: str,
-            check: Callable,
+            check: Optional[Callable[..., bool]] = None,
             timeout: Optional[float] = None,
     ):
         """|coro|
@@ -125,7 +137,7 @@ class Bot(slack.Client):
 
         Waiting for a user reply: ::
 
-            @client.event
+            @bot.event
             async def on_message(message):
                 if message.content.startswith('$greet'):
                     channel = message.channel
@@ -134,12 +146,12 @@ class Bot(slack.Client):
                     def check(m):
                         return m.content == 'hello' and m.channel == channel
 
-                    msg = await client.wait_for('message', check=check)
+                    msg = await bot.wait_for('message', check=check)
                     await channel.send(f'Hello {msg.author}!')
 
         Waiting for a thumbs up reaction from the message author: ::
 
-            @client.event
+            @bot.event
             async def on_message(message):
                 if message.content.startswith('$thumb'):
                     channel = message.channel
@@ -149,27 +161,75 @@ class Bot(slack.Client):
                         return user == message.author
 
                     try:
-                        reaction, user = await client.wait_for('channel_create', timeout=60.0, check=check)
+                        reaction, user = await bot.wait_for('channel_create', timeout=60.0, check=check)
                     except asyncio.TimeoutError:
                         await channel.send('\N{THUMBS DOWN SIGN}')
                     else:
                         await channel.send('\N{THUMBS UP SIGN}')
         """
         if not (event or isinstance(event, str)):
-            raise TypeError("event param must be str.")
+            raise TypeError("vent param must be str.")
 
         future = self.loop.create_future()
-        event = re.sub(r"^on_", event, "").lower()
-        if not check:
+        event = event.lower()
+        if check is None:
             # noinspection PyUnusedLocal
             def _check(*args):
                 return True
+
             check = _check
-        listeners = self._listeners.get(event, [])
+        listeners: List[
+            Tuple[
+                asyncio.Future[Any],
+                Union[
+                    Callable[[Tuple[Any, ...]], bool],
+                    Callable[..., bool]
+                ],
+                Optional[float]
+            ]
+        ] = self._listeners.get(event, [])
         listeners.append((future, check, timeout))
         self._listeners[event] = listeners
 
         return asyncio.wait_for(future, timeout)
+
+    def dispatch(self, event: str, *args, **kwargs) -> None:
+        super().dispatch(event, *args, **kwargs)
+
+        listeners = self._listeners.get(f"on_{event}")
+        if listeners:
+            removed = []
+            future: asyncio.Future
+            condition: Callable[..., bool]
+            timeout: Optional[float]
+            for i, (future, condition, timeout) in enumerate(listeners):
+                if future.cancelled():
+                    removed.append(i)
+                    continue
+
+                try:
+                    result = condition(*args)
+
+                except Exception as exc:
+                    future.set_exception(exc)
+                    removed.append(i)
+
+                else:
+                    if result:
+                        if len(args) == 0:
+                            future.set_result(None)
+                        elif len(args) == 1:
+                            future.set_result(args[0])
+                        else:
+                            future.set_result(args)
+                    removed.append(i)
+
+            if len(removed) == len(listeners):
+                self._listeners.pop(f"on_{event}")
+
+            else:
+                for index in reversed(removed):
+                    del listeners[index]
 
     async def invoke_command(self, ctx: Context):
         if ctx.command:
