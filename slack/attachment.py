@@ -1,6 +1,6 @@
 from typing import List, Optional, Dict
 
-from . import Channel
+from .channel import Channel
 from .state import ConnectionState
 from .types import (
     File as FilePayload,

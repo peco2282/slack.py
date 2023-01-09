@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Optional, List, Any, Dict
 
 from .route import Route
 
@@ -18,7 +18,8 @@ from .types.message import (
     JoinMessage as JoinMessagePayload,
     PurposeMessage as PurposeMessagePayload,
     PreviousMessage as PreviousMessagePayload,
-    DeletedMessage as DeletedMessagePayload
+    DeletedMessage as DeletedMessagePayload,
+    ArchivedMessage as ArchivedMessagePayload
 )
 
 __all__ = (
@@ -56,6 +57,7 @@ class Message:
         self.channel_id: str = data.get("channel")
         self.content: str = data.get("text", "")
         self.created_at: datetime = datetime.fromtimestamp(float(self.id))
+        self.blocks: List[Dict[str, Any]] = data.get("blocks")
         self.scheduled_message_id: Optional[str] = None
         self.__edited: Optional[_Edited] = data.get("edited")
         self.__edited_ts: str = self.__edited.get("ts") if self.__edited else self.id
@@ -307,6 +309,7 @@ class ArchivedMessage:
         Archived channel.
 
     """
+
     def __init__(self, state: ConnectionState, data: ArchivedMessagePayload):
         self.state = state
         self.ts = data.get("ts")

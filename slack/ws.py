@@ -130,9 +130,11 @@ class SlackWebSocket:
             event: Optional[Dict[str, Any]] = payload.get("event")
             event_type: Optional[str] = event.get("subtype") if event is not None else None
             await self.response_event(data["envelope_id"], data)
-            if event_type is None:
-                event_type = event.get("type")
+            if event is None:
+                event_type = payload.get("type")
 
+            if (event_type is None) and (event is not None):
+                event_type = event.get("type")
             if data.get("retry_reason") == "timeout":
                 return
 

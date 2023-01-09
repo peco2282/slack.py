@@ -23,6 +23,7 @@ from .message import (
     PurposeMessage,
     DeletedMessage,
 )
+from .block import Block
 from .route import Route
 from .team import Team
 from .utils import ts2time
@@ -342,3 +343,7 @@ class ConnectionState:
     def parse_pin_removed(self, payload: Dict[str, Any]):
         self.all_events.add("pin_remove")
         self.dispatch("pin_remove")
+
+    def parse_block_actions(self, payload: Dict[str, Any]):
+        block = Block(self, payload)
+        self.dispatch("block_action", block)

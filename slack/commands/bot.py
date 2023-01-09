@@ -155,17 +155,10 @@ class Bot(slack.Client):
         :exc:`asyncio.TimeoutError` for you in case of timeout and is provided for
         ease of use.
 
-        In case the event returns multiple arguments, a :class:`tuple` containing those
-        arguments is returned instead. Please check the
-        :ref:`documentation <discord-api-events>` for a list of events and their
-        parameters.
-
-        This function returns the **first event that meets the requirements**.
-
         Parameters
         ----------
         event: :class:`str`
-            The event name, similar to the :ref:`event reference <discord-api-events>`,
+            The event name, similar to the :ref:`event reference <api-events>`,
             but without the ``on_`` prefix, to wait for.
         check: Optional[Callable[..., :class:`bool`]]
             A predicate to check what to wait for. The arguments must meet the
@@ -179,7 +172,7 @@ class Bot(slack.Client):
         Any
             Returns no arguments, a single argument, or a :class:`tuple` of multiple
             arguments that mirrors the parameters passed in the
-            :ref:`event reference <discord-api-events>`.
+            :ref:`event reference <api-events>`.
 
         Raises
         ------
