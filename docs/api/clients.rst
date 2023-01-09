@@ -1,5 +1,7 @@
 .. currentmodule:: slack
 
+.. _api-client:
+
 Client Object
 =============
 
