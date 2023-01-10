@@ -26,6 +26,6 @@ def ts2time(time: Union[str, int, float]) -> datetime:
 def parse_exception(event_name: str):
     exc = errors.get(event_name)
     if exc is None:
-        exc = SlackException()
+        exc = SlackException(event_name)
 
     raise exc

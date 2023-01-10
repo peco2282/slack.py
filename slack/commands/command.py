@@ -1,7 +1,7 @@
 import functools
 import logging
 import traceback
-from typing import Optional, Callable
+from typing import Optional, Callable, Any
 
 from .context import Context
 
@@ -40,17 +40,22 @@ class Command:
     """It's a class that represents a command
 
     .. versionadded:: 1.2.0
+
+    Attributes
+    ----------
+    name: :class:`str`
+        Comman name.
     """
 
-    def __init__(self, func: Callable, name: Optional[str] = None, *args, **kwargs):
-        self.func = func
+    def __init__(self, func: Callable[..., Any], name: Optional[str] = None, *args, **kwargs):
+        self.__func = func
         self.name = name or func.__name__
         self.args = args
         self.kwargs = kwargs
 
     def __eq__(self, other) -> bool:
         if isinstance(other, Command):
-            return self.func == other.func
+            return self.__func == other.__func
         return False
 
     def __repr__(self):
@@ -69,8 +74,8 @@ class Command:
              The function itself.
 
         """
-        return self.func
+        return self.__func
 
     async def invoke(self, ctx: Context):
-        occur = _occur(self.func)
+        occur = _occur(self.__func)
         await occur(ctx, *ctx.args, **ctx.kwargs)

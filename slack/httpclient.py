@@ -123,6 +123,7 @@ class HTTPClient:
 
                     else:
                         if _json.get("error") == "ratelimited":
+
                             raise RateLimitException(_json)
 
                         else:
