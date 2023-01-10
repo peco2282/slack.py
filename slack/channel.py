@@ -16,9 +16,10 @@ from .types.channel import (
 )
 from .utils import ts2time
 from .view import ViewFrame
+import slack
 
 if TYPE_CHECKING:
-    from .attachment import Attachment, File
+    from .attachment import Attachment
     from .state import ConnectionState
 
 __all__ = (
@@ -333,7 +334,7 @@ class Channel:
 
         return ts2time(rtn.get("message_ts", "0"))
 
-    async def send_file(self, attachment: Attachment) -> File:
+    async def send_file(self, attachment: Attachment) -> slack.File:
         """This function occur sending file.
 
         Parameters
@@ -361,7 +362,7 @@ class Channel:
             data=param,
             files=[attachment],
         )
-        return File(self.state, sended["file"])
+        return slack.File(self.state, sended["file"])
 
     async def get_permalink(self, message: Message):
         if not isinstance(message, Message):
