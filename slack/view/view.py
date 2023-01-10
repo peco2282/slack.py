@@ -202,7 +202,7 @@ class SectionView(BaseView):
     Attributes
     ----------
     block: :class:`BaseView`
-        Component of block. MUst be inherit :class:`BaseView`.
+        Component of block. MUst inherit :class:`BaseView`.
 
     text: :class:`str`
         Text of block.
@@ -246,13 +246,15 @@ class ActionView(BaseView):
     Attributes
     ----------
     blocks: :class:`BaseView`
-        Component of blocks. MUst be inherit :class:`BaseView`.
+        Component of blocks. MUst inherit :class:`BaseView`.
     """
     def __init__(self, *block: BaseView) -> None:
         self.blocks = block
 
     def to_dict(self):
-        """It takes a list of blocks, and returns a dictionary with the key "elements" and the value of a list of dictionaries,
+        """
+        It takes a list of blocks, and returns a dictionary with the key "elements"
+        and the value of a list of dictionaries,
         where each dictionary is the result of calling the to_dict() method on each block
 
         Returns

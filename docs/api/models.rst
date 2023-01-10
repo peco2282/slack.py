@@ -1,5 +1,7 @@
 .. currentmodule:: slack
 
+.. _api-models:
+
 Models
 ======
 
@@ -38,6 +40,25 @@ JoinMessage
 .. autoclass:: JoinMessage()
     :members:
     :inherited-members:
+
+Blocks
+------
+
+Block
+~~~~~
+
+.. attributetable:: Block
+
+.. autoclass:: Block()
+    :members:
+
+Action
+~~~~~~
+
+.. attributetable:: Action
+
+.. autoclass:: Action()
+    :members:
 
 
 Channels

@@ -1,7 +1,14 @@
 import asyncio
 import logging
-import re
-from typing import Optional, Dict, Callable, List, Tuple, Any, Union
+from typing import (
+    Optional,
+    Dict,
+    Callable,
+    List,
+    Tuple,
+    Any,
+    Union
+)
 
 import slack
 from .command import Command
@@ -10,6 +17,18 @@ from ..errors import SlackException
 from ..message import Message
 
 _logger = logging.getLogger(__name__)
+
+# Coro = TypeVar("Coro", bound=Callable[..., Coroutine[..., ..., Any]])
+Listener = List[
+    Tuple[
+        asyncio.Future[Any],
+        Union[
+            Callable[[Tuple[Any, ...]], bool],
+            Callable[..., bool]
+        ],
+        Optional[float]
+    ]
+]
 
 
 def command(name: Optional[str], **kwargs):
@@ -52,7 +71,7 @@ class Bot(slack.Client):
             self,
             user_token: str,
             bot_token: str,
-            token: str,
+            token: Optional[str],
 
             prefix: str,
 
@@ -72,15 +91,7 @@ class Bot(slack.Client):
         self.__commands: Dict[str, Command] = {}
         self.prefix = str(prefix)
         self._logger = logger
-        self._listeners: Dict[
-            str, List[
-                Tuple[
-                    asyncio.Future,
-                    Callable[..., bool],
-                    Optional[float]
-                ]
-            ]
-        ] = {}
+        self._listeners: Dict[str, Listener] = {}
 
     @property
     def commands(self) -> Dict[str, Command]:
@@ -155,17 +166,10 @@ class Bot(slack.Client):
         :exc:`asyncio.TimeoutError` for you in case of timeout and is provided for
         ease of use.
 
-        In case the event returns multiple arguments, a :class:`tuple` containing those
-        arguments is returned instead. Please check the
-        :ref:`documentation <discord-api-events>` for a list of events and their
-        parameters.
-
-        This function returns the **first event that meets the requirements**.
-
         Parameters
         ----------
         event: :class:`str`
-            The event name, similar to the :ref:`event reference <discord-api-events>`,
+            The event name, similar to the :ref:`event reference <api-events>`,
             but without the ``on_`` prefix, to wait for.
         check: Optional[Callable[..., :class:`bool`]]
             A predicate to check what to wait for. The arguments must meet the
@@ -179,7 +183,7 @@ class Bot(slack.Client):
         Any
             Returns no arguments, a single argument, or a :class:`tuple` of multiple
             arguments that mirrors the parameters passed in the
-            :ref:`event reference <discord-api-events>`.
+            :ref:`event reference <api-events>`.
 
         Raises
         ------
@@ -232,16 +236,7 @@ class Bot(slack.Client):
                 return True
 
             check = _check
-        listeners: List[
-            Tuple[
-                asyncio.Future[Any],
-                Union[
-                    Callable[[Tuple[Any, ...]], bool],
-                    Callable[..., bool]
-                ],
-                Optional[float]
-            ]
-        ] = self._listeners.get(event, [])
+        listeners: Listener = self._listeners.get(event, [])
         listeners.append((future, check, timeout))
         self._listeners[event] = listeners
 
@@ -304,11 +299,8 @@ class Bot(slack.Client):
                 _logger.error("%s occured", type(exc), exc_info=exc)
 
     async def process_commands(self, message: Message):
-        p_pattern = re.compile("^<@[A-z0-9]{8,10}>")
         content = message.content
         ctx = Context(client=self, message=message, prefix=self.prefix)
-        ctx.name = p_pattern.sub("", content).split()[0]
-
         ctx.name = content.split()[0].replace(self.prefix, "")
         ctx.command = self.commands.get(content.split()[0].replace(self.prefix, ""))
         ctx.args = content.split()[1:]

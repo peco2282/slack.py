@@ -3,7 +3,7 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
-from typing import TYPE_CHECKING, Dict, Any, Callable, List, Optional
+from typing import TYPE_CHECKING, Dict, Any, Callable, List, Optional, Coroutine
 
 import aiohttp
 
@@ -75,9 +75,7 @@ class SlackWebSocket:
         """
         try:
             msg: aiohttp.WSMessage = await self.socket.receive()
-            with open("log.log", mode="a", encoding="utf8") as f:
-                f.write(str(msg.data) + "\n")
-            await self.parse_event(json.loads(msg.data))
+            await self.parse_event(msg.json())
 
         except Exception as e:
             raise e
@@ -115,7 +113,7 @@ class SlackWebSocket:
         """
         if data.get("type") == "hello":
             try:
-                func: Callable = self._slack_parsers["hello"]
+                func: Callable[..., Coroutine[..., ..., Any]] = self._slack_parsers["hello"]
 
             except KeyError:
                 pass
@@ -130,14 +128,16 @@ class SlackWebSocket:
             event: Optional[Dict[str, Any]] = payload.get("event")
             event_type: Optional[str] = event.get("subtype") if event is not None else None
             await self.response_event(data["envelope_id"], data)
-            if event_type is None:
-                event_type = event.get("type")
+            if event is None:
+                event_type = payload.get("type")
 
+            if (event_type is None) and (event is not None):
+                event_type = event.get("type")
             if data.get("retry_reason") == "timeout":
                 return
 
             try:
-                func: Callable = self._slack_parsers[event_type]
+                func: Callable[..., Coroutine[..., ..., Any]] = self._slack_parsers[event_type]
 
             except KeyError:
                 _logger.info("%s is not defined. (Undefined Event.)", event_type)

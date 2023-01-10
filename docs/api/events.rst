@@ -1,5 +1,7 @@
 .. currentmodule:: slack
 
+.. _api-events:
+
 Event Reference
 ===============
 
@@ -59,6 +61,12 @@ Messages
     :param message: Sended message.
     :type message:  :class:`Message`
 
+.. py:function:: on_block_action(block)
+
+    Called whenever message action occured.
+
+    :param block: The block data.
+    :type block: :class:`Block`
 
 .. function:: on_channel_join(message)
 

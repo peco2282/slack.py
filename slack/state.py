@@ -23,6 +23,7 @@ from .message import (
     PurposeMessage,
     DeletedMessage,
 )
+from .block import Block
 from .route import Route
 from .team import Team
 from .utils import ts2time
@@ -74,6 +75,7 @@ class ReactionEvent:
 
 
 class ConnectionState:
+    # noinspection PyUnusedLocal
     def __init__(
             self,
             dispatch: Callable[..., None],
@@ -157,6 +159,7 @@ class ConnectionState:
 
         return self.teams, self.channels, self.members
 
+    # noinspection PyUnusedLocal
     def parse_hello(self, *args, **kwargs):
         self.dispatch("ready")
 
@@ -336,9 +339,15 @@ class ConnectionState:
         self.dispatch("reaction_removed", user, item_user, react_type)
 
     def parse_pin_added(self, payload: Dict[str, Any]):
+        payload.get("event", {})
         self.all_events.add("pin_add")
         self.dispatch("pin_add")
 
     def parse_pin_removed(self, payload: Dict[str, Any]):
+        payload.get("event", {})
         self.all_events.add("pin_remove")
         self.dispatch("pin_remove")
+
+    def parse_block_actions(self, payload: Dict[str, Any]):
+        block = Block(self, payload)
+        self.dispatch("block_action", block)

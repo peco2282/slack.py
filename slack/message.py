@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Optional, List, Any, Dict
 
+from .errors import SlackException
 from .route import Route
 
 if TYPE_CHECKING:
@@ -18,7 +19,8 @@ from .types.message import (
     JoinMessage as JoinMessagePayload,
     PurposeMessage as PurposeMessagePayload,
     PreviousMessage as PreviousMessagePayload,
-    DeletedMessage as DeletedMessagePayload
+    DeletedMessage as DeletedMessagePayload,
+    ArchivedMessage as ArchivedMessagePayload
 )
 
 __all__ = (
@@ -56,6 +58,7 @@ class Message:
         self.channel_id: str = data.get("channel")
         self.content: str = data.get("text", "")
         self.created_at: datetime = datetime.fromtimestamp(float(self.id))
+        self.blocks: List[Dict[str, Any]] = data.get("blocks")
         self.scheduled_message_id: Optional[str] = None
         self.__edited: Optional[_Edited] = data.get("edited")
         self.__edited_ts: str = self.__edited.get("ts") if self.__edited else self.id
@@ -142,44 +145,62 @@ class Message:
             route,
             data=param
         )
-        return Message(self.state, rtn["message"])
+        msg = rtn["message"]
+        msg["ts"] = rtn["ts"]
+        return Message(self.state, msg)
 
     async def delete(self) -> DeletedMessage:
         """It deletes a message.
 
-        .. versionchanged:: 1.4.0
-            Return :class:`DeletedMessage`
 
         Returns
         -------
         :class:`DeletedMessage`
             A DeletedMessage object.
+
+            .. versionchanged:: 1.4.0
+                Return :class:`DeletedMessage`
         """
         param = {
             "channel": self.channel_id,
             "ts": self.id
         }
-        rtn = await self.state.http.delete_message(
-            Route(
-                "DELETE",
-                "chat.delete",
-                self.state.http.bot_token
-            ),
-            param
-        )
-        rtn.pop("ok")
+        try:
+            rtn = await self.state.http.delete_message(
+                Route(
+                    "DELETE",
+                    "chat.delete",
+                    self.state.http.bot_token
+                ),
+                param
+            )
+        except SlackException:
+            try:
+                rtn = await self.state.http.delete_message(
+                    Route(
+                        "DELETE",
+                        "chat.delete",
+                        self.state.http.user_token
+                    ),
+                    param
+                )
+            except SlackException as exc:
+                raise exc
         return DeletedMessage(self.state, rtn)
 
     async def reply(self, text: str):
         """
+        Create thread to this message.
 
         Parameters
         ----------
         text: :class:`str`
+            Text you want reply.
 
         Returns
         -------
         :class:`Message`
+            Sended message.
         """
         param = {
             "channel": self.channel_id,
@@ -194,7 +215,8 @@ class Message:
 
 
 class JoinMessage(Message):
-    """This function is a constructor for the JoinMessage class. It takes in a ConnectionState and a JoinMessagePayload as
+    """
+    This function is a constructor for the JoinMessage class. It takes in a ConnectionState and a JoinMessagePayload as
     parameters and sets the author of the message to the user in the JoinMessagePayload
 
     """
@@ -307,6 +329,7 @@ class ArchivedMessage:
         Archived channel.
 
     """
+
     def __init__(self, state: ConnectionState, data: ArchivedMessagePayload):
         self.state = state
         self.ts = data.get("ts")
