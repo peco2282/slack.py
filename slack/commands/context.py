@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING, Optional, TypeVar, overload
 
 from typing_extensions import ParamSpec
 
-from .. import commands
+from slack import commands
 from ..channel import Channel
 from ..errors import InvalidArgumentException
 from ..message import Message, DeletedMessage
@@ -13,6 +13,7 @@ from ..team import Team
 from ..view import ViewFrame
 
 if TYPE_CHECKING:
+    from .bot import Bot
     from .command import Command
 
     P = ParamSpec("P")
@@ -20,7 +21,7 @@ if TYPE_CHECKING:
 else:
     P = TypeVar("P")
 
-BotT = TypeVar("BotT", bound="Bot")
+BotT = TypeVar("BotT", bound=Bot)
 
 
 class Context(Message):
@@ -64,7 +65,7 @@ class Context(Message):
 
     def __eq__(self, other) -> bool:
         if isinstance(other, Context):
-            return self.command.func == other.command.func
+            return self.command.callback == other.command.callback
         return False
 
     def __repr__(self) -> str:

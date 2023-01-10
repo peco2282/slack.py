@@ -38,7 +38,7 @@ class Share:
             k: [PublicShare(state, c) for c in v] for k, v in self.__share.items()
         }
 
-    def public(self, channel_id: str) -> Optional[PublicShare]:
+    def public(self, channel_id: str) -> Optional[List[PublicShare]]:
         return self.publics.get(channel_id)
 
 

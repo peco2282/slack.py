@@ -1,4 +1,4 @@
-from typing import TypedDict, Literal, Optional
+from typing import TypedDict, Literal, Optional, Any, Dict, List
 
 mimetypes = Literal[
     "image/png",
@@ -113,7 +113,7 @@ class Message(TypedDict):
     # channel: str
     # event_ts: str
     # channel_type: str
-    # blocks:
+    blocks: List[Dict[str, Any]]
     edited: Optional[_Edited]
 
 

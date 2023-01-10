@@ -63,7 +63,7 @@ class ReactionEvent:
 
     """
 
-    def __init__(self, _type: str, state: "ConnectionState", event: Dict[str, str]):
+    def __init__(self, _type: str, state: "ConnectionState", event: Dict[str, Any]):
         self.type: str = _type
         self.reaction: str = event.get("reaction")
         self.file: Optional[str] = event.get("item", {}).get("file")
@@ -318,9 +318,9 @@ class ConnectionState:
 
     def parse_reaction_added(self, payload: Dict[str, Any]):
         event = payload['event']
-        user: Member = self.members.get(event.get("user", ""))
+        user: Member = self.members[event["user"]]
         _type: str = event["item"]["type"]
-        item_user: Member = self.members.get(event.get("item_user", ""))
+        item_user: Member = self.members[event["item_user"]]
 
         react_type = ReactionEvent(_type, self, event)
         print(user)
@@ -329,9 +329,9 @@ class ConnectionState:
 
     def parse_reaction_removed(self, payload: Dict[str, Any]):
         event = payload.get("event", {})
-        user: Member = self.members[event.get("user", "")]
+        user: Member = self.members[event["user"]]
         _type: str = event["item"]["type"]
-        item_user: Member = self.members.get(event.get("item_user", ""))
+        item_user: Member = self.members[event["item_user"]]
 
         react_type = ReactionEvent(_type, self, event)
 

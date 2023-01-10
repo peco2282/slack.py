@@ -60,6 +60,7 @@ class Channel:
         self.team: Team = self.state.teams.get(data.get("context_team_id"), "")
         self.created_at: datetime = datetime.fromtimestamp(float(data.get("created", 0)))
         self.created_by: Optional[Member] = self.state.members.get(data.get("creator"))
+        self.__http = self.state.http
         # self.overload(data)
 
     def __eq__(self, other) -> bool:
@@ -255,7 +256,7 @@ class Channel:
             latest: Optional[datetime, int, float] = None,
             oldest: Optional[datetime, int, float] = None
     ) -> List[Dict[str, Union[str, int]]]:
-        if any(
+        if not any(
                 [
                     isinstance(limit, (int, type(None))),
                     *[isinstance(
@@ -389,6 +390,29 @@ class Channel:
             Route("POST", "conversations.archive", token=self.state.http.user_token),
             param
         )
+
+    async def unarchive(self):
+        param = {
+            "channel": self.id
+        }
+        rtn = await self.state.http.request(
+            Route("POST", "channels.unarchive", self.state.http.bot_token),
+            data=param
+        )
+        return rtn
+
+    async def replies(self):
+        rtn = await self.state.http.send_message(
+            Route("GET", "conversations.replies", self.state.http.bot_token)
+        )
+        return rtn
+
+    async def edit(
+            self,
+            title: str = None,
+            purpose: str = None,
+    ):
+        pass
 
 
 class DeletedChannel:

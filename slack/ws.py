@@ -3,7 +3,7 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
-from typing import TYPE_CHECKING, Dict, Any, Callable, List, Optional, Coroutine
+from typing import TYPE_CHECKING, Dict, Any, Callable, List, Optional, Coroutine, TypeVar
 
 import aiohttp
 
@@ -11,7 +11,7 @@ if TYPE_CHECKING:
     from .client import Client
 
 _logger = logging.getLogger(__name__)
-
+Call = TypeVar("Call", bound=Callable[..., Coroutine[..., ..., Any]])
 
 class SlackWebSocket:
     def __init__(
@@ -34,7 +34,7 @@ class SlackWebSocket:
         # self.http = http
         self.logger: logging.Logger
 
-        self.token: str
+        self.token: Optional[str]
 
         self._dispatch = lambda *args: None
         self._dispatch_listeners: List[Any] = []
@@ -113,7 +113,7 @@ class SlackWebSocket:
         """
         if data.get("type") == "hello":
             try:
-                func: Callable[..., Coroutine[..., ..., Any]] = self._slack_parsers["hello"]
+                func: Call = self._slack_parsers["hello"]
 
             except KeyError:
                 pass
@@ -137,7 +137,7 @@ class SlackWebSocket:
                 return
 
             try:
-                func: Callable[..., Coroutine[..., ..., Any]] = self._slack_parsers[event_type]
+                func: Call = self._slack_parsers[event_type]
 
             except KeyError:
                 _logger.info("%s is not defined. (Undefined Event.)", event_type)

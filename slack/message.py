@@ -50,7 +50,7 @@ class Message:
 
     """
 
-    def __init__(self, state: ConnectionState, data: Optional[MessagePayload] = None):
+    def __init__(self, state: ConnectionState, data: MessagePayload):
         self.state = state
         self.team_id = data.get("team")
         self.id = data.get("ts")
@@ -213,6 +213,15 @@ class Message:
         )
         return Message(self.state, rtn["message"])
 
+    async def reaction_add(self):
+        param = {
+            "ts": self.id
+        }
+        rtn = await self.state.http.post_anything(
+            Route("POST", "reactions.add", self.state.http.bot_token),
+            data=param
+        )
+
 
 class JoinMessage(Message):
     """
@@ -261,9 +270,9 @@ class PreviousMessage:
         self.state = state
         self.client_msg_id = data.get("client_msg_id")
         self.text = data.get("text")
-        self.user = self.state.members[data.get("user")]
-        self.team = self.state.teams[data.get("team")]
-        self.ts = datetime.fromtimestamp(float(data.get("ts")))
+        self.user = self.state.members.get(data.get("user", ""))
+        self.team = self.state.teams.get(data.get("team", ""))
+        self.ts = datetime.fromtimestamp(float(data["ts"]))
 
 
 class DeletedMessage:
@@ -333,6 +342,6 @@ class ArchivedMessage:
     def __init__(self, state: ConnectionState, data: ArchivedMessagePayload):
         self.state = state
         self.ts = data.get("ts")
-        self.user: Member = self.state.members[data.get("user")]
-        self.channel: Channel = self.state.channels[data.get("channel")]
+        self.user: Member = self.state.members.get(data.get("user", ""))
+        self.channel: Channel = self.state.channels.get(data.get("channel", ""))
         # self.channel_type = data.get("channel_type")
