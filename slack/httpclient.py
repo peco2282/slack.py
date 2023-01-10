@@ -198,6 +198,9 @@ class HTTPClient:
     def get_anything(self, route: Route, data):
         return self.request(route, data=data)
 
+    def post_anything(self, route: Route, data):
+        return self.request(route, data=data)
+
     async def login(self):
         """It gets a list of teams the bot is on, then gets the info for each team and stores it in a dictionary
 
