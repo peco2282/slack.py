@@ -21,7 +21,7 @@ _logger = logging.getLogger(__name__)
 # Coro = TypeVar("Coro", bound=Callable[..., Coroutine[..., ..., Any]])
 Listener = List[
     Tuple[
-        asyncio.Future[Any],
+        asyncio.Future,
         Union[
             Callable[[Tuple[Any, ...]], bool],
             Callable[..., bool]
