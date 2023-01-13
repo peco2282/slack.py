@@ -110,11 +110,11 @@ class Member:
         self.profile: Profile = Profile(state, self, data.get("profile", {}))
         self.name = data.get("name")
         self.is_admin: bool = data.get("is_admin", False)
-        self.is_owner: bool = data.get("is_owner")
-        self.bot: bool = data.get("is_bot")
-        self.is_app_user: bool = data.get("is_app_user")
+        self.is_owner: bool = data.get("is_owner", False)
+        self.bot: bool = data.get("is_bot", False)
+        self.is_app_user: bool = data.get("is_app_user", False)
         self.updated_at = datetime.fromtimestamp(float(data.get("updated", 0)))
-        self.is_email_confirmed: bool = data.get("is_email_confirmed")
+        self.is_email_confirmed: bool = data.get("is_email_confirmed", False)
 
     def __eq__(self, other) -> bool:
         if isinstance(other, Member):

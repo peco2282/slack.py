@@ -2,9 +2,6 @@ from __future__ import annotations
 
 from typing import Optional, List, TYPE_CHECKING
 
-from .channel import Channel
-from .member import Member
-from .message import Message
 from .team import Team
 from .types.block import (
     Block as BlockPayload,
@@ -12,6 +9,11 @@ from .types.block import (
 )
 
 if TYPE_CHECKING:
+    from .message import Message
+
+    from .channel import Channel
+    from .member import Member
+
     from .state import ConnectionState
 
 
@@ -82,7 +84,7 @@ class Block:
     def __init__(self, state: ConnectionState, data: BlockPayload):
         self.state = state
         self.__data = data
-        self.member: Member = state.members.get(data.get("user", {}).get("id"))
+        self.member: Optional[Member] = state.members.get(data.get("user", {}).get("id"))
         self.trigger_id = data.get("trigger_id")
         self.enterprise = data.get("enterprise")
         self.is_enterprise_install = data.get("is_enterprise_install", False)

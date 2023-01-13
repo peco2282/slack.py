@@ -1,4 +1,5 @@
 from .attachment import *
+from .base import *
 from .block import *
 from .channel import *
 from .client import *

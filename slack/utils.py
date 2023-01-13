@@ -6,6 +6,7 @@ from .errors import *
 errors: Dict[str, SlackExceptions] = {
     "invalid_auth": TokenTypeException("Some aspect of authentication cannot be validated."),
     "missing_args": ClientException("An app-level token wasn't provided."),
+    "missing_scope": "",
     "internal_error": SlackException("The server could not complete your operation(s) without encountering an error"),
     "forbidden_team": ForbiddenException("The authenticated team cannot use."),
     "not_authed": TokenTypeException("No authentication token provided."),
@@ -23,7 +24,11 @@ def ts2time(time: Union[str, int, float]) -> datetime:
     return datetime.fromtimestamp(float(time))
 
 
-def parse_exception(event_name: str):
+def parse_exception(event_name: str, **kwargs):
+    if event_name == "missing_scope":
+        needed = kwargs.get("needed", "").split(",")
+        provided = kwargs.get("provided", "").split(",")
+        raise ClientException("missing_scope: {}, provided: {}".format(", ".join(needed), ", ".join(provided)))
     exc = errors.get(event_name)
     if exc is None:
         exc = SlackException(event_name)

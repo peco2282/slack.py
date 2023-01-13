@@ -330,7 +330,11 @@ class Client:
                 if not self.ws:
                     break
                 while True:
-                    await self.ws.poll_event()
+                    try:
+                        await self.ws.poll_event()
+
+                    except AttributeError:
+                        break
 
             except Exception as e:
                 _logger.error("raise %s", e)

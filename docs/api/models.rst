@@ -70,6 +70,7 @@ Channel
 .. attributetable:: Channel
 
 .. autoclass:: Channel()
+    :inherited-members:
     :members:
 
 DeletedChannel
