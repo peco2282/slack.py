@@ -1,7 +1,7 @@
-from typing import List, Optional, Dict
+from __future__ import annotations
 
-from .channel import Channel
-from .state import ConnectionState
+from typing import List, Optional, Dict, Sequence, TYPE_CHECKING
+
 from .types import (
     File as FilePayload,
     Share as SharePayload,
@@ -9,31 +9,36 @@ from .types import (
 )
 from .utils import ts2time
 
+if TYPE_CHECKING:
+    from .channel import Channel
+
+    from .state import ConnectionState
+
 
 class Attachment:
-    def __init__(self, fp: str, name: str, title: str, initial_comment: str = None):
+    def __init__(self, fp: str, name: str, title: str, initial_comment: Optional[str] = None):
         self.fp = fp
         self.name = str(name)
         self.title = str(title)
-        self.initial_comment = str(initial_comment)
+        self.initial_comment = str(initial_comment) if isinstance(initial_comment, str) else None
 
 
 class PublicShare:
     def __init__(self, state: ConnectionState, data: PublicSharePayload):
         self.state = state
-        self.reply_users: List[str] = data.get("reply_users")
-        self.reply_users_count: int = data.get("reply_users_count")
-        self.reply_count: int = data.get("reply_count")
-        self.ts: str = data.get("ts")
-        self.channel_name: str = data.get("channel_name")
-        self.team_id: str = data.get("team_id")
-        self.share_user_id: str = data.get("share_user_id")
+        self.reply_users: Sequence[Optional[str]] = data.get("reply_users", [])
+        self.reply_users_count: int = data.get("reply_users_count", 0)
+        self.reply_count: int = data.get("reply_count", 0)
+        self.ts: str = data["ts"]
+        self.channel_name: str = data["channel_name"]
+        self.team_id: str = data["team_id"]
+        self.share_user_id: str = data["share_user_id"]
 
 
 class Share:
     def __init__(self, state: ConnectionState, data: SharePayload):
         self.state = state
-        self.__share: Dict[str, List[PublicSharePayload]] = data.get("public")
+        self.__share: Dict[str, List[PublicSharePayload]] = data.get("public", {})
         self.publics: Dict[str, List[PublicShare]] = {
             k: [PublicShare(state, c) for c in v] for k, v in self.__share.items()
         }
@@ -78,8 +83,7 @@ class File:
         self.shares: Share = Share(state, data.get("shares", {}))
 
         self.channels: List[Optional[Channel]] = [self.state.channels.get(c) for c in data.get("channels", [])]
-        self.groups: List[Optional[str]] = data.get("groups")
-        self.ims: List[Optional[str]] = data.get("ims")
-        self.has_rich_preview: bool = data.get("has_rich_preview")
-        self.file_access: str = data.get("file_access")
-
+        self.groups: List[Optional[str]] = data.get("groups", [])
+        self.ims: List[Optional[str]] = data.get("ims", [])
+        self.has_rich_preview: bool = data.get("has_rich_preview", False)
+        self.file_access: Optional[str] = data.get("file_access")

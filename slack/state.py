@@ -12,24 +12,26 @@ from typing import (
     Tuple,
     Set,
     Optional,
-    TypeVar
+    TypeVar,
+    Generic
 )
 
-from .channel import Channel, DeletedChannel
-from .member import Member
+from .block import Block
 from .message import (
     Message,
     JoinMessage,
     PurposeMessage,
     DeletedMessage,
 )
-from .block import Block
 from .route import Route
 from .team import Team
 from .utils import ts2time
+from .channel import Channel, DeletedChannel
+from .member import Member
 
 if TYPE_CHECKING:
     from .httpclient import HTTPClient
+
 
 _logger = logging.getLogger(__name__)
 
@@ -89,7 +91,7 @@ class ConnectionState:
         self.dispatch: Callable[..., None] = dispatch
         self.handlers: Dict[str, Callable] = handlers
         self.all_events: Set[str] = set()
-        parsers: Parsers
+        parsers: Generic[Parsers]
         self.parsers = parsers = {}
         self.teams: Dict[str, Team] = {}
         self.channels: Dict[str, Channel] = {}
@@ -323,7 +325,6 @@ class ConnectionState:
         item_user: Member = self.members.get(event.get("item_user", ""))
 
         react_type = ReactionEvent(_type, self, event)
-        print(user)
 
         self.dispatch("reaction_added", user, item_user, react_type)
 

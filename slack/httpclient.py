@@ -91,6 +91,7 @@ class HTTPClient:
         if files is not None:
             f = open(files[0].fp, mode="rb")
             data["file"] = f
+            is_file = True
 
         if data is not None:
             attrs["data"] = data
@@ -135,7 +136,13 @@ class HTTPClient:
             except json.JSONDecodeError:
                 return await response.text()
 
-    def send_files(self, route: Route, data: Any, file: Attachment = None, files: List[Attachment] = None):
+    def send_files(
+            self,
+            route: Route,
+            data: Any,
+            file: Optional[Attachment] = None,
+            files: Optional[List[Attachment]] = None
+    ):
         if file is not None:
             files = [file]
 
@@ -166,11 +173,12 @@ class HTTPClient:
             query=query
         )
 
-    def delete_message(self, route: Route, data):
+    def delete_message(self, route: Route, data=None, query=None):
         """This function deletes a message from a chat
 
         Parameters
         ----------
+        query
         route
             a data to connect.
 
@@ -184,23 +192,25 @@ class HTTPClient:
         """
         return self.request(
             route,
-            data=data
+            data=data,
+            query=query
         )
 
-    def create_channel(self, route: Route, data):
+    def create_channel(self, route: Route, data=None, query=None):
         return self.request(
             route,
-            data=data
+            data=data,
+            query=query
         )
 
-    def join_channel(self, route: Route, data):
-        return self.request(route, data=data)
+    def manage_channel(self, route: Route, data=None, query=None):
+        return self.request(route, data=data, query=query)
 
-    def get_anything(self, route: Route, data):
-        return self.request(route, data=data)
+    def get_anything(self, route: Route, data=None, query=None):
+        return self.request(route, data=data, query=query)
 
-    def post_anything(self, route: Route, data):
-        return self.request(route, data=data)
+    def post_anything(self, route: Route, data=None, query=None):
+        return self.request(route, data=data, query=query)
 
     async def login(self):
         """It gets a list of teams the bot is on, then gets the info for each team and stores it in a dictionary

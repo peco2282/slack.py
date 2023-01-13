@@ -328,7 +328,11 @@ class Client:
                 coro = SlackWebSocket.from_client(client=self, ws_url=ws_url, logger=self.logger)
                 self.ws: SlackWebSocket = await asyncio.wait_for(coro, timeout=60.)
                 while True:
-                    await self.ws.poll_event()
+                    try:
+                        await self.ws.poll_event()
+
+                    except AttributeError:
+                        break
 
             except Exception as e:
                 _logger.error("raise %s", e)

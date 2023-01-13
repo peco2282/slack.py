@@ -28,13 +28,13 @@ class SlackWebSocket:
         loop : asyncio.AbstractEventLoop
             Slackbot loop.
         """
-        self._slack_parsers: Dict[str, Callable] = {}
+        self._slack_parsers: Dict[str, Callable[..., Coroutine[Any, Any, Any]]] = {}
         self.socket = socket
         self.loop = loop
         # self.http = http
         self.logger: logging.Logger
 
-        self.token: str
+        self.token: Optional[str]
 
         self._dispatch = lambda *args: None
         self._dispatch_listeners: List[Any] = []
@@ -113,13 +113,13 @@ class SlackWebSocket:
         """
         if data.get("type") == "hello":
             try:
-                func: Callable[..., Coroutine[..., ..., Any]] = self._slack_parsers["hello"]
+                hello_func: Callable[..., Coroutine[Any, Any, Any]] = self._slack_parsers["hello"]
 
             except KeyError:
                 pass
 
             else:
-                func()
+                hello_func()
 
         else:
             # if not data.get("ok") or data.get("ok") is None:
@@ -137,14 +137,14 @@ class SlackWebSocket:
                 return
 
             try:
-                func: Callable[..., Coroutine[..., ..., Any]] = self._slack_parsers[event_type]
+                event_func: Callable[..., Coroutine[Any, Any, Any]] = self._slack_parsers[event_type]
 
             except KeyError:
                 _logger.info("%s is not defined. (Undefined Event.)", event_type)
                 pass
 
             else:
-                func(payload)
+                event_func(payload)
                 _logger.info(f"{event_type} function occuring.")
 
             removed = []

@@ -300,10 +300,16 @@ class Bot(slack.Client):
 
     async def process_commands(self, message: Message):
         content = message.content
-        ctx = Context(client=self, message=message, prefix=self.prefix)
+        ctx = Context(
+            client=self,
+            message=message,
+            prefix=self.prefix,
+            command=self.commands[(
+                content.split()[0].replace(self.prefix, "")
+            )]
+        )
         ctx.name = content.split()[0].replace(self.prefix, "")
-        ctx.command = self.commands.get(content.split()[0].replace(self.prefix, ""))
-        ctx.args = content.split()[1:]
+        ctx.args = tuple(content.split()[1:])
         await self.invoke_command(ctx)
 
     async def on_message(self, message):

@@ -58,7 +58,8 @@ class Icon:
 
 
 class Team:
-    """This function takes in a TeamPayload object and sets the data attribute of the Team object to the TeamPayload object
+    """This function takes in a TeamPayload object and sets the data attribute of the Team object
+    to the TeamPayload object
 
     Attributes
     ----------
@@ -116,7 +117,7 @@ class Team:
             {"name": name}
         )
         if join:
-            self.state.http.join_channel(
+            self.state.http.manage_channel(
                 Route("POST", "conversations.join", self.state.http.bot_token),
                 {"id": channel["channel"]["id"]}
             )

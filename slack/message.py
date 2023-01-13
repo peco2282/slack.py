@@ -3,13 +3,13 @@ from __future__ import annotations
 from datetime import datetime
 from typing import TYPE_CHECKING, Optional, List, Any, Dict
 
+from .channel import Channel
 from .errors import SlackException
 from .route import Route
 
 if TYPE_CHECKING:
     from .team import Team
     from .state import ConnectionState
-    from .channel import Channel
     from .member import Member
 
 # noinspection PyProtectedMember
@@ -88,16 +88,16 @@ class Message:
         return self.state.channels[self.channel_id]
 
     @property
-    def author(self) -> Optional[Member]:
+    def author(self) -> Member:
         """Message author.
 
         Returns
         -------
-        Optional[:class:`Member`]
+        :class:`Member`
             Message author.
 
         """
-        return self.state.members.get(self.user_id)
+        return self.state.members[self.user_id]
 
     @property
     def team(self) -> Team:
@@ -109,7 +109,7 @@ class Message:
             Message team.
 
         """
-        return self.state.teams.get(self.team_id)
+        return self.state.teams[self.team_id]
 
     async def edit(self, text: str, is_bot: bool = True):
         """|coro|
@@ -209,7 +209,7 @@ class Message:
         }
         rtn = await self.state.http.send_message(
             Route("POST", "chat.postMessage", self.state.http.bot_token),
-            data=param
+            query=param
         )
         return Message(self.state, rtn["message"])
 

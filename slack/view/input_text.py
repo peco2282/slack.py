@@ -3,7 +3,7 @@ from enum import Enum
 from typing import Optional
 
 from .select import SelectOption
-from .view import BaseView, Placeholder, Label
+from .view import BaseView, Placeholder
 from ..errors import InvalidArgumentException
 
 
@@ -35,11 +35,11 @@ class Input(BaseView):
             multiline: bool = False,
             placeholder: Optional[Placeholder] = None,
             *select_options: SelectOption,
-            label: Optional[Label] = None,
+            label: Optional[Placeholder] = None,
             input_type: InputType = InputType.plain_text_input,
             initial_text: Optional[str] = None
     ):
-        self.label = label if isinstance(label, Label) else None
+        self.label = label if isinstance(label, Placeholder) else None
         self.dispatch_action = dispatch_action
         self.action_id = str(action_id)
         self.multiline = multiline
@@ -129,7 +129,7 @@ class Input(BaseView):
             "element": elem
         }
         if not self.label:
-            self.label = Label(text="Label", mrkdwn=True, emoji=True)
+            self.label = Placeholder(text="Label", mrkdwn=True, emoji=True)
         block["label"] = self.label.to_dict()
 
         return block

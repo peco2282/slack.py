@@ -6,7 +6,7 @@ from .view import BaseView
 
 if TYPE_CHECKING:
     from ..errors import InvalidArgumentException
-    from .view import Label
+    from .view import Placeholder
 
 
 class Button(BaseView):
@@ -22,12 +22,12 @@ class Button(BaseView):
 
     def __init__(
             self,
-            label: Label,
+            label: Placeholder,
             value: str,
             action_id: str,
             url: Optional[str] = None
     ):
-        if not isinstance(label, Label):
+        if not isinstance(label, Placeholder):
             raise InvalidArgumentException()
         self.label = label
         self.value = str(value)
