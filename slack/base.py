@@ -12,15 +12,44 @@ from .utils import ts2time
 from .view import ViewFrame
 
 if TYPE_CHECKING:
+    from .channel import Channel
     from .attachment import Attachment
     from .member import Member
     from .message import Message
     from .state import ConnectionState
 
 
+class ScheduledMessage:
+    """
+    A class of shedduled message.
+
+    ..versionadded:: 1.4.3
+
+    Attributes
+    ----------
+    id: :class:`int`
+        Message id.
+    channel: :class:`Channel`
+        Scheuled channel.
+    post_at: :class:`int`
+        When post at.
+    date_created: :class:`int`
+        When scheduled at.
+    content: :class:`str`
+        Text content.
+    """
+    def __init__(self, state: ConnectionState, data: Dict[str, Union[str, int]]):
+        self.id: int = data["id"]
+        self.channel: Channel = state.channels.get(data["channel_id"])
+        self.post_at: int = data["post_at"]
+        self.date_created: int = data["date_created"]
+        self.content: str = data["date_created"]
+
+
 class Sendable:
     state: ConnectionState
     id: str
+
     # channel_id
 
     @property
@@ -179,7 +208,7 @@ class Sendable:
             limit: Optional[int] = None,
             latest: Optional[datetime, int, float] = None,
             oldest: Optional[datetime, int, float] = None
-    ) -> List[Dict[str, Union[str, int]]]:
+    ) -> List[Optional[ScheduledMessage]]:
         """
         Examples
         --------
@@ -190,13 +219,13 @@ class Sendable:
 
         Parameters
         ----------
-        limit
-        latest
-        oldest
+        limit: :class:`int`
+        latest: Union[:class:`int`, :class:`float`, :class:`datetime`]
+        oldest: Union[:class:`int`, :class:`float`, :class:`datetime`]
 
         Returns
         -------
-
+        List[Optional[:class:`ScheduledMessage`]]
         """
         if any(
                 [
@@ -238,7 +267,7 @@ class Sendable:
             Route("GET", "chat.scheduledMessages.list", self.state.http.bot_token),
             param
         )
-        messages = [m for m in rtn.get("scheduled_messages", [])]
+        messages = [ScheduledMessage(self.state, m) for m in rtn.get("scheduled_messages", [])]
         return messages
 
     async def send_ephemeral(self, text: str, member: Member) -> datetime:

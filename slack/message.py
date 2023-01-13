@@ -3,7 +3,6 @@ from __future__ import annotations
 from datetime import datetime
 from typing import TYPE_CHECKING, Optional, List, Any, Dict
 
-from .channel import Channel
 from .errors import SlackException
 from .route import Route
 
@@ -11,6 +10,7 @@ if TYPE_CHECKING:
     from .team import Team
     from .state import ConnectionState
     from .member import Member
+    from .channel import Channel
 
 # noinspection PyProtectedMember
 from .types.message import (
@@ -152,7 +152,6 @@ class Message:
     async def delete(self) -> DeletedMessage:
         """It deletes a message.
 
-
         Returns
         -------
         :class:`DeletedMessage`
@@ -192,6 +191,8 @@ class Message:
         """
         Create thread to this message.
 
+        .. versionadded:: 1.4.3
+
         Parameters
         ----------
         text: :class:`str`
@@ -212,6 +213,26 @@ class Message:
             query=param
         )
         return Message(self.state, rtn["message"])
+
+    async def replies(self) -> List[Message]:
+        """
+        Get replied message from message id.
+
+        .. versionadded:: 1.4.3
+
+        Returns
+        -------
+        List[:class:`Message`]
+            Returns original message and replied messages.
+        """
+        rtn = await self.state.http.send_message(
+            Route("GET", "conversations.replies", self.state.http.bot_token),
+            query={
+                "channel": self.channel.id,
+                "ts": self.id
+            }
+        )
+        return [Message(self.state, message) for message in rtn.get("messages", {})]
 
     async def reaction_add(self):
         param = {

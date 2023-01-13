@@ -41,6 +41,14 @@ JoinMessage
     :members:
     :inherited-members:
 
+ScheduledMessage
+~~~~~~~~~~~~~~~~
+
+.. attributetable:: ScheduledMessage
+
+.. autoclass:: ScheduledMessage()
+    :members:
+
 Blocks
 ------
 

@@ -1,10 +1,11 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING, Optional, List, Any, Dict
 
-from .route import Route
 from .base import Sendable
+from .errors import InvalidArgumentException
+from .route import Route
 from .team import Team
 from .types.channel import (
     Channel as ChannelPayload,
@@ -14,7 +15,6 @@ from .types.channel import (
 if TYPE_CHECKING:
     from .state import ConnectionState
     from .member import Member
-
 
 __all__ = (
     "Channel",
@@ -57,64 +57,157 @@ class Channel(Sendable):
         self.created_by: Optional[Member] = self.state.members.get(data.get("creator"))
         # self.overload(data)
 
-    async def kick(self, member: Member):
+    async def kick(self, member: Member) -> None:
         """
         Removes a user from a conversation.
+
+        ..versionadded:: 1.4.3
 
         Parameters
         ----------
         member: `Member`
 
-        Returns
-        -------
-
         """
+        if not isinstance(member, Member):
+            raise InvalidArgumentException("member parameter must be `Member` class.")
+
         query = {
             "user": member.id,
             "channel": self.id
         }
-        return await self.http.post_anything(
+        await self.http.post_anything(
             Route("POST", "conversations.kick", self.http.bot_token),
             query=query
         )
 
     async def leave(self, member: Member):
+        """
+        Leaves a conversation.
+
+        ..versionadded:: 1.4.3
+
+        Parameters
+        ----------
+        member: :class:`Member`
+            Member who leave channel.
+        """
+        if not isinstance(member, Member):
+            raise InvalidArgumentException("member parameter must be `Member` class.")
         query = {
             "user": member.id,
             "channel": self.id
         }
-        return await self.http.manage_channel(
+        await self.http.manage_channel(
             Route("POST", "conversations.leave", self.http.bot_token),
             query=query
         )
 
-    async def members(self):
-        return await self.http.get_anything(
-            Route("GET", "conversations.members", self.http.bot_token)
-        )
+    async def members(self, channel_id: Optional[str] = None) -> List[Optional[Member]]:
+        """
+        Return List channel the calling user may access.
 
-    async def unarchive(self):
+        ..versionadded:: 1.4.3
+
+
+        Parameters
+        ----------
+        channel_id: Optional[:class:`str`]
+
+        Returns
+        -------
+        List[Optional[:class:`Member`]]
+            Users participating in the channel.
+        """
+        rtn = await self.http.get_anything(
+            Route("GET", "conversations.members", self.http.bot_token),
+            query={
+                "channel": channel_id or self.id
+            }
+        )
+        members = rtn["members"]
+        return [self.state.members[user] for user in members]
+
+    async def unarchive(self) -> None:
+        """
+        This channel unarchive.
+
+        ..versionadded:: 1.4.3
+        """
         param = {
             "channel": self.id
         }
-        rtn = await self.state.http.request(
+        await self.state.http.request(
             Route("POST", "channels.unarchive", self.state.http.bot_token),
             data=param
         )
-        return rtn
-
-    async def replies(self):
-        rtn = await self.state.http.send_message(
-            Route("GET", "conversations.replies", self.state.http.bot_token)
-        )
-        return rtn
 
     async def edit(
             self,
-            title: str = None,
-            purpose: str = None,
-    ):
-        pass
+            name: str = None,
+            title: Optional[str] = None,
+            purpose: Optional[str] = None,
+            topic: Optional[str] = None
+    ) -> Channel:
+        """It edits the channel's title, purpose, or topic.
+
+        .. versionadded:: 1.4.3
+
+        Parameters
+        ----------
+        name : Optional[:class:`str`]
+            The new name of the channel.
+        title : Optional[:class:`str`]
+            The new title of the channel.
+        purpose : Optional[:class:`str`]
+            The purpose of the channel.
+        topic : Optional[:class:`str`]
+            The channel topic.
+
+        Returns
+        -------
+        :class:`Channel`
+            Edited channel object.
+        """
+        if not any([q is not None for q in (name, title, purpose, topic)]):
+            raise InvalidArgumentException("Some parameter needs to be filled in.")
+        ch: Dict[str, Any] = {}
+        if name is not None:
+            ch = await self.http.manage_channel(
+                Route("POST", "conversation.rename", self.http.bot_token),
+                query={
+                    "channel": self.id,
+                    "name": str(name)
+                }
+            )
+        if title is not None:
+            ch = await self.http.manage_channel(
+                Route("POST", "conversations.setTitle", self.http.bot_token),
+                query={
+                    "channel": self.id,
+                    "title": str(title)
+                }
+            )
+
+        if purpose is not None:
+            ch = await self.http.manage_channel(
+                Route("POST", "conversations.setPurpose", self.http.bot_token),
+                query={
+                    "channel": self.id,
+                    "title": str(title)
+                }
+            )
+        if topic is not None:
+            ch = await self.http.manage_channel(
+                Route("POST", "conversations.setTopic", self.http.bot_token),
+                query={
+                    "channel": self.id,
+                    "topic": str(title)
+                }
+            )
+
+        channel = Channel(self.state, ch["channel"])
+        self.state.channels[self.id] = channel
+        return channel
 
 
 class DeletedChannel:

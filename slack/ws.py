@@ -11,7 +11,7 @@ if TYPE_CHECKING:
     from .client import Client
 
 _logger = logging.getLogger(__name__)
-Call = TypeVar("Call", bound=Callable[..., Coroutine[..., ..., Any]])
+Call = TypeVar("Call", bound=Callable[..., Coroutine[Any, Any, Any]])
 
 
 class SlackWebSocket:
