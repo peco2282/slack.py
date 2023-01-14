@@ -1,7 +1,7 @@
 from typing import TypedDict, Optional, List
 
 
-class Valuable(TypedDict):
+class Serializable(TypedDict):
     value: str
     creator: str
     last_set: int
@@ -17,7 +17,7 @@ class Channel(TypedDict):
     is_shared: bool
     is_org_shared: bool
     context_team_id: str
-    purpose: Valuable
+    purpose: Serializable
     is_im: bool
     is_mpim: bool
     is_private: bool
@@ -28,7 +28,7 @@ class Channel(TypedDict):
     updated: int
     parent_conversation: Optional[str]
     shared_team_id: List[str]
-    topic: Valuable
+    topic: Serializable
     previous_names: List[Optional[str]]
 
 

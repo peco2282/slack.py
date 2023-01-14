@@ -117,8 +117,19 @@ Members
     :members:
     :inherited-members:
 
+Reactions
+---------
+
+ReactionComponent
+~~~~~~~~~~~~~~~~~
+
+.. attributetable:: ReactionComponent
+
+.. autoclass:: ReactionComponent()
+    :members:
+
 Reaction-Event
---------------
+~~~~~~~~~~~~~~
 
 .. attributetable:: ReactionEvent
 

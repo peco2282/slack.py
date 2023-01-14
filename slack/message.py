@@ -3,8 +3,9 @@ from __future__ import annotations
 from datetime import datetime
 from typing import TYPE_CHECKING, Optional, List, Any, Dict
 
-from .errors import SlackException
+from .errors import SlackException, InvalidArgumentException
 from .route import Route
+from .utils import ts2time
 
 if TYPE_CHECKING:
     from .team import Team
@@ -20,15 +21,40 @@ from .types.message import (
     PurposeMessage as PurposeMessagePayload,
     PreviousMessage as PreviousMessagePayload,
     DeletedMessage as DeletedMessagePayload,
-    ArchivedMessage as ArchivedMessagePayload
+    ArchivedMessage as ArchivedMessagePayload,
+    ReactionComponent as ReactionComponentPayload
 )
 
 __all__ = (
+    "ReactionComponent",
     "Message",
     "JoinMessage",
     "PurposeMessage",
     "DeletedMessage",
 )
+
+
+class ReactionComponent:
+    """
+    Information of reaction.
+
+    Attributes
+    ----------
+    name: :class:str`
+        Reaction name.
+
+    members: List[:class:`Member`]
+        A list of reacted members.
+        Always contain the authenticated user, but might not always contain all users that have reacted.
+
+    count: :class:`int`
+        Represent the count of all users who made that reaction.
+    """
+    def __init__(self, state: ConnectionState, data: ReactionComponentPayload):
+        self.name: str = data["name"]
+        self.__users: List[str] = data["users"]
+        self.members: List[Member] = [state.members[member] for member in self.__users]
+        self.count: int = int(data["count"])
 
 
 class Message:
@@ -57,14 +83,15 @@ class Message:
         self.user_id: str = data.get("user")
         self.channel_id: str = data.get("channel")
         self.content: str = data.get("text", "")
-        self.created_at: datetime = datetime.fromtimestamp(float(self.id))
+        self.created_at: Optional[datetime] = ts2time(float(self.id)) if self.id else None
         self.blocks: List[Dict[str, Any]] = data.get("blocks")
         self.scheduled_message_id: Optional[str] = None
         self.__edited: Optional[_Edited] = data.get("edited")
         self.__edited_ts: str = self.__edited.get("ts") if self.__edited else self.id
         self.__edited_user: Optional[Member] = self.state.members.get(
             self.__edited.get("user")) if self.__edited else None
-        self.edited_at = datetime.fromtimestamp(float(self.__edited_ts))
+        self.edited_at = ts2time(float(self.__edited_ts))
+        self.all_reactions: List[Optional[ReactionComponent]] = data.get("reactions", [])
 
     def __eq__(self, other) -> bool:
         if isinstance(other, Message):
@@ -234,14 +261,68 @@ class Message:
         )
         return [Message(self.state, message) for message in rtn.get("messages", {})]
 
-    async def reaction_add(self):
-        param = {
-            "ts": self.id
+    async def reaction_add(self, name: str, skin_tone_level: Optional[int] = None) -> None:
+        """
+        Add a reaction to the specified message.
+
+        ..versionadded:: 1.4.3
+
+        Parameters
+        ----------
+        name: :class:`str`
+            Reaction name. See `this URL <https://emojipedia.org/>`_ for supported reactions.
+
+        skin_tone_level: :class:`int`
+
+        """
+        if skin_tone_level is not None and isinstance(skin_tone_level, int):
+            if not 2 <= skin_tone_level <= 6:
+                raise InvalidArgumentException("`skin_tone_level` must be between 2 and 6.")
+
+            name = str(name) + f"::skin-tone-{skin_tone_level}"
+
+        query = {
+            "ts": self.id,
+            "channel": self.channel_id,
+            "name": str(name)
         }
-        rtn = await self.state.http.post_anything(
-            Route("POST", "reactions.add", self.state.http.bot_token),
-            data=param
+        try:
+            await self.state.http.post_anything(
+                Route("POST", "reactions.add", self.state.http.bot_token),
+                query=query
+            )
+
+        except SlackException as e:  # If the name of the reaction is incorrect.
+            pass
+
+    async def reactions(self) -> List[ReactionComponent]:
+        """
+        Returns a list of reactions given to the specified message.
+
+        ..versionadded:: 1.4.3
+
+        Returns
+        -------
+        List[:class:`ReactionComponent`]
+        """
+        query = {
+            "timestamp": self.id,
+            "channel": self.channel_id
+        }
+        rtn = await self.state.http.send_message(
+            Route("GET", "reactions.get", self.state.http.bot_token),
+            query=query
         )
+        reactions = rtn["message"].get("reactions")
+        reaction_list = []
+        if reactions is not None:
+            reaction_list = [
+                ReactionComponent(self.state, r) for r in reactions
+            ]
+        return reaction_list
+
+    async def reaction_remove(self):
+        pass
 
 
 class JoinMessage(Message):

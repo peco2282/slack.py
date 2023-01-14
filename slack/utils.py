@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Dict
+from typing import Dict, Optional
 
 from .errors import *
 
@@ -20,7 +20,9 @@ errors: Dict[str, SlackExceptions] = {
 }
 
 
-def ts2time(time: Union[str, int, float]) -> datetime:
+def ts2time(time: Union[str, int, float, None]) -> Optional[datetime]:
+    if time is None:
+        return None
     return datetime.fromtimestamp(float(time))
 
 

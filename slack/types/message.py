@@ -12,6 +12,12 @@ messagesubtype = Literal[
 ]
 
 
+class ReactionComponent(TypedDict):
+    name: str
+    users: List[str]
+    count: int
+
+
 class ArchivedMessage(TypedDict):
     type: str
     subtype: messagesubtype
@@ -114,6 +120,7 @@ class Message(TypedDict):
     # event_ts: str
     # channel_type: str
     blocks: List[Dict[str, Any]]
+    reactions: Optional[List[Optional[ReactionComponent]]]
     edited: Optional[_Edited]
 
 

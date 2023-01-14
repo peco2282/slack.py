@@ -3,6 +3,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import TYPE_CHECKING, Optional, List, Any, Dict
 
+from .message import Message
 from .base import Sendable
 from .errors import InvalidArgumentException
 from .route import Route
@@ -208,6 +209,50 @@ class Channel(Sendable):
         channel = Channel(self.state, ch["channel"])
         self.state.channels[self.id] = channel
         return channel
+
+    async def reaction_messages(
+            self,
+            *,
+            team: Optional[Team] = None,
+            member: Optional[Member] = None
+    ) -> List[Optional[Message]]:
+        """
+        Returns a list of messages that have been reacted to on the specified channel.
+
+        ..versionadded:: 1.4.3
+
+        Parameters
+        ----------
+        team: Optional[:class:`Team`]
+            Team to be sent from.
+
+        member: Optional[:class:`Member`]
+            Member to be sent from.
+
+        Returns
+        -------
+
+        """
+        query = {}
+        if team is not None:
+            query["team_id"] = team.id
+
+        if member is not None:
+            query["member"] = member.id
+
+        rtn = await self.http.manage_channel(
+            Route("GET", "reactions.list", self.http.bot_token),
+            query=query
+        )
+        items = rtn["items"]
+        messages = []
+        for item in items:
+            message = Message(self.state, item["message"])
+            message.channel_id = item["channel"]
+            messages.append(message)
+
+        return messages
+
 
 
 class DeletedChannel:
