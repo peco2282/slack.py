@@ -312,5 +312,5 @@ class Bot(slack.Client):
         ctx.args = tuple(content.split()[1:])
         await self.invoke_command(ctx)
 
-    async def on_message(self, message):
-        await self.process_commands(message)
+    # async def on_message(self, message):
+    #     await self.process_commands(message)

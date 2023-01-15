@@ -6,12 +6,11 @@ from datetime import datetime
 from typing import overload, Optional, List, Dict, Union, TYPE_CHECKING
 
 import slack
-from .errors import InvalidArgumentException
+from .errors import InvalidArgumentException, SlackException
 from .route import Route
 from .utils import ts2time
 from .view import ViewFrame
-from .message import Message
-
+from .message import Message, DeletedMessage
 
 if TYPE_CHECKING:
     from .channel import Channel
@@ -391,3 +390,31 @@ class Sendable:
         )
         messages = msg["messages"]
         return [slack.Message(self.state, data=data) for data in messages]
+
+    async def delete_message(self, message_id: str):
+        query = {
+            "channel": self.id,
+            "ts": str(message_id)
+        }
+        try:
+            rtn = await self.state.http.delete_message(
+                Route(
+                    "DELETE",
+                    "chat.delete",
+                    self.state.http.bot_token
+                ),
+                query=query
+            )
+        except SlackException:
+            try:
+                rtn = await self.state.http.delete_message(
+                    Route(
+                        "DELETE",
+                        "chat.delete",
+                        self.state.http.user_token
+                    ),
+                    query=query
+                )
+            except SlackException as exc:
+                raise exc
+        return DeletedMessage(self.state, rtn)
