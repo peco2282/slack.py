@@ -99,6 +99,7 @@ class HTTPClient:
         if query is not None:
             query_url = "&".join(f"{k}={v}" for k, v in query.items())
             route.url += f"?{query_url}"
+            print(route.url)
 
         method = route.method
 

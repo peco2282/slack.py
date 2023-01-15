@@ -113,7 +113,7 @@ class Context(slack.base.Sendable, Generic[BotT]):
         """
         param = {
             "channel": self.id,
-            "ts": self.id
+            "ts": self.message_id
         }
         message = await self.state.http.delete_message(
             Route(

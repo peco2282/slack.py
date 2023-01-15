@@ -71,9 +71,6 @@ class Message:
     content: :class:`str`
         Message content.
 
-    created_at: :class:`datetime`
-        Message created at.
-
     """
 
     def __init__(self, state: ConnectionState, data: MessagePayload):
@@ -83,14 +80,14 @@ class Message:
         self.user_id: str = data.get("user")
         self.channel_id: str = data.get("channel")
         self.content: str = data.get("text", "")
-        self.created_at: Optional[datetime] = ts2time(float(self.id)) if self.id else None
+        # self.created_at: Optional[datetime] = ts2time(float(self.id)) if self.id else None
         self.blocks: List[Dict[str, Any]] = data.get("blocks")
         self.scheduled_message_id: Optional[str] = None
         self.__edited: Optional[_Edited] = data.get("edited")
-        self.__edited_ts: str = self.__edited.get("ts") if self.__edited else self.id
+        # self.__edited_ts: str = self.__edited.get("ts") if self.__edited else self.id
         self.__edited_user: Optional[Member] = self.state.members.get(
             self.__edited.get("user")) if self.__edited else None
-        self.edited_at = ts2time(float(self.__edited_ts))
+        # self.edited_at = ts2time(float(self.__edited_ts))
         self.all_reactions: List[Optional[ReactionComponent]] = data.get("reactions", [])
 
     def __eq__(self, other) -> bool:
@@ -101,6 +98,52 @@ class Message:
 
     def __repr__(self):
         return f"<{self.__class__.__name__} id={self.id} channel_id={self.channel_id}>"
+
+    @property
+    def created_at(self) -> datetime:
+        """
+        .. versionadded:: 1.4.3
+
+        Returns
+        -------
+        :class:`datetime`
+            Returns the date and time of transmission.
+        """
+        return ts2time(self.id)
+
+    @property
+    def edited_at(self) -> datetime:
+        """
+
+        .. versionadded:: 1.4.3
+
+        Returns
+        -------
+        :class:`datetime`
+            Returns when it was edited.
+            If not edited, returns the sender.
+        """
+        if self.__edited is None:
+            return self.created_at
+
+        return ts2time(self.__edited.get("ts"))
+
+    @property
+    def edited_by(self) -> Member:
+        """
+
+        .. versionadded:: 1.4.3
+
+        Returns
+        -------
+        :class:`Member`
+            Returns who edited the file.
+            If not edited, returns the sender.
+        """
+        if self.__edited_user is not None:
+            return self.__edited_user
+
+        return self.author
 
     @property
     def channel(self) -> Channel:
@@ -292,7 +335,7 @@ class Message:
                 query=query
             )
 
-        except SlackException as e:  # If the name of the reaction is incorrect.
+        except SlackException:  # If the name of the reaction is incorrect.
             pass
 
     async def reactions(self) -> List[ReactionComponent]:

@@ -10,12 +10,13 @@ from .errors import InvalidArgumentException
 from .route import Route
 from .utils import ts2time
 from .view import ViewFrame
+from .message import Message
+
 
 if TYPE_CHECKING:
     from .channel import Channel
     from .attachment import Attachment
     from .member import Member
-    from .message import Message
     from .state import ConnectionState
 
 
@@ -195,7 +196,7 @@ class Sendable:
             raise InvalidArgumentException("`date` parameter must be `datetime`, `int` or `float`.")
         resp = await self.state.http.send_message(
             Route("POST", "chat.scheduleMessage", self.state.http.bot_token),
-            data=param
+            query=param
         )
         message = Message(self.state, resp["message"])
         message.id = resp.get("post_at")
@@ -210,24 +211,27 @@ class Sendable:
             oldest: Optional[datetime, int, float] = None
     ) -> List[Optional[ScheduledMessage]]:
         """
+
         Examples
         --------
         Examples ::
 
-            async for message in channel.get_scheduled_messages():
+            messages = await channel.get_scheduled_messages():
+            for message in messages:
                 print(message.content)
 
         Parameters
         ----------
-        limit: :class:`int`
-        latest: Union[:class:`int`, :class:`float`, :class:`datetime`]
-        oldest: Union[:class:`int`, :class:`float`, :class:`datetime`]
+        limit: Optional[:class:`int`]
+
+        latest: Optional[:class:`int`, :class:`float`, :class:`datetime`]
+        oldest: Optional[:class:`int`, :class:`float`, :class:`datetime`]
 
         Returns
         -------
         List[Optional[:class:`ScheduledMessage`]]
         """
-        if any(
+        if not any(
                 [
                     isinstance(limit, (int, type(None))),
                     *[isinstance(
@@ -236,6 +240,7 @@ class Sendable:
                 ]
         ):
             raise InvalidArgumentException()
+
         param = {
             "channel": self.id
         }
@@ -267,6 +272,7 @@ class Sendable:
             Route("GET", "chat.scheduledMessages.list", self.state.http.bot_token),
             param
         )
+        print(rtn)
         messages = [ScheduledMessage(self.state, m) for m in rtn.get("scheduled_messages", [])]
         return messages
 
