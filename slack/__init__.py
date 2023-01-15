@@ -12,4 +12,4 @@ from .state import *
 from .team import *
 from .ws import *
 
-__version__ = "1.4.2"
+__version__ = "1.4.3"
