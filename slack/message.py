@@ -422,17 +422,11 @@ class PreviousMessage:
 
 class DeletedMessage:
     """This function is used to delete a message from a channel
-
-    Attributes
-    ----------
-    ts: :class:`datetime`
-        time when deleted.
     """
 
     def __init__(self, state: ConnectionState, data: DeletedMessagePayload):
         self.__data = data
         self.state = state
-        self.ts: datetime = datetime.fromtimestamp(float(data.get("ts")))
         # self.previous_message: PreviousMessage = PreviousMessage(self.state, data.get("previous_message"))
         # self.hidden: bool = data.get("hidden", False)
         # self.deleted_text: str = self.previous_message.text
