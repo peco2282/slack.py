@@ -91,11 +91,6 @@ class SelectOption(BaseView):
                 "text": self.text,
                 # "emoji": self.emoji
             },
-            "description": {
-                "type": self.mrkdwn,
-                "text": self.text,
-                # "emoji": self.emoji
-            },
             "value": self.value
         }
 

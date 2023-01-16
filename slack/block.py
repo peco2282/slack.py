@@ -4,8 +4,7 @@ from typing import Optional, List, TYPE_CHECKING
 
 from .team import Team
 from .types.block import (
-    Block as BlockPayload,
-    Action as ActionPayload
+    Block as BlockPayload
 )
 
 if TYPE_CHECKING:
@@ -33,7 +32,7 @@ class Action:
 
     """
 
-    def __init__(self, state: ConnectionState, data: ActionPayload):
+    def __init__(self, state: ConnectionState, data):
         self.state = state
         self.data = data
         self.type = data.get("type")

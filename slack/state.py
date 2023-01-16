@@ -17,6 +17,8 @@ from typing import (
 )
 
 from .block import Block
+from .channel import Channel, DeletedChannel
+from .member import Member
 from .message import (
     Message,
     JoinMessage,
@@ -26,12 +28,9 @@ from .message import (
 from .route import Route
 from .team import Team
 from .utils import ts2time
-from .channel import Channel, DeletedChannel
-from .member import Member
 
 if TYPE_CHECKING:
     from .httpclient import HTTPClient
-
 
 _logger = logging.getLogger(__name__)
 
@@ -151,13 +150,21 @@ class ConnectionState:
 
         await asyncio.sleep(0.5)
 
-        # Request member data.
-        members: Dict[str, Any] = await self.http.request(
-            Route("GET", "users.list", self.http.bot_token)
-        )
-        # Serialize Member class.
-        for member in members["members"]:
-            self.members[member["id"]] = Member(state=self, data=member)
+        while True:
+            try:
+                # Request member data.
+                members: Dict[str, Any] = await self.http.request(
+                    Route("GET", "users.list", self.http.bot_token)
+                )
+                # Serialize Member class.
+                for member in members["members"]:
+                    self.members[member["id"]] = Member(state=self, data=member)
+
+            except AttributeError:
+                continue
+
+            else:
+                break
 
         return self.teams, self.channels, self.members
 
@@ -272,6 +279,10 @@ class ConnectionState:
         # self.all_events.add("on_channel_archive")
         # self.dispatch("channel_archive", message)
         ...
+
+    def parse_team_rename(self, payload: Dict[str, Any]) -> None:
+        event = payload['event']
+        self.loop.time()
 
     def parse_message_changed(self, payload: Dict[str, Any]) -> None:
         """It takes a dictionary of data, and returns a message object
