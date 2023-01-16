@@ -6,10 +6,10 @@ from .team import Team
 from .types.block import (
     Block as BlockPayload
 )
+from .message import Message
+
 
 if TYPE_CHECKING:
-    from .message import Message
-
     from .channel import Channel
     from .member import Member
 
