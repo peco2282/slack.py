@@ -300,17 +300,20 @@ class Bot(slack.Client):
 
     async def process_commands(self, message: Message):
         content = message.content
-        ctx = Context(
-            client=self,
-            message=message,
-            prefix=self.prefix,
-            command=self.commands[(
-                content.split()[0].replace(self.prefix, "")
-            )]
-        )
-        ctx.name = content.split()[0].replace(self.prefix, "")
-        ctx.args = tuple(content.split()[1:])
-        await self.invoke_command(ctx)
+        # noinspection PyShadowingNames
+        command = self.commands.get(content.split()[0].replace(self.prefix, ""))
+        if command:
+            ctx = Context(
+                client=self,
+                message=message,
+                prefix=self.prefix,
+                command=self.commands[(
+                    content.split()[0].replace(self.prefix, "")
+                )]
+            )
+            ctx.name = content.split()[0].replace(self.prefix, "")
+            ctx.args = tuple(content.split()[1:])
+            await self.invoke_command(ctx)
 
     # async def on_message(self, message):
     #     await self.process_commands(message)

@@ -129,7 +129,7 @@ class Client:
         self.http: HTTPClient = HTTPClient(self.loop, user_token=user_token, bot_token=bot_token, token=token)
         self._closed: bool = False
         self._ready: asyncio.Event = asyncio.Event()
-        self._handlers: Dict[str, Callable] = {
+        self._handlers: Dict[str, Callable[[], None]] = {
             "ready": self._handle_ready
         }
         self.logger = logger or _logger
