@@ -128,7 +128,7 @@ class SlackWebSocket:
             payload: Dict[str, Any] = data["payload"]
             event: Optional[Dict[str, Any]] = payload.get("event")
             event_type: Optional[str] = event.get("subtype") if event is not None else None
-            await self.response_event(data["envelope_id"], data)
+            await self.response_event(data["envelope_id"], payload)
             if event is None:
                 event_type = payload.get("type")
 
