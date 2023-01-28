@@ -4,6 +4,7 @@ import asyncio
 import datetime
 import inspect
 import logging
+import sys
 from typing import (
     Dict,
     Callable,
@@ -15,6 +16,8 @@ from typing import (
     TypeVar,
     Generic
 )
+
+from typing_extensions import Unpack
 
 from .block import Block
 from .channel import Channel, DeletedChannel
@@ -35,6 +38,13 @@ if TYPE_CHECKING:
 _logger = logging.getLogger(__name__)
 
 Parsers = TypeVar("Parsers", bound=Dict[str, Callable[[Optional[Dict[str, Any]]], None]])
+
+if sys.version_info >= (3, 11,):
+    # noinspection PyCompatibility
+    Dispatch = TypeVar("Dispatch", bound=Callable[[str, Optional[*Tuple[str, ...]]], str])
+
+else:
+    Dispatch = TypeVar("Dispatch", bound=Callable[[str, Optional[Unpack[Tuple[str, ...]]]], None])
 
 
 class ReactionEvent:
@@ -79,16 +89,16 @@ class ConnectionState:
     # noinspection PyUnusedLocal
     def __init__(
             self,
-            dispatch: Callable[..., None],
+            dispatch: Dispatch,
             http: HTTPClient,
             loop: asyncio.AbstractEventLoop,
-            handlers: Dict[str, Callable],
+            handlers: Dict[str, Callable[[], None]],
             **kwargs
     ) -> None:
         self.http: HTTPClient = http
         self.loop: asyncio.AbstractEventLoop = loop
-        self.dispatch: Callable[..., None] = dispatch
-        self.handlers: Dict[str, Callable] = handlers
+        self.dispatch: Dispatch = dispatch
+        self.handlers: Dict[str, Callable[[], None]] = handlers
         self.all_events: Set[str] = set()
         parsers: Generic[Parsers]
         self.parsers = parsers = {}
@@ -281,8 +291,8 @@ class ConnectionState:
         ...
 
     def parse_team_rename(self, payload: Dict[str, Any]) -> None:
-        event = payload['event']
-        self.loop.time()
+        # event = payload['event']
+        self.all_events.add("on_team_rename")
 
     def parse_message_changed(self, payload: Dict[str, Any]) -> None:
         """It takes a dictionary of data, and returns a message object
@@ -316,9 +326,10 @@ class ConnectionState:
         self.dispatch("channel_unarchive", channel, user)
 
     def parse_member_joined_channel(self, payload: Dict[str, Any]):
-        channel = self.channels[payload["channel"]]
-        user = self.members[payload["user"]]
-        inviter = self.members[payload["inviter"]]
+        event = payload["event"]
+        channel = self.channels[event["channel"]]
+        user = self.members[event["user"]]
+        inviter = self.members[event["inviter"]]
         self.all_events.add("on_member_join")
         self.dispatch("member_join", channel, user, inviter)
 
@@ -363,3 +374,20 @@ class ConnectionState:
     def parse_block_actions(self, payload: Dict[str, Any]):
         block = Block(self, payload)
         self.dispatch("block_action", block)
+
+    def parse_file_change(self, payload: Dict[str, Any]):
+        event = payload.get("event", {})
+        file_id = event.get("file_id")
+        # file = self.http.get_anything(Route())
+        user = self.members.get(event.get("user_id", ""))
+        team = self.teams.get(payload.get("team_id", ""))
+        self.dispatch("file_update")
+
+    def parse_app_home_opened(self, payload: Dict[str, Any]):
+        event = payload.get("event", {})
+        user = self.members.get(event.get("user", ""))
+        ts = event.get("ts")
+
+    def parse_thread_broadcast(self, payload: Dict[str, Any]):
+        event = payload.get("event", {})
+        user = self.members.get(event.get("user", ""))
