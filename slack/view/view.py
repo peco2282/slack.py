@@ -12,7 +12,7 @@ __all__ = (
     "SectionView"
 )
 
-from typing import TypeVar, TYPE_CHECKING, Union
+from typing import TypeVar, TYPE_CHECKING
 
 ViewT = TypeVar("ViewT")
 if TYPE_CHECKING:
@@ -143,7 +143,7 @@ class View(ViewFrame):
 
     def __init__(
             self,
-            *blocks: Union[ActionView, SectionView]
+            *blocks: ActionView | SectionView
     ):
         self.blocks = [
             b
@@ -158,7 +158,7 @@ class View(ViewFrame):
     def __bool__(self) -> bool:
         return len(self.blocks) != 0
 
-    def add_block(self, block: Union[ActionView, SectionView]) -> View:
+    def add_block(self, block: ActionView | SectionView) -> View:
         """Add block to the view object.
 
         Parameters
