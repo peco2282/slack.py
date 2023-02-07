@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 from .view import BaseView
 
@@ -25,7 +25,7 @@ class Button(BaseView):
             label: Placeholder,
             value: str,
             action_id: str,
-            url: Optional[str] = None
+            url: str | None = None
     ):
         if not isinstance(label, Placeholder):
             raise InvalidArgumentException()
@@ -57,8 +57,8 @@ class ButtonOption(BaseView):
     def __init__(
             self,
             text: str,
-            description: Optional[str] = None,
-            value: Optional[str] = None,
+            description: str | None = None,
+            value: str | None = None,
             mrkdwn: bool = True):
         self.text = str(text)
         self.desscription = str(description)

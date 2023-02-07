@@ -1,4 +1,6 @@
-from typing import TypedDict, Optional, Any, List, Dict
+from __future__ import annotations
+
+from typing import TypedDict, Any
 
 
 class Container(TypedDict):
@@ -17,14 +19,14 @@ class Action(TypedDict):
 
 
 class Block(TypedDict):
-    user: Dict[str, str]
+    user: dict[str, str]
     container: Container
     trigger_id: str
-    team: Dict[str, str]
-    enterprise: Optional[Any]
+    team: dict[str, str]
+    enterprise: Any | None
     is_enterprise_install: bool
-    channel: Dict[str, str]
-    message: Dict[str, Any]
-    state: Dict[str, Any]
+    channel: dict[str, str]
+    message: dict[str, Any]
+    state: dict[str, Any]
     response_url: str
-    actions: List[Action]
+    actions: dict[Action]

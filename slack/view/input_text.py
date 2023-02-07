@@ -1,6 +1,7 @@
+from __future__ import annotations
+
 import datetime
 from enum import Enum
-from typing import Optional
 
 from .select import SelectOption
 from .view import BaseView, Placeholder
@@ -33,11 +34,11 @@ class Input(BaseView):
             action_id: str,
             dispatch_action: bool = False,
             multiline: bool = False,
-            placeholder: Optional[Placeholder] = None,
+            placeholder: Placeholder | None = None,
             *select_options: SelectOption,
-            label: Optional[Placeholder] = None,
+            label: Placeholder | None = None,
             input_type: InputType = InputType.plain_text_input,
-            initial_text: Optional[str] = None
+            initial_text: str | None = None
     ):
         self.label = label if isinstance(label, Placeholder) else None
         self.dispatch_action = dispatch_action

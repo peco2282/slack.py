@@ -3,7 +3,7 @@ from __future__ import annotations
 import asyncio
 import json
 import traceback
-from typing import Any, Dict, TYPE_CHECKING, Optional, Union, List, IO
+from typing import Any, TYPE_CHECKING, IO
 
 import aiohttp
 
@@ -32,14 +32,14 @@ class HTTPClient:
             self,
             loop: asyncio.AbstractEventLoop,
             user_token: str,
-            token: Optional[str],
+            token: str | None,
             bot_token: str
     ):
         self.loop: asyncio.AbstractEventLoop = loop
         self.user_token: str = user_token
-        self.token: Optional[str] = token
+        self.token: str | None = token
         self.bot_token: str = bot_token
-        self.__session: Optional[aiohttp.ClientSession] = None
+        self.__session: aiohttp.ClientSession | None = None
         self.ws: SlackWebSocket
 
     async def ws_connect(self, url: str):
@@ -60,13 +60,10 @@ class HTTPClient:
     async def request(
             self,
             route: Route,
-            data: Optional[Dict[str, Any]] = None,
-            query: Optional[Dict[str, str]] = None,
+            data: dict[str, Any] | None = None,
+            query: dict[str, str] | None = None,
             **kwargs
-    ) -> Union[
-        Dict[str, Any],
-        str
-    ]:
+    ) -> dict[str, Any] | str:
         """request with param
 
         Parameters
@@ -86,8 +83,8 @@ class HTTPClient:
             "headers": headers
         }
         is_file = False
-        f: Optional[IO] = None
-        files: Optional[List[Attachment]] = kwargs.get("files")
+        f: IO | None = None
+        files: list[Attachment] | None = kwargs.get("files")
         if files is not None:
             f = open(files[0].fp, mode="rb")
             data["file"] = f
@@ -119,6 +116,7 @@ class HTTPClient:
                                 raise io
 
                             finally:
+                                # noinspection PyUnusedLocal
                                 is_file = False
                         return _json
 
@@ -140,8 +138,8 @@ class HTTPClient:
             self,
             route: Route,
             data: Any,
-            file: Optional[Attachment] = None,
-            files: Optional[List[Attachment]] = None
+            file: Attachment | None = None,
+            files: list[Attachment] | None = None
     ):
         if file is not None:
             files = [file]

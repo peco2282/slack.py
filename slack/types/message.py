@@ -1,4 +1,6 @@
-from typing import TypedDict, Literal, Optional, Any, Dict, List
+from __future__ import annotations
+
+from typing import TypedDict, Literal, Any
 
 mimetypes = Literal[
     "image/png",
@@ -14,7 +16,7 @@ messagesubtype = Literal[
 
 class ReactionComponent(TypedDict):
     name: str
-    users: List[str]
+    users: list[str]
     count: int
 
 
@@ -105,7 +107,7 @@ class _Edited(TypedDict):
 class Message(TypedDict):
     type: str
     text: str
-    files: Optional[Attatchment]
+    files: Attatchment | None
     upload: bool
     user: str
     display_as_bot: bool
@@ -119,9 +121,9 @@ class Message(TypedDict):
     # channel: str
     # event_ts: str
     # channel_type: str
-    blocks: List[Dict[str, Any]]
-    reactions: Optional[List[Optional[ReactionComponent]]]
-    edited: Optional[_Edited]
+    blocks: list[dict[str, Any]]
+    reactions: list[ReactionComponent]
+    edited: _Edited | None
 
 
 class JoinMessage(Message):

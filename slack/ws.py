@@ -3,7 +3,7 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
-from typing import TYPE_CHECKING, Dict, Any, Callable, List, Optional, Coroutine, TypeVar
+from typing import TYPE_CHECKING, Any, Callable, Coroutine, TypeVar
 
 import aiohttp
 
@@ -29,16 +29,16 @@ class SlackWebSocket:
         loop : asyncio.AbstractEventLoop
             Slackbot loop.
         """
-        self._slack_parsers: Dict[str, Callable[..., Coroutine[Any, Any, Any]]] = {}
+        self._slack_parsers: dict[str, Callable[..., Coroutine[Any, Any, Any]]] = {}
         self.socket = socket
         self.loop = loop
         # self.http = http
         self.logger: logging.Logger
 
-        self.token: Optional[str]
+        self.token: str | None
 
         self._dispatch = lambda *args: None
-        self._dispatch_listeners: List[Any] = []
+        self._dispatch_listeners: list[Any] = []
 
     @classmethod
     async def from_client(cls, client: Client, ws_url: str, logger: logging.Logger) -> SlackWebSocket:
@@ -81,11 +81,11 @@ class SlackWebSocket:
         except Exception as e:
             raise e
 
-    async def response_event(self, envelope_id: str, payload: Dict[str, Any]):
+    async def response_event(self, envelope_id: str, payload: dict[str, Any]):
         await asyncio.sleep(0.5)
         await self.socket.send_str(str({"envelope_id": envelope_id, "payload": json.dumps(payload)}))
 
-    async def parse_event(self, data: Dict[str, Any]) -> None:
+    async def parse_event(self, data: dict[str, Any]) -> None:
         """It takes a dictionary of data, and if the data is a hello event, it prints the data and sets the ready event.
 
         If the data is not a hello event, it gets the payload and event from the data, and sets the event type to the
@@ -125,9 +125,9 @@ class SlackWebSocket:
         else:
             # if not data.get("ok") or data.get("ok") is None:
             #     return
-            payload: Dict[str, Any] = data["payload"]
-            event: Optional[Dict[str, Any]] = payload.get("event")
-            event_type: Optional[str] = event.get("subtype") if event is not None else None
+            payload: dict[str, Any] = data["payload"]
+            event: dict[str, Any] | None = payload.get("event")
+            event_type: str | None = event.get("subtype") if event is not None else None
             await self.response_event(data["envelope_id"], payload)
             if event is None:
                 event_type = payload.get("type")

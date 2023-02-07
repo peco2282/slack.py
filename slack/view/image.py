@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 from .view import BaseView
 
@@ -33,7 +33,7 @@ class Image(BaseView):
             self,
             image_url: str,
             alt_text: str,
-            title: Optional[Placeholder] = None
+            title: Placeholder | None = None
     ):
         self.image_url = str(image_url)
         self.alt_text = str(alt_text)

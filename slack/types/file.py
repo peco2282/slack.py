@@ -1,4 +1,6 @@
-from typing import TypedDict, Literal, List, Optional, Dict
+from __future__ import annotations
+
+from typing import TypedDict, Literal
 from .message import mimetypes
 
 filetypes = Literal[
@@ -7,7 +9,7 @@ filetypes = Literal[
 
 
 class PublicShare(TypedDict):
-    reply_users: List[str]
+    reply_users: list[str]
     reply_users_count: int
     reply_count: int
     ts: str
@@ -17,7 +19,7 @@ class PublicShare(TypedDict):
 
 
 class Share(TypedDict):
-    public: Dict[str, List[PublicShare]]
+    public: dict[str, list[PublicShare]]
 
 
 class File(TypedDict):
@@ -53,8 +55,8 @@ class File(TypedDict):
     comments_count: str
     is_starred: bool
     shares: Share
-    channels: List[str]
-    groups: List[Optional[str]]
-    ims: List[Optional[str]]
+    channels: list[str]
+    groups: list[str | None]
+    ims: list[str | None]
     has_rich_preview: bool
     file_access: str

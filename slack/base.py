@@ -3,14 +3,14 @@ from __future__ import annotations
 import json
 import urllib.parse
 from datetime import datetime
-from typing import overload, Optional, List, Dict, Union, TYPE_CHECKING
+from typing import overload, TYPE_CHECKING
 
-import slack
 from .errors import InvalidArgumentException, SlackException
+from .message import Message, DeletedMessage
 from .route import Route
 from .utils import ts2time
 from .view import ViewFrame
-from .message import Message, DeletedMessage
+from .attachment import File
 
 if TYPE_CHECKING:
     from .channel import Channel
@@ -38,7 +38,8 @@ class ScheduledMessage:
     content: :class:`str`
         Text content.
     """
-    def __init__(self, state: ConnectionState, data: Dict[str, Union[str, int]]):
+
+    def __init__(self, state: ConnectionState, data: dict[str, [str | int]]):
         self.id: int = data["id"]
         self.channel: Channel = state.channels.get(data["channel_id"])
         self.post_at: int = data["post_at"]
@@ -93,8 +94,8 @@ class Sendable:
 
     async def send(
             self,
-            text: Optional[str] = None,
-            view: Optional[ViewFrame] = None,
+            text: str | None = None,
+            view: ViewFrame | None = None,
             as_user: bool = False
     ) -> Message:
         """|coro|
@@ -155,14 +156,14 @@ class Sendable:
             # data=param if param != {} else None,
             query=query if query != {} else None
         )
-        msg = slack.Message(state=self.state, data=message["message"])
+        msg = Message(state=self.state, data=message["message"])
         msg.channel_id = self.id
         return msg
 
     async def send_schedule(
             self,
             text: str,
-            date: Union[datetime, int, float]
+            date: datetime | int | float
     ) -> Message:
         """This function is sending scheduled message with UNIX timestamp.
 
@@ -205,10 +206,10 @@ class Sendable:
 
     async def get_scheduled_messages(
             self,
-            limit: Optional[int] = None,
-            latest: Optional[datetime, int, float] = None,
-            oldest: Optional[datetime, int, float] = None
-    ) -> List[Optional[ScheduledMessage]]:
+            limit: int | None = None,
+            latest: datetime | int | float | None = None,
+            oldest: datetime | int | float | None = None
+    ) -> list[ScheduledMessage | None]:
         """
 
         Examples
@@ -311,7 +312,7 @@ class Sendable:
 
         return ts2time(rtn.get("message_ts", "0"))
 
-    async def send_file(self, attachment: Attachment) -> slack.File:
+    async def send_file(self, attachment: Attachment) -> File:
         """This function occur sending file.
 
         Parameters
@@ -339,7 +340,7 @@ class Sendable:
             data=param,
             files=[attachment],
         )
-        return slack.File(self.state, sended["file"])
+        return File(self.state, sended["file"])
 
     async def get_permalink(self, message: Message):
         if not isinstance(message, Message):
@@ -368,7 +369,7 @@ class Sendable:
             param
         )
 
-    async def history(self) -> List[Message]:
+    async def history(self) -> list[Message]:
         """
         Examples
         --------
@@ -389,7 +390,7 @@ class Sendable:
             query=query
         )
         messages = msg["messages"]
-        return [slack.Message(self.state, data=data) for data in messages]
+        return [Message(self.state, data=data) for data in messages]
 
     async def delete_message(self, message_id: str):
         query = {

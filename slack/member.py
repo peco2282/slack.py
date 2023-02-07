@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 
 from .route import Route
 from .team import Team
@@ -69,7 +69,7 @@ class Profile:
         self.image_512 = data.get("image_512")
         self.status_text_canonical = data.get("status_text_canonical")
         team = data.get("team")
-        self.team: Optional[Team] = state.teams[team] if team is not None else None
+        self.team: Team | None = state.teams[team] if team is not None else None
 
 
 # It creates a class called User.

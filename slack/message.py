@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import TYPE_CHECKING, Optional, List, Any, Dict
+from typing import TYPE_CHECKING, Any
 
 from .errors import SlackException, InvalidArgumentException
 from .route import Route
@@ -52,8 +52,8 @@ class ReactionComponent:
     """
     def __init__(self, state: ConnectionState, data: ReactionComponentPayload):
         self.name: str = data["name"]
-        self.__users: List[str] = data["users"]
-        self.members: List[Member] = [state.members[member] for member in self.__users]
+        self.__users: list[str] = data["users"]
+        self.members: list[Member] = [state.members[member] for member in self.__users]
         self.count: int = int(data["count"])
 
 
@@ -81,14 +81,16 @@ class Message:
         self.channel_id: str = data.get("channel")
         self.content: str = data.get("text", "")
         # self.created_at: Optional[datetime] = ts2time(float(self.id)) if self.id else None
-        self.blocks: List[Dict[str, Any]] = data.get("blocks")
-        self.scheduled_message_id: Optional[str] = None
-        self.__edited: Optional[_Edited] = data.get("edited")
+        self.blocks: list[dict[str, Any]] = data.get("blocks")
+        self.scheduled_message_id: str | None = None
+        self.__edited: _Edited | None = data.get("edited")
         # self.__edited_ts: str = self.__edited.get("ts") if self.__edited else self.id
-        self.__edited_user: Optional[Member] = self.state.members.get(
+        self.__edited_user: Member | None = self.state.members.get(
             self.__edited.get("user")) if self.__edited else None
         # self.edited_at = ts2time(float(self.__edited_ts))
-        self.all_reactions: List[Optional[ReactionComponent]] = data.get("reactions", [])
+        self.all_reactions: list[ReactionComponent | None] = [
+            ReactionComponent(state, c) for c in data.get("reactions", [])
+        ]
 
     def __eq__(self, other) -> bool:
         if isinstance(other, Message):
@@ -284,7 +286,7 @@ class Message:
         )
         return Message(self.state, rtn["message"])
 
-    async def replies(self) -> List[Message]:
+    async def replies(self) -> list[Message]:
         """
         Get replied message from message id.
 
@@ -304,7 +306,7 @@ class Message:
         )
         return [Message(self.state, message) for message in rtn.get("messages", {})]
 
-    async def reaction_add(self, name: str, skin_tone_level: Optional[int] = None) -> None:
+    async def reaction_add(self, name: str, skin_tone_level: int | None = None) -> None:
         """
         Add a reaction to the specified message.
 
@@ -338,7 +340,7 @@ class Message:
         except SlackException:  # If the name of the reaction is incorrect.
             pass
 
-    async def reactions(self) -> List[ReactionComponent]:
+    async def reactions(self) -> list[ReactionComponent]:
         """
         Returns a list of reactions given to the specified message.
 
@@ -432,7 +434,7 @@ class DeletedMessage:
         # self.deleted_text: str = self.previous_message.text
 
     @property
-    def channel(self) -> Optional[Channel]:
+    def channel(self) -> Channel | None:
         """Deleted message's channel.
 
         Returns
