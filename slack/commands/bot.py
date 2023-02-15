@@ -4,7 +4,9 @@ import asyncio
 import logging
 from typing import (
     Callable,
-    Any, Optional, Union,
+    Any,
+    Optional,
+    Union,
 )
 
 import slack
