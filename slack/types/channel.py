@@ -1,4 +1,6 @@
-from typing import TypedDict, Optional, List
+from __future__ import annotations
+
+from typing import TypedDict
 
 
 class Serializable(TypedDict):
@@ -26,10 +28,10 @@ class Channel(TypedDict):
     is_general: bool
     is_pending_ext_shared: bool
     updated: int
-    parent_conversation: Optional[str]
-    shared_team_id: List[str]
+    parent_conversation: str | None
+    shared_team_id: list[str]
     topic: Serializable
-    previous_names: List[Optional[str]]
+    previous_names: list[str | None]
 
 
 class DeletedChannel(TypedDict):

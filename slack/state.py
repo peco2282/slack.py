@@ -6,15 +6,11 @@ import inspect
 import logging
 import sys
 from typing import (
-    Dict,
     Callable,
     Any,
     TYPE_CHECKING,
-    Tuple,
-    Set,
-    Optional,
     TypeVar,
-    Generic
+    Generic, Optional,
 )
 
 from typing_extensions import Unpack
@@ -37,14 +33,14 @@ if TYPE_CHECKING:
 
 _logger = logging.getLogger(__name__)
 
-Parsers = TypeVar("Parsers", bound=Dict[str, Callable[[Optional[Dict[str, Any]]], None]])
+Parsers = TypeVar("Parsers", bound=dict[str, Callable[[Optional[dict[str, Any]]], None]])
 
 if sys.version_info >= (3, 11,):
     # noinspection PyCompatibility
-    Dispatch = TypeVar("Dispatch", bound=Callable[[str, *Tuple[str, ...]], str])
+    Dispatch = TypeVar("Dispatch", bound=Callable[[str, *tuple[str, ...] | None], str])
 
 else:
-    Dispatch = TypeVar("Dispatch", bound=Callable[[str, Optional[Unpack[Tuple[str, ...]]]], None])
+    Dispatch = TypeVar("Dispatch", bound=Callable[[str, Unpack[tuple[str, ...]] | None], None])
 
 
 class ReactionEvent:
@@ -74,15 +70,15 @@ class ReactionEvent:
 
     """
 
-    def __init__(self, _type: str, state: "ConnectionState", event: Dict[str, Any]):
+    def __init__(self, _type: str, state: "ConnectionState", event: dict[str, Any]):
         self.type: str = _type
         self.reaction: str = event.get("reaction")
-        self.file: Optional[str] = event.get("item", {}).get("file")
-        self.file_comment: Optional[str] = event.get("file_comment")
-        self.channel: Optional[Channel] = state.channels.get(event.get("item", {}).get("channel", ""))
-        self.timestamp: Optional[datetime.datetime] = datetime.datetime.fromtimestamp(
+        self.file: str | None = event.get("item", {}).get("file")
+        self.file_comment: str | None = event.get("file_comment")
+        self.channel: Channel | None = state.channels.get(event.get("item", {}).get("channel", ""))
+        self.timestamp: datetime.datetime | None = datetime.datetime.fromtimestamp(
             float(event.get("item", {}).get("ts", 0)))
-        self.message_timestamp: Optional[datetime.datetime] = ts2time(event.get("event_ts", 0))
+        self.message_timestamp: datetime.datetime | None = ts2time(event.get("event_ts", 0))
 
 
 class ConnectionState:
@@ -92,30 +88,30 @@ class ConnectionState:
             dispatch: Dispatch,
             http: HTTPClient,
             loop: asyncio.AbstractEventLoop,
-            handlers: Dict[str, Callable[[], None]],
+            handlers: dict[str, Callable[[], None]],
             **kwargs
     ) -> None:
         self.http: HTTPClient = http
         self.loop: asyncio.AbstractEventLoop = loop
         self.dispatch: Dispatch = dispatch
-        self.handlers: Dict[str, Callable[[], None]] = handlers
-        self.all_events: Set[str] = set()
+        self.handlers: dict[str, Callable[[], None]] = handlers
+        self.all_events: set[str] = set()
         parsers: Generic[Parsers]
         self.parsers = parsers = {}
-        self.teams: Dict[str, Team] = {}
-        self.channels: Dict[str, Channel] = {}
-        self.members: Dict[str, Member] = {}
+        self.teams: dict[str, Team] = {}
+        self.channels: dict[str, Channel] = {}
+        self.members: dict[str, Member] = {}
         for attr, func in inspect.getmembers(self):
             if attr.startswith("parse_"):
                 parsers[attr[6:]] = func
 
-    async def initialize(self) -> Tuple[
-        Dict[str, Team],
-        Dict[str, Channel],
-        Dict[str, Member]
+    async def initialize(self) -> tuple[
+        dict[str, Team],
+        dict[str, Channel],
+        dict[str, Member]
     ]:
         # Request installed team ids.
-        teams: Dict[str, Any] = await self.http.request(
+        teams: dict[str, Any] = await self.http.request(
             Route("GET", "auth.teams.list", self.http.bot_token)
         )
         await asyncio.sleep(0.5)
@@ -163,7 +159,7 @@ class ConnectionState:
         while True:
             try:
                 # Request member data.
-                members: Dict[str, Any] = await self.http.request(
+                members: dict[str, Any] = await self.http.request(
                     Route("GET", "users.list", self.http.bot_token)
                 )
                 # Serialize Member class.
@@ -182,12 +178,12 @@ class ConnectionState:
     def parse_hello(self, *args, **kwargs):
         self.dispatch("ready")
 
-    def parse_message(self, payload: Dict[str, Any]) -> None:
+    def parse_message(self, payload: dict[str, Any]) -> None:
         """It takes a dictionary of data, and returns a message object
 
         Parameters
         ----------
-        payload : Dict[str, Any]
+        payload : dict[str, Any]
             The payload of the event.
 
         """
@@ -196,12 +192,12 @@ class ConnectionState:
         self.all_events.add("on_message")
         self.dispatch("message", message)
 
-    def parse_channel_created(self, payload: Dict[str, Any]) -> None:
+    def parse_channel_created(self, payload: dict[str, Any]) -> None:
         """It takes a dictionary of data, and returns a channel object
 
         Parameters
         ----------
-        payload : Dict[str, Any]
+        payload : dict[str, Any]
             The raw payload from the websocket.
 
         """
@@ -212,12 +208,12 @@ class ConnectionState:
         self.channels[channel.id] = channel
         self.dispatch("channel_create", channel)
 
-    def parse_channel_deleted(self, payload: Dict[str, Any]) -> None:
+    def parse_channel_deleted(self, payload: dict[str, Any]) -> None:
         """It takes a payload (a dictionary) and returns a channel object
 
         Parameters
         ----------
-        payload : Dict[str, Any]
+        payload : dict[str, Any]
             The payload of the event.
 
         """
@@ -227,12 +223,12 @@ class ConnectionState:
         self.all_events.add("on_channel_delete")
         self.dispatch("channel_delete", channel)
 
-    def parse_channel_purpose(self, payload: Dict[str, Any]) -> None:
+    def parse_channel_purpose(self, payload: dict[str, Any]) -> None:
         """It takes a dictionary of data, and returns a message object
 
         Parameters
         ----------
-        payload : Dict[str, Any]
+        payload : dict[str, Any]
             The raw payload from the server.
 
         """
@@ -241,12 +237,12 @@ class ConnectionState:
         self.all_events.add("on_channel_purpose")
         self.dispatch("channel_purpose", message)
 
-    def parse_message_deleted(self, payload: Dict[str, Any]) -> None:
+    def parse_message_deleted(self, payload: dict[str, Any]) -> None:
         """It takes a payload (a dictionary) and returns a message object
 
         Parameters
         ----------
-        payload : Dict[str, Any]
+        payload : dict[str, Any]
             The payload of the event.
 
         """
@@ -255,12 +251,12 @@ class ConnectionState:
         self.all_events.add("on_message_delete")
         self.dispatch("message_delete", message)
 
-    def parse_channel_joined(self, payload: Dict[str, Any]) -> None:
+    def parse_channel_joined(self, payload: dict[str, Any]) -> None:
         """It takes a payload (a dictionary) and returns a JoinMessage object
 
         Parameters
         ----------
-        payload : Dict[str, Any]
+        payload : dict[str, Any]
             The payload of the event.
 
         """
@@ -269,18 +265,18 @@ class ConnectionState:
         self.all_events.add("on_channel_join")
         self.dispatch("channel_join", message)
 
-    def parse_app_mention(self, payload: Dict[str, Any]):
+    def parse_app_mention(self, payload: dict[str, Any]):
         event = payload['event']
         message = Message(self, event)
         message.team_id = payload.get("team")
         self.dispatch("mention", message)
 
-    def parse_channel_archive(self, payload: Dict[str, Any]) -> None:
+    def parse_channel_archive(self, payload: dict[str, Any]) -> None:
         """This function takes a payload (a dictionary) and returns a message (an object)
 
         Parameters
         ----------
-        payload : Dict[str, Any]
+        payload : dict[str, Any]
             The payload of the event.
 
         """
@@ -290,16 +286,16 @@ class ConnectionState:
         # self.dispatch("channel_archive", message)
         ...
 
-    def parse_team_rename(self, payload: Dict[str, Any]) -> None:
+    def parse_team_rename(self, payload: dict[str, Any]) -> None:
         # event = payload['event']
         self.all_events.add("on_team_rename")
 
-    def parse_message_changed(self, payload: Dict[str, Any]) -> None:
+    def parse_message_changed(self, payload: dict[str, Any]) -> None:
         """It takes a dictionary of data, and returns a message object
 
         Parameters
         ----------
-        payload : Dict[str, Any]
+        payload : dict[str, Any]
             The payload of the event.
 
         """
@@ -309,7 +305,7 @@ class ConnectionState:
         self.all_events.add("on_message_update")
         self.dispatch("message_update", before_message, after_message)
 
-    def parse_channel_rename(self, payload: Dict[str, Any]):
+    def parse_channel_rename(self, payload: dict[str, Any]):
         event = payload["event"]
         channel_data = event["channel"]
         channel = self.channels[channel_data["id"]]
@@ -318,14 +314,14 @@ class ConnectionState:
         self.all_events.add("on_channel_rename")
         self.dispatch("channel_rename", channel, _channel)
 
-    def parse_channel_unarchive(self, payload: Dict[str, Any]):
+    def parse_channel_unarchive(self, payload: dict[str, Any]):
         event = payload["event"]
         channel = self.channels[event["channel"]]
         user = self.members[event["user"]]
         self.all_events.add("on_channel_unarchive")
         self.dispatch("channel_unarchive", channel, user)
 
-    def parse_member_joined_channel(self, payload: Dict[str, Any]):
+    def parse_member_joined_channel(self, payload: dict[str, Any]):
         event = payload["event"]
         channel = self.channels[event["channel"]]
         user = self.members[event["user"]]
@@ -333,14 +329,14 @@ class ConnectionState:
         self.all_events.add("on_member_join")
         self.dispatch("member_join", channel, user, inviter)
 
-    def parse_member_left_channel(self, payload: Dict[str, Any]):
+    def parse_member_left_channel(self, payload: dict[str, Any]):
         event = payload["event"]
         user = self.members[event["user"]]
         channel = self.channels[event["channel"]]
         self.all_events.add("on_member_left")
         self.dispatch("member_left", channel, user)
 
-    def parse_reaction_added(self, payload: Dict[str, Any]):
+    def parse_reaction_added(self, payload: dict[str, Any]):
         event = payload['event']
         user: Member = self.members[event["user"]]
         _type: str = event["item"]["type"]
@@ -350,7 +346,7 @@ class ConnectionState:
 
         self.dispatch("reaction_added", user, item_user, react_type)
 
-    def parse_reaction_removed(self, payload: Dict[str, Any]):
+    def parse_reaction_removed(self, payload: dict[str, Any]):
         event = payload.get("event", {})
         user: Member = self.members[event["user"]]
         _type: str = event["item"]["type"]
@@ -361,21 +357,21 @@ class ConnectionState:
         self.all_events.add("on_reaction_remove")
         self.dispatch("reaction_removed", user, item_user, react_type)
 
-    def parse_pin_added(self, payload: Dict[str, Any]):
+    def parse_pin_added(self, payload: dict[str, Any]):
         payload.get("event", {})
         self.all_events.add("pin_add")
         self.dispatch("pin_add")
 
-    def parse_pin_removed(self, payload: Dict[str, Any]):
+    def parse_pin_removed(self, payload: dict[str, Any]):
         payload.get("event", {})
         self.all_events.add("pin_remove")
         self.dispatch("pin_remove")
 
-    def parse_block_actions(self, payload: Dict[str, Any]):
+    def parse_block_actions(self, payload: dict[str, Any]):
         block = Block(self, payload)
         self.dispatch("block_action", block)
 
-    def parse_file_change(self, payload: Dict[str, Any]):
+    def parse_file_change(self, payload: dict[str, Any]):
         event = payload.get("event", {})
         file_id = event.get("file_id")
         # file = self.http.get_anything(Route())
@@ -383,11 +379,11 @@ class ConnectionState:
         team = self.teams.get(payload.get("team_id", ""))
         self.dispatch("file_update")
 
-    def parse_app_home_opened(self, payload: Dict[str, Any]):
+    def parse_app_home_opened(self, payload: dict[str, Any]):
         event = payload.get("event", {})
         user = self.members.get(event.get("user", ""))
         ts = event.get("ts")
 
-    def parse_thread_broadcast(self, payload: Dict[str, Any]):
+    def parse_thread_broadcast(self, payload: dict[str, Any]):
         event = payload.get("event", {})
         user = self.members.get(event.get("user", ""))

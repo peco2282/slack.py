@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import TYPE_CHECKING, Optional, List, Any, Dict
+from typing import TYPE_CHECKING, Any
 
 from .message import Message
 from .base import Sendable
@@ -53,9 +53,9 @@ class Channel(Sendable):
         self.http = state.http
         self.id: str = data.get("id")
         self.name = data.get("name")
-        self.team: Optional[Team] = self.state.teams.get(data.get("context_team_id", ""))
+        self.team: Team | None = self.state.teams.get(data.get("context_team_id", ""))
         self.created_at: datetime = datetime.fromtimestamp(float(data.get("created", 0)))
-        self.created_by: Optional[Member] = self.state.members.get(data.get("creator"))
+        self.created_by: Member | None = self.state.members.get(data.get("creator"))
         # self.overload(data)
 
     async def kick(self, member: Member) -> None:
@@ -97,7 +97,7 @@ class Channel(Sendable):
             query=query
         )
 
-    async def members(self, channel_id: Optional[str] = None) -> List[Optional[Member]]:
+    async def members(self, channel_id: str | None = None) -> list[Member | None]:
         """
         Return List channel the calling user may access.
 
@@ -139,9 +139,9 @@ class Channel(Sendable):
     async def edit(
             self,
             name: str = None,
-            title: Optional[str] = None,
-            purpose: Optional[str] = None,
-            topic: Optional[str] = None
+            title: str | None = None,
+            purpose: str | None = None,
+            topic: str | None = None
     ) -> Channel:
         """It edits the channel's title, purpose, or topic.
 
@@ -165,7 +165,7 @@ class Channel(Sendable):
         """
         if not any([q is not None for q in (name, title, purpose, topic)]):
             raise InvalidArgumentException("Some parameter needs to be filled in.")
-        ch: Dict[str, Any] = {}
+        ch: dict[str, Any] = {}
         if name is not None:
             ch = await self.http.manage_channel(
                 Route("POST", "conversation.rename", self.http.bot_token),
@@ -207,9 +207,9 @@ class Channel(Sendable):
     async def reaction_messages(
             self,
             *,
-            team: Optional[Team] = None,
-            member: Optional[Member] = None
-    ) -> List[Optional[Message]]:
+            team: Team | None = None,
+            member: Member | None = None
+    ) -> list[Message | None]:
         """
         Returns a list of messages that have been reacted to on the specified channel.
 
@@ -246,7 +246,6 @@ class Channel(Sendable):
             messages.append(message)
 
         return messages
-
 
 
 class DeletedChannel:

@@ -1,13 +1,12 @@
+from __future__ import annotations
+
 import asyncio
 import logging
 from typing import (
-    Optional,
-    Dict,
     Callable,
-    List,
-    Tuple,
     Any,
-    Union
+    Optional,
+    Union,
 )
 
 import slack
@@ -19,11 +18,16 @@ from ..message import Message
 _logger = logging.getLogger(__name__)
 
 # Coro = TypeVar("Coro", bound=Callable[..., Coroutine[..., ..., Any]])
-Listener = List[
-    Tuple[
+Listener = list[
+    tuple[
         asyncio.Future,
         Union[
-            Callable[[Tuple[Any, ...]], bool],
+            Callable[
+                [
+                    tuple[Any, ...]
+                ],
+                bool
+            ],
             Callable[..., bool]
         ],
         Optional[float]
@@ -31,7 +35,7 @@ Listener = List[
 ]
 
 
-def command(name: Optional[str], **kwargs):
+def command(name: str | None, **kwargs):
     def decorator(func: Callable):
         return Command(func=func, name=name, **kwargs)
 
@@ -71,13 +75,13 @@ class Bot(slack.Client):
             self,
             user_token: str,
             bot_token: str,
-            token: Optional[str],
+            token: str | None,
 
             prefix: str,
 
-            logger: Optional[logging.Logger] = None,
+            logger: logging.Logger | None = None,
 
-            loop: Optional[asyncio.AbstractEventLoop] = None,
+            loop: asyncio.AbstractEventLoop | None = None,
             **optional
     ):
         super().__init__(
@@ -88,13 +92,13 @@ class Bot(slack.Client):
             loop=loop,
             **optional
         )
-        self.__commands: Dict[str, Command] = {}
+        self.__commands: dict[str, Command] = {}
         self.prefix = str(prefix)
         self._logger = logger
-        self._listeners: Dict[str, Listener] = {}
+        self._listeners: dict[str, Listener] = {}
 
     @property
-    def commands(self) -> Dict[str, Command]:
+    def commands(self) -> dict[str, Command]:
         """Return all commands
 
         .. versionadded:: 1.4.0
@@ -105,7 +109,7 @@ class Bot(slack.Client):
         """
         return self.__commands
 
-    def get_command(self, name: str, /) -> Optional[Command]:
+    def get_command(self, name: str, /) -> Command | None:
         """Get registered command from name
 
         .. versionadded:: 1.4.0
@@ -120,7 +124,7 @@ class Bot(slack.Client):
         """
         return self.__commands.get(name)
 
-    def command(self, name: Optional[str] = None, **kwargs):
+    def command(self, name: str | None = None, **kwargs):
         """
         Register command of your client-object.
 
@@ -150,8 +154,8 @@ class Bot(slack.Client):
     def wait_for(
             self,
             event: str,
-            check: Optional[Callable[..., bool]] = None,
-            timeout: Optional[float] = None,
+            check: Callable[..., bool] | None = None,
+            timeout: float | None = None,
     ):
         """|coro|
 
@@ -250,7 +254,7 @@ class Bot(slack.Client):
             removed = []
             future: asyncio.Future
             condition: Callable[..., bool]
-            timeout: Optional[float]
+            timeout: float | None
             for i, (future, condition, timeout) in enumerate(listeners):
                 if future.cancelled():
                     removed.append(i)

@@ -5,13 +5,10 @@ import logging
 import signal
 import traceback
 from typing import (
-    List,
-    Dict,
     Callable,
     TypeVar,
     Coroutine,
     Any,
-    Optional,
     TYPE_CHECKING
 )
 
@@ -99,10 +96,10 @@ class Client:
             user_token: str,
             bot_token: str,
 
-            token: Optional[str] = None,
-            logger: Optional[logging.Logger] = None,
+            token: str | None = None,
+            logger: logging.Logger | None = None,
 
-            loop: Optional[asyncio.AbstractEventLoop] = None,
+            loop: asyncio.AbstractEventLoop | None = None,
             **options
     ):
 
@@ -121,23 +118,23 @@ class Client:
         if token is not None and not token.startswith("xapp-"):
             raise TokenTypeException("Token must be start `xapp-`")
 
-        self.ws: Optional[SlackWebSocket] = None
+        self.ws: SlackWebSocket | None = None
         self.user_token: str = user_token
         self.bot_token: str = bot_token
-        self.token: Optional[str] = token
+        self.token: str | None = token
         self.loop: asyncio.AbstractEventLoop = loop or asyncio.get_event_loop()
         self.http: HTTPClient = HTTPClient(self.loop, user_token=user_token, bot_token=bot_token, token=token)
         self._closed: bool = False
         self._ready: asyncio.Event = asyncio.Event()
-        self._handlers: Dict[str, Callable[[], None]] = {
+        self._handlers: dict[str, Callable[[], None]] = {
             "ready": self._handle_ready
         }
         self.logger = logger or _logger
         self.connection: ConnectionState = self._get_state(**options)
-        self._teams: List[Dict[str, Any]]
-        self._teams: Dict[str, Team] = {}
-        self._channels: Dict[str, Channel] = {}
-        self._members: Dict[str, Member] = {}
+        self._teams: list[dict[str, Any]]
+        self._teams: dict[str, Team] = {}
+        self._channels: dict[str, Channel] = {}
+        self._members: dict[str, Member] = {}
 
     def _get_state(self, **options) -> ConnectionState:
         return ConnectionState(
@@ -149,7 +146,7 @@ class Client:
         )
 
     @property
-    def teams(self) -> List[Team]:
+    def teams(self) -> list[Team]:
         """
         List of teams.
 
@@ -161,7 +158,7 @@ class Client:
         return list(self._teams.values())
 
     @property
-    def channels(self) -> List[Channel]:
+    def channels(self) -> list[Channel]:
         """
         List of channels.
 
@@ -172,7 +169,7 @@ class Client:
         return list(self._channels.values())
 
     @property
-    def members(self) -> List[Member]:
+    def members(self) -> list[Member]:
         """
         List of members.
 

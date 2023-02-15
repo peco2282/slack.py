@@ -1,9 +1,10 @@
+from __future__ import annotations
+
 from datetime import datetime
-from typing import Dict, Optional
 
 from .errors import *
 
-errors: Dict[str, SlackExceptions] = {
+errors: dict[str, SlackExceptions] = {
     "invalid_auth": TokenTypeException("Some aspect of authentication cannot be validated."),
     "missing_args": ClientException("An app-level token wasn't provided."),
     "missing_scope": "",
@@ -20,7 +21,7 @@ errors: Dict[str, SlackExceptions] = {
 }
 
 
-def ts2time(time: Union[str, int, float, None]) -> Optional[datetime]:
+def ts2time(time: str | int | float | None) -> datetime | None:
     if time is None:
         return None
     return datetime.fromtimestamp(float(time))

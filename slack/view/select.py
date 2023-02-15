@@ -1,11 +1,10 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import TYPE_CHECKING, Optional
+from typing import TYPE_CHECKING
 from .view import BaseView, Placeholder
 
 if TYPE_CHECKING:
-    # from .view import Placeholder
     from ..errors import InvalidArgumentException
 
 __all__ = (
@@ -65,7 +64,7 @@ class SelectOption(BaseView):
             self,
             text: str,
             value: str,
-            description: Optional[str] = None,
+            description: str | None = None,
             mrkdwn: bool = True,
             # emoji: bool = True
     ):
@@ -123,9 +122,9 @@ class Select(BaseView):
             action_id: str,
             /,
             *options: SelectOption,
-            placeholder: Optional[Placeholder] = None,
+            placeholder: Placeholder | None = None,
             select_type: SelectType = SelectType.static_select,
-            initial_text: Optional[str] = None
+            initial_text: str | None = None
     ):
         if placeholder is not None and not isinstance(placeholder, Placeholder):
             raise InvalidArgumentException()

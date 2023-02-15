@@ -1,7 +1,9 @@
+from __future__ import annotations
+
 import functools
 import logging
 import traceback
-from typing import Optional, Callable, Any
+from typing import Callable, Any
 
 from .context import Context
 
@@ -47,7 +49,7 @@ class Command:
         Comman name.
     """
 
-    def __init__(self, func: Callable[..., Any], name: Optional[str] = None, *args, **kwargs):
+    def __init__(self, func: Callable[..., Any], name: str | None = None, *args, **kwargs):
         self.__func = func
         self.name = name or func.__name__
         self.args = args

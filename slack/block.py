@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Optional, List, TYPE_CHECKING
+from typing import TYPE_CHECKING
 
 from .team import Team
 from .types.block import (
@@ -83,19 +83,19 @@ class Block:
     def __init__(self, state: ConnectionState, data: BlockPayload):
         self.state = state
         self.__data = data
-        self.member: Optional[Member] = state.members.get(data.get("user", {}).get("id"))
+        self.member: Member | None = state.members.get(data.get("user", {}).get("id"))
         self.trigger_id = data.get("trigger_id")
         self.enterprise = data.get("enterprise")
         self.is_enterprise_install = data.get("is_enterprise_install", False)
         self.message: Message = Message(state, data.get("message"))
         self.response_url: str = data.get("response_url")
-        self.actions: List[Action] = [
+        self.actions: list[Action] = [
             Action(state, action)
             for action in data.get("actions")
         ]
 
     @property
-    def channel(self) -> Optional[Channel]:
+    def channel(self) -> Channel | None:
         """
         Returns
         -------
@@ -105,7 +105,7 @@ class Block:
         return self.state.channels.get(self.__data.get("channel", {}).get("id", ""))
 
     @property
-    def team(self) -> Optional[Team]:
+    def team(self) -> Team | None:
         """
         Returns
         -------

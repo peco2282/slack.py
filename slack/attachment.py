@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import List, Optional, Dict, Sequence, TYPE_CHECKING
+from typing import Optional, TYPE_CHECKING
 
 from .types import (
     File as FilePayload,
@@ -26,7 +26,7 @@ class Attachment:
 class PublicShare:
     def __init__(self, state: ConnectionState, data: PublicSharePayload):
         self.state = state
-        self.reply_users: Sequence[Optional[str]] = data.get("reply_users", [])
+        self.reply_users: list[Optional[str]] = data.get("reply_users", [])
         self.reply_users_count: int = data.get("reply_users_count", 0)
         self.reply_count: int = data.get("reply_count", 0)
         self.ts: str = data["ts"]
@@ -38,12 +38,12 @@ class PublicShare:
 class Share:
     def __init__(self, state: ConnectionState, data: SharePayload):
         self.state = state
-        self.__share: Dict[str, List[PublicSharePayload]] = data.get("public", {})
-        self.publics: Dict[str, List[PublicShare]] = {
+        self.__share: dict[str, list[PublicSharePayload]] = data.get("public", {})
+        self.publics: dict[str, list[PublicShare]] = {
             k: [PublicShare(state, c) for c in v] for k, v in self.__share.items()
         }
 
-    def public(self, channel_id: str) -> Optional[List[PublicShare]]:
+    def public(self, channel_id: str) -> Optional[list[PublicShare]]:
         return self.publics.get(channel_id)
 
 
@@ -82,8 +82,8 @@ class File:
         self.is_starred: bool = data.get("is_starred", False)
         self.shares: Share = Share(state, data.get("shares", {}))
 
-        self.channels: List[Optional[Channel]] = [self.state.channels.get(c) for c in data.get("channels", [])]
-        self.groups: List[Optional[str]] = data.get("groups", [])
-        self.ims: List[Optional[str]] = data.get("ims", [])
+        self.channels: list[Optional[Channel]] = [self.state.channels.get(c) for c in data.get("channels", [])]
+        self.groups: list[Optional[str]] = data.get("groups", [])
+        self.ims: list[Optional[str]] = data.get("ims", [])
         self.has_rich_preview: bool = data.get("has_rich_preview", False)
         self.file_access: Optional[str] = data.get("file_access")

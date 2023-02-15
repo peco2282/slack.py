@@ -1,4 +1,4 @@
-from typing import TypedDict, Dict, Any, List, Optional
+from typing import TypedDict, Any
 
 
 class Profile(TypedDict):
@@ -9,10 +9,10 @@ class Profile(TypedDict):
     real_name_normalized: str
     display_name: str
     display_name_normalized: str
-    fields: Optional[Dict[str, Any]]
+    fields: dict[str, Any]
     status_text: str
     status_emoji: str
-    status_emoji_display_info: List[Any]
+    status_emoji_display_info: list[Any]
     status_expiration: int
     avatar_hash: str
     huddle_state: str
