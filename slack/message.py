@@ -364,8 +364,25 @@ class Message:
             ]
         return reaction_list
 
-    async def reaction_remove(self):
-        pass
+    async def reaction_remove(self, name: str):
+        """
+
+        Parameters
+        ----------
+        name: :class:`str`
+            A reaction name you want to remove.
+
+        Returns
+        -------
+
+        """
+        query = {
+            "name": str(name)
+        }
+        await self.state.http.post_anything(
+            Route("POST", "reactions.remove", self.state.http.bot_token),
+            query=query
+        )
 
 
 class JoinMessage(Message):

@@ -60,6 +60,7 @@ class Channel(Sendable):
 
     async def kick(self, member: Member) -> None:
         """
+        A way to :class:`Member`.kick()
         Removes a user from a conversation.
 
         ..versionadded:: 1.4.3
@@ -72,14 +73,7 @@ class Channel(Sendable):
         if not isinstance(member, Member):
             raise InvalidArgumentException("member parameter must be `Member` class.")
 
-        query = {
-            "user": member.id,
-            "channel": self.id
-        }
-        await self.http.post_anything(
-            Route("POST", "conversations.kick", self.http.bot_token),
-            query=query
-        )
+        await member.kick(self)
 
     async def leave(self, member: Member):
         """

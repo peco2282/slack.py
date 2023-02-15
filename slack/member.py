@@ -3,6 +3,7 @@ from __future__ import annotations
 from datetime import datetime
 from typing import TYPE_CHECKING, Optional
 
+from .channel import Channel
 from .route import Route
 from .team import Team
 from .types.member import (
@@ -98,6 +99,7 @@ class Member:
     """
 
     def __init__(self, state: ConnectionState, data: MemberPayload):
+        self.http = state.http
         self.state = state
         self.id = data.get("id")
         self.team = state.teams[data.get("team_id")]
@@ -159,3 +161,25 @@ class Member:
             }
         )
         return Message(self.state, rtn.get("message"))
+
+    async def kick(self, channel: Channel):
+        """
+        A way to :class:`Channel`.kick()
+
+        Kick a member out of the channel.
+
+        ..versionadded:: 1.4.5
+
+        Parameters
+        ----------
+        channel: :class:`Channel`
+            Channel you want to kick.
+        """
+        query = {
+            "user": self.id,
+            "channel": channel.id
+        }
+        await self.http.post_anything(
+            Route("POST", "conversations.kick", self.http.bot_token),
+            query=query
+        )

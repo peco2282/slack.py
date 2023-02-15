@@ -41,7 +41,7 @@ Parsers = TypeVar("Parsers", bound=Dict[str, Callable[[Optional[Dict[str, Any]]]
 
 if sys.version_info >= (3, 11,):
     # noinspection PyCompatibility
-    Dispatch = TypeVar("Dispatch", bound=Callable[[str, Optional[*Tuple[str, ...]]], str])
+    Dispatch = TypeVar("Dispatch", bound=Callable[[str, *Tuple[str, ...]], str])
 
 else:
     Dispatch = TypeVar("Dispatch", bound=Callable[[str, Optional[Unpack[Tuple[str, ...]]]], None])
