@@ -3,14 +3,14 @@ from __future__ import annotations
 import json
 import urllib.parse
 from datetime import datetime
-from typing import overload, TYPE_CHECKING
+from typing import TYPE_CHECKING
 
+from .attachment import File
 from .errors import InvalidArgumentException, SlackException
 from .message import Message, DeletedMessage
 from .route import Route
 from .utils import ts2time
 from .view import ViewFrame
-from .attachment import File
 
 if TYPE_CHECKING:
     from .channel import Channel
@@ -76,21 +76,21 @@ class Sendable:
         """
         return "<@here>"
 
-    @overload
-    async def send(
-            self,
-            text: str = ...,
-            as_user: bool = ...
-    ):
-        ...
-
-    @overload
-    async def send(
-            self,
-            view: ViewFrame = ...,
-            as_user: bool = ...
-    ):
-        ...
+    # @overload
+    # async def send(
+    #         self,
+    #         text: str = ...,
+    #         as_user: bool = ...
+    # ):
+    #     ...
+    #
+    # @overload
+    # async def send(
+    #         self,
+    #         view: ViewFrame = ...,
+    #         as_user: bool = ...
+    # ):
+    #     ...
 
     async def send(
             self,
@@ -130,8 +130,8 @@ class Sendable:
 
         """
         param = query = {}
-        if (text is not None) and (view is not None):
-            raise InvalidArgumentException()
+        # if (text is not None) and (view is not None):
+        #     raise InvalidArgumentException()
 
         if text is not None:
             param = {
@@ -342,17 +342,32 @@ class Sendable:
         )
         return File(self.state, sended["file"])
 
-    async def get_permalink(self, message: Message):
+    async def get_permalink(self, message: Message) -> str:
+        """
+        Retrieve a permalink URL for a specific extant message.
+
+        .. versionadded:: 1.4.5
+
+        Parameters
+        ----------
+        message: :class:`Message`
+            Message for which you want to get a permalink.
+
+        Returns
+        -------
+        :class:`str`
+            Message permalink.
+        """
         if not isinstance(message, Message):
             raise InvalidArgumentException("`message` parameter must instance `Message` class")
         rtn = await self.state.http.get_anything(
             Route("GET", "chat.getPermalink", self.state.http.user_token),
-            data={
+            query={
                 "message_ts": message.id,
                 "channel": self.id
             }
         )
-        return rtn
+        return rtn["permalink"]
 
     async def archive(self) -> None:
         """|coro|
