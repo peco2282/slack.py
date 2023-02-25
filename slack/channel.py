@@ -58,6 +58,9 @@ class Channel(Sendable):
         self.created_by: Member | None = self.state.members.get(data.get("creator"))
         # self.overload(data)
 
+    def __repr__(self) -> str:
+        return f"<{self.__class__.__name__} id={self.id} name={self.name}>"
+
     async def kick(self, member: Member) -> None:
         """
         A way to :class:`Member`.kick()
