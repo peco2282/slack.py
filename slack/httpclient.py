@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import logging
 import traceback
 from typing import Any, TYPE_CHECKING, IO
 
@@ -33,7 +34,8 @@ class HTTPClient:
             loop: asyncio.AbstractEventLoop,
             user_token: str,
             token: str | None,
-            bot_token: str
+            bot_token: str,
+            logger: logging.Logger
     ):
         self.loop: asyncio.AbstractEventLoop = loop
         self.user_token: str = user_token
@@ -41,8 +43,9 @@ class HTTPClient:
         self.bot_token: str = bot_token
         self.__session: aiohttp.ClientSession | None = None
         self.ws: SlackWebSocket
+        self.logger = logger
 
-    async def ws_connect(self, url: str):
+    async def ws_connect(self, url: str) -> aiohttp.ClientWebSocketResponse:
         """It connects to a websocket and returns a websocket object
 
         Parameters
@@ -132,6 +135,7 @@ class HTTPClient:
                     raise ForbiddenException()
 
             except json.JSONDecodeError:
+                self.logger.warning("JSON object cannot serialize.")
                 return await response.text()
 
     def send_files(

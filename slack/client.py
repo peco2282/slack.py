@@ -3,7 +3,6 @@ from __future__ import annotations
 import asyncio
 import logging
 import signal
-import traceback
 from typing import (
     Callable,
     TypeVar,
@@ -12,6 +11,7 @@ from typing import (
     TYPE_CHECKING
 )
 
+from . import utils
 from .errors import TokenTypeException, InvalidArgumentException
 from .httpclient import HTTPClient
 from .state import ConnectionState
@@ -23,8 +23,6 @@ if TYPE_CHECKING:
     from .member import Member
 
 Coro = TypeVar("Coro", bound=Callable[..., Coroutine[Any, Any, Any]])
-
-_logger = logging.getLogger(__name__)
 
 
 def cancel_task(loop: asyncio.AbstractEventLoop):
@@ -98,6 +96,8 @@ class Client:
 
             token: str | None = None,
             logger: logging.Logger | None = None,
+            log_level: int = logging.INFO,
+            log_format: logging.Formatter | None = None,
 
             loop: asyncio.AbstractEventLoop | None = None,
             **options
@@ -123,18 +123,28 @@ class Client:
         self.bot_token: str = bot_token
         self.token: str | None = token
         self.loop: asyncio.AbstractEventLoop = loop or asyncio.get_event_loop()
-        self.http: HTTPClient = HTTPClient(self.loop, user_token=user_token, bot_token=bot_token, token=token)
         self._closed: bool = False
         self._ready: asyncio.Event = asyncio.Event()
         self._handlers: dict[str, Callable[[], None]] = {
             "ready": self._handle_ready
         }
-        self.logger = logger or _logger
+        self.logger = logger or logging.getLogger(__name__)
+        utils.setup_logging(self.logger, log_level, log_format)
+
+        self.http: HTTPClient = HTTPClient(
+            self.loop,
+            user_token=user_token,
+            bot_token=bot_token,
+            token=token,
+            logger=logger
+        )
+
         self.connection: ConnectionState = self._get_state(**options)
         self._teams: list[dict[str, Any]]
         self._teams: dict[str, Team] = {}
         self._channels: dict[str, Channel] = {}
         self._members: dict[str, Member] = {}
+        self.logger.info("setup finished")
 
     def _get_state(self, **options) -> ConnectionState:
         return ConnectionState(
@@ -142,6 +152,7 @@ class Client:
             http=self.http,
             loop=self.loop,
             handlers=self._handlers,
+            logger=self.logger,
             **options
         )
 
@@ -187,7 +198,7 @@ class Client:
         method = f"on_{event}"
         try:
             coro: Coro = getattr(self, method)
-            _logger.info("dispatch event %s", method)
+            self.logger.info("dispatch event %s", method)
 
         except AttributeError:
             pass
@@ -227,7 +238,6 @@ class Client:
             raise TypeError("event must be coroutine function.")
 
         setattr(self, coro.__name__, coro)
-        _logger.info("%s event set", coro.__name__)
         return coro
 
     def run(self) -> None:
@@ -257,8 +267,8 @@ class Client:
             loop.add_signal_handler(signal.SIGINT, loop.stop)
             loop.add_signal_handler(signal.SIGTERM, loop.stop)
 
-        except NotImplementedError as nie:
-            _logger.error(traceback.TracebackException.from_exception(nie))
+        except NotImplementedError:
+            pass
 
         async def runner() -> None:
             try:
@@ -304,6 +314,7 @@ class Client:
         Get teams, channels and member data.
         """
         data = await self.http.login()
+        self.logger.info("login successful with wss: %s", data.get("url"))
         self._teams, self._channels, self._members = await self.connection.initialize()
         await self.connect(data.get("url"))
 
@@ -311,6 +322,7 @@ class Client:
         """Close connection.
         """
         self._closed = True
+        self.logger.info("connection closed.")
 
     async def connect(self, ws_url: str) -> None:
         """
@@ -334,7 +346,7 @@ class Client:
                         break
 
             except Exception as e:
-                _logger.error("raise %s", e)
+                self.logger.error("raise %s", e)
                 raise e
 
     def _schedule_event(
@@ -359,7 +371,7 @@ class Client:
             await coro(*args, **kwargs)
 
         except asyncio.CancelledError as e:
-            _logger.warning("%s", e)
+            self.logger.warning("%s", e)
             pass
 
         except Exception as exc:
@@ -379,4 +391,4 @@ class Client:
             The exception that was raised.
 
         """
-        _logger.error(f"{event_name} raise {exc.__class__.__name__} in {self.__class__.__name__}")
+        self.logger.error(f"{event_name} raise {exc.__class__.__name__} in {self.__class__.__name__}")

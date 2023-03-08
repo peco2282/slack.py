@@ -1,6 +1,10 @@
 from __future__ import annotations
 
+import logging
+import os
+from ctypes import windll, wintypes, byref
 from datetime import datetime
+from typing import Any
 
 from .errors import *
 
@@ -20,6 +24,47 @@ errors: dict[str, SlackExceptions] = {
                                                       "Block Kit syntax.")
 }
 
+# https://learn.microsoft.com/en-us/windows/console/console-virtual-terminal-sequences#text-formatting
+DEFAULT = 0
+UNDERLINE = 4
+NO_UNDERLINE = 24
+
+FOREGROUND_BLACK = 30
+FOREGROUND_RED = 31
+FOREGROUND_GREEN = 32
+FOREGROUND_YELLOW = 33
+FOREGROUND_BLUE = 34
+FOREGROUND_MAGENTA = 35
+FOREGROUND_CYAN = 36
+FOREGROUND_WHITE = 37
+
+BACKGROUND_BLACK = 40
+BACKGROUND_RED = 41
+BACKGROUND_GREEN = 42
+BACKGROUND_YELLOW = 43
+BACKGROUND_BLUE = 44
+BACKGROUND_MAGENTA = 45
+BACKGROUND_CYAN = 46
+BACKGROUND_WHITE = 47
+
+BLIGHT_FOREGROUND_BLACK = 90
+BLIGHT_FOREGROUND_RED = 91
+BLIGHT_FOREGROUND_GREEN = 92
+BLIGHT_FOREGROUND_YELLOW = 93
+BLIGHT_FOREGROUND_BLUE = 94
+BLIGHT_FOREGROUND_MAGENTA = 95
+BLIGHT_FOREGROUND_CYAN = 96
+BLIGHT_FOREGROUND_WHITE = 97
+
+BLIGHT_BACKGROUND_BLACK = 100
+BLIGHT_BACKGROUND_RED = 101
+BLIGHT_BACKGROUND_GREEN = 102
+BLIGHT_BACKGROUND_YELLOW = 103
+BLIGHT_BACKGROUND_BLUE = 104
+BLIGHT_BACKGROUND_MAGENTA = 105
+BLIGHT_BACKGROUND_CYAN = 106
+BLIGHT_BACKGROUND_WHITE = 107
+
 
 def ts2time(time: str | int | float | None) -> datetime | None:
     if time is None:
@@ -37,3 +82,88 @@ def parse_exception(event_name: str, **kwargs):
         exc = SlackException(event_name)
 
     raise exc
+
+
+class _Formatter(logging.Formatter):
+    COLORS: tuple[tuple[int, int]] = (
+        (logging.NOTSET, FOREGROUND_WHITE),
+        (logging.DEBUG, FOREGROUND_WHITE),
+        (logging.INFO, BACKGROUND_GREEN),
+        (logging.WARNING, FOREGROUND_YELLOW),
+        (logging.ERROR, FOREGROUND_RED),
+        (logging.CRITICAL, FOREGROUND_RED)
+    )
+    FORMAT: dict[int, logging.Formatter] = {
+        lv: logging.Formatter(
+            f"\x1b[{FOREGROUND_CYAN}m%(asctime)s\x1b[0m \x1b[{cl}m\x1b[{BLIGHT_BACKGROUND_BLACK}m"
+            f"%(levelname)-8s\x1b[0m \x1b[35m%(name)s\x1b[0m \x1b[{FOREGROUND_GREEN}m%(message)s",
+            "%Y-%m-%d %H:%M:%S"
+        ) for lv, cl in COLORS
+    }
+
+    def format(self, record: logging.LogRecord) -> str:
+        _format = self.FORMAT.get(record.levelno, logging.DEBUG)
+        if record.exc_info:
+            text = _format.formatException(record.exc_info)
+            record.exc_text = f'\x1b[31m{text}\x1b[0m'
+
+        output = _format.format(record)
+        record.exc_text = None
+        return output
+
+
+INVALID_HANDLE_VALUE = -1
+STD_INPUT_HANDLE = -10
+STD_OUTPUT_HANDLE = -11
+STD_ERROR_HANDLE = -12
+ENABLE_VIRTUAL_TERMINAL_PROCESSING = 0x0004
+ENABLE_LVB_GRID_WORLDWIDE = 0x0010
+
+
+def enable():
+    out = windll.kernel32.GetStdHandle(STD_OUTPUT_HANDLE)
+    if out == INVALID_HANDLE_VALUE:
+        return False
+    dw_mode = wintypes.DWORD()
+    if windll.kernel32.GetConsoleMode(out, byref(dw_mode)) == 0:
+        return False
+    dw_mode.value |= ENABLE_VIRTUAL_TERMINAL_PROCESSING
+    # dwMode.value |= ENABLE_LVB_GRID_WORLDWIDE
+    if windll.kernel32.SetConsoleMode(out, dw_mode) == 0:
+        return False
+    return True
+
+
+def stream_supports_colour(stream: Any) -> bool:
+    # Pycharm and Vscode support colour in their inbuilt editors
+    if 'PYCHARM_HOSTED' in os.environ or os.environ.get('TERM_PROGRAM') == 'vscode':
+        return True
+
+    is_a_tty = hasattr(stream, 'isatty') and stream.isatty()
+    # if sys.platform != 'win32':
+    #     # Docker does not consistently have a tty attached to it
+    #     return is_a_tty or is_docker()
+
+    # ANSICON checks for things like ConEmu
+    # WT_SESSION checks if this is Windows Terminal
+    return is_a_tty and ('ANSICON' in os.environ or 'WT_SESSION' in os.environ)
+
+
+def setup_logging(logger: logging.Logger, level: int = logging.INFO, log_format: logging.Formatter | None = None):
+    # b = enable()
+    handler = logging.StreamHandler()
+    if log_format is None or not isinstance(log_format, logging.Formatter):
+        if stream_supports_colour(handler.stream):
+            log_format = _Formatter()
+
+        else:
+            dt_fmt = '%Y-%m-%d %H:%M:%S'
+            log_format = logging.Formatter(
+                '[{asctime}] [{levelname:<8}] {name}: {message}',
+                dt_fmt,
+                style='{'
+            )
+    handler.setFormatter(log_format)
+
+    logger.setLevel(level)
+    logger.addHandler(handler)

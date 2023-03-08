@@ -31,8 +31,6 @@ from .utils import ts2time
 if TYPE_CHECKING:
     from .httpclient import HTTPClient
 
-_logger = logging.getLogger(__name__)
-
 Parsers = TypeVar("Parsers", bound=dict[str, Callable[[Optional[dict[str, Any]]], None]])
 
 if sys.version_info >= (3, 11,):
@@ -89,6 +87,7 @@ class ConnectionState:
             http: HTTPClient,
             loop: asyncio.AbstractEventLoop,
             handlers: dict[str, Callable[[], None]],
+            logger: logging.Logger,
             **kwargs
     ) -> None:
         self.http: HTTPClient = http
@@ -101,6 +100,7 @@ class ConnectionState:
         self.teams: dict[str, Team] = {}
         self.channels: dict[str, Channel] = {}
         self.members: dict[str, Member] = {}
+        self.logger = logger
         for attr, func in inspect.getmembers(self):
             if attr.startswith("parse_"):
                 parsers[attr[6:]] = func
@@ -166,7 +166,7 @@ class ConnectionState:
                 for member in members["members"]:
                     self.members[member["id"]] = Member(state=self, data=member)
 
-            except AttributeError:
+            except (AttributeError, TypeError):
                 continue
 
             else:
