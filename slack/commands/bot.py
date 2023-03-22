@@ -24,11 +24,11 @@ Listener = list[
         Union[
             Callable[
                 [
-                    tuple[Any, ...]
+                    tuple[Any]
                 ],
                 bool
             ],
-            Callable[..., bool]
+            Callable[[...], bool]
         ],
         Optional[float]
     ]
