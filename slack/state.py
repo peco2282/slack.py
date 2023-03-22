@@ -34,8 +34,7 @@ if TYPE_CHECKING:
 Parsers = TypeVar("Parsers", bound=dict[str, Callable[[Optional[dict[str, Any]]], None]])
 
 if sys.version_info >= (3, 11,):
-    # noinspection PyCompatibility
-    Dispatch = TypeVar("Dispatch", bound=Callable[[str, *tuple[str, ...] | None], str])
+    Dispatch = TypeVar("Dispatch", bound=Callable[[str, *Optional[tuple[str, ...]]], str])
 
 else:
     Dispatch = TypeVar("Dispatch", bound=Callable[[str, Unpack[tuple[str, ...]] | None], None])
