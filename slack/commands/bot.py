@@ -4,7 +4,7 @@ import asyncio
 import logging
 from typing import (
     Callable,
-    Optional,
+    Optional, TypeVar,
 )
 
 import slack
@@ -16,9 +16,15 @@ from ..message import Message
 _logger = logging.getLogger(__name__)
 
 # Coro = TypeVar("Coro", bound=Callable[..., Coroutine[..., ..., Any]])
-Listener = list[
-    tuple[asyncio.Future, Callable[..., bool], Optional[float]]
-]
+# noinspection PyBroadException
+try:
+    Listener = TypeVar("Listener", bound=list[
+        tuple[asyncio.Future, Callable[..., bool], Optional[float]]
+    ])
+
+except Exception:
+    # noinspection PyTypeHints
+    Listener = TypeVar("Listener")
 
 
 def command(name: str | None, **kwargs):
