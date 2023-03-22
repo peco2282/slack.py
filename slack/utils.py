@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 import os
-from ctypes import windll, wintypes, byref
+import sys
 from datetime import datetime
 from typing import Any
 
@@ -121,6 +121,10 @@ ENABLE_LVB_GRID_WORLDWIDE = 0x0010
 
 
 def enable():
+    if sys.platform != "win32":
+        return
+
+    from ctypes import windll, wintypes, byref
     out = windll.kernel32.GetStdHandle(STD_OUTPUT_HANDLE)
     if out == INVALID_HANDLE_VALUE:
         return False
@@ -150,7 +154,7 @@ def stream_supports_colour(stream: Any) -> bool:
 
 
 def setup_logging(logger: logging.Logger, level: int = logging.INFO, log_format: logging.Formatter | None = None):
-    # b = enable()
+    enable()
     handler = logging.StreamHandler()
     if log_format is None or not isinstance(log_format, logging.Formatter):
         if stream_supports_colour(handler.stream):
