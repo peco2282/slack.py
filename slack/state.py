@@ -39,13 +39,18 @@ except Exception:
     # noinspection PyTypeHints
     Parsers = TypeVar("Parsers")
 
-if sys.version_info >= (3, 11,):
-    # noinspection PyCompatibility
-    Dispatch = TypeVar("Dispatch", bound=Callable[[str, *tuple[str, ...] | None], str])
+# noinspection PyBroadException
+try:
+    if sys.version_info >= (3, 11,):
+        # noinspection PyCompatibility
+        Dispatch = TypeVar("Dispatch", bound=Callable[[str, *tuple[str, ...] | None], str])
 
-else:
-    Dispatch = TypeVar("Dispatch", bound=Callable[[str, Unpack[tuple[str, ...]] | None], None])
+    else:
+        Dispatch = TypeVar("Dispatch", bound=Callable[[str, Unpack[tuple[str, ...]] | None], None])
 
+except Exception:
+    # noinspection PyTypeHints
+    Dispatch = TypeVar("Dispatch")
 
 class ReactionEvent:
     """
