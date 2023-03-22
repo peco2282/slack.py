@@ -3,9 +3,10 @@ from __future__ import annotations
 from datetime import datetime
 from typing import TYPE_CHECKING, Any
 
-from .message import Message
+from .attachment import File
 from .base import Sendable
 from .errors import InvalidArgumentException
+from .message import Message
 from .route import Route
 from .team import Team
 from .types.channel import (
@@ -249,6 +250,29 @@ class Channel(Sendable):
             messages.append(message)
 
         return messages
+
+    async def files(
+            self,
+            this_channel: bool = True,
+            member: Member | None = None,
+            *,
+            count: int = 100
+    ) -> list[File | None]:
+        query = {}
+        if isinstance(count, int):
+            query["count"] = int(count)
+
+        if this_channel:
+            query["channel"] = self.id
+
+        if member:
+            query["user"] = member.id
+        resp = await self.http.get_anything(
+            Route("GET", "files.list", self.http.bot_token),
+            query=query
+        )
+        files = resp["files"]
+        return [File(self.state, data) for data in files]
 
 
 class DeletedChannel:

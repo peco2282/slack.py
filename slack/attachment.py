@@ -1,7 +1,8 @@
 from __future__ import annotations
 
-from typing import Optional, TYPE_CHECKING
+from typing import TYPE_CHECKING
 
+from .route import Route
 from .types import (
     File as FilePayload,
     Share as SharePayload,
@@ -16,7 +17,7 @@ if TYPE_CHECKING:
 
 
 class Attachment:
-    def __init__(self, fp: str, name: str, title: str, initial_comment: Optional[str] = None):
+    def __init__(self, fp: str, name: str, title: str, initial_comment: str | None = None):
         self.fp = fp
         self.name = str(name)
         self.title = str(title)
@@ -26,7 +27,7 @@ class Attachment:
 class PublicShare:
     def __init__(self, state: ConnectionState, data: PublicSharePayload):
         self.state = state
-        self.reply_users: list[Optional[str]] = data.get("reply_users", [])
+        self.reply_users: list[str | None] = data.get("reply_users", [])
         self.reply_users_count: int = data.get("reply_users_count", 0)
         self.reply_count: int = data.get("reply_count", 0)
         self.ts: str = data["ts"]
@@ -43,7 +44,7 @@ class Share:
             k: [PublicShare(state, c) for c in v] for k, v in self.__share.items()
         }
 
-    def public(self, channel_id: str) -> Optional[list[PublicShare]]:
+    def public(self, channel_id: str) -> list[PublicShare] | None:
         return self.publics.get(channel_id)
 
 
@@ -63,7 +64,7 @@ class File:
         self.size = int(data.get("size", 0))
         self.mode = data.get("mode")
         self.is_external = data.get("is_external")
-        self.external_type: Optional[str] = data.get("external_type")
+        self.external_type: str | None = data.get("external_type")
         self.is_public: bool = data.get("is_public", False)
         self.public_url_shared: bool = data.get("public_url_shared", False)
         self.display_as_bot: bool = data.get("display_as_bot", False)
@@ -78,12 +79,21 @@ class File:
         self.lines: int = data.get("lines", 0)
         self.lines_more: int = data.get("lines_more", 0)
         self.preview_is_truncated: bool = data.get("preview_is_truncated", False)
-        self.comments_count: Optional[str] = data.get("comments_count")
+        self.comments_count: str | None = data.get("comments_count")
         self.is_starred: bool = data.get("is_starred", False)
         self.shares: Share = Share(state, data.get("shares", {}))
 
-        self.channels: list[Optional[Channel]] = [self.state.channels.get(c) for c in data.get("channels", [])]
-        self.groups: list[Optional[str]] = data.get("groups", [])
-        self.ims: list[Optional[str]] = data.get("ims", [])
+        self.channels: list[Channel | None] = [self.state.channels.get(c) for c in data.get("channels", [])]
+        self.groups: list[str | None] = data.get("groups", [])
+        self.ims: list[str | None] = data.get("ims", [])
         self.has_rich_preview: bool = data.get("has_rich_preview", False)
-        self.file_access: Optional[str] = data.get("file_access")
+        self.file_access: str | None = data.get("file_access")
+
+    async def create_url(self):
+        await self.state.http.get_anything(
+            Route("GET", "files.getUploadURLExternal", self.state.http.bot_token),
+            query={
+                "filename": self.id,
+                # "length": length
+            }
+        )

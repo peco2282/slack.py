@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import TypedDict, Any
 
 
@@ -9,7 +11,7 @@ class Profile(TypedDict):
     real_name_normalized: str
     display_name: str
     display_name_normalized: str
-    fields: dict[str, Any]
+    fields: list[dict[str, Any]] | None
     status_text: str
     status_emoji: str
     status_emoji_display_info: list[Any]
