@@ -4,9 +4,7 @@ import asyncio
 import logging
 from typing import (
     Callable,
-    Any,
     Optional,
-    Union,
 )
 
 import slack
@@ -19,19 +17,7 @@ _logger = logging.getLogger(__name__)
 
 # Coro = TypeVar("Coro", bound=Callable[..., Coroutine[..., ..., Any]])
 Listener = list[
-    tuple[
-        asyncio.Future,
-        Union[
-            Callable[
-                [
-                    tuple[Any]
-                ],
-                bool
-            ],
-            Callable[[...], bool]
-        ],
-        Optional[float]
-    ]
+    tuple[asyncio.Future, Callable[..., bool], Optional[float]]
 ]
 
 
