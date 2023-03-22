@@ -31,10 +31,17 @@ from .utils import ts2time
 if TYPE_CHECKING:
     from .httpclient import HTTPClient
 
-Parsers = TypeVar("Parsers", bound=dict[str, Callable[[Optional[dict[str, Any]]], None]])
+# noinspection PyBroadException
+try:
+    Parsers = TypeVar("Parsers", bound=dict[str, Callable[[Optional[dict[str, Any]]], None]])
+
+except Exception:
+    # noinspection PyTypeHints
+    Parsers = TypeVar("Parsers")
 
 if sys.version_info >= (3, 11,):
-    Dispatch = TypeVar("Dispatch", bound=Callable[[str, *Optional[tuple[str, ...]]], str])
+    # noinspection PyCompatibility
+    Dispatch = TypeVar("Dispatch", bound=Callable[[str, *tuple[str, ...] | None], str])
 
 else:
     Dispatch = TypeVar("Dispatch", bound=Callable[[str, Unpack[tuple[str, ...]] | None], None])
