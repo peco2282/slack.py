@@ -4,7 +4,8 @@ import logging
 import os
 import sys
 from datetime import datetime
-from typing import Any
+from operator import attrgetter
+from typing import Any, TypeVar, Iterable, Generator, overload
 
 from .errors import *
 
@@ -82,6 +83,42 @@ def parse_exception(event_name: str, **kwargs):
         exc = SlackException(event_name)
 
     raise exc
+
+
+T = TypeVar("T")
+
+
+@overload
+def get(iterator: Iterable[T]) -> Generator[T]:
+    ...
+
+
+def get(iterator: Iterable[T], /, **kwargs) -> Generator[T]:
+    """
+
+    Parameters
+    ----------
+    iterator
+    kwargs
+
+    Returns
+    -------
+    Generator object contain matched keyword(s).
+    """
+    if len(kwargs) == 0:
+        for i in iterator:
+            yield i
+
+    else:
+        flag = True
+        converted: list[tuple[attrgetter, Any]] = [(attrgetter(k.replace("__", ".")), v) for k, v in kwargs.items()]
+        for i, elem in enumerate(iterator):
+            if all(agetter(elem) == v for agetter, v in converted):
+                flag = False
+                yield elem
+
+        if flag:
+            yield None
 
 
 class _Formatter(logging.Formatter):
