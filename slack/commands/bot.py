@@ -42,18 +42,18 @@ class Bot(slack.Client):
 
     Attributes
     ----------
-    user_token: :class:`str`
+    _user_token: :class:`str`
         The your-self token. It must be start 'xoxp-...'
 
-    bot_token: :class:`str`
+    _bot_token: :class:`str`
         The bot token. It must be start 'xoxb-...'
-    token: Optional[:class:`str`]
+    _token: Optional[:class:`str`]
         App-level token. It is startwith 'xapp-...'
 
         .. versionchanged:: 1.4.0
             To optional.
 
-    logger: :class:`Logger.Logger`
+    _logger: :class:`Logger.Logger`
         Logger object.
 
         .. versionadded:: 1.4.0

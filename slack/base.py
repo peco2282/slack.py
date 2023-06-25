@@ -48,7 +48,7 @@ class ScheduledMessage:
 
 
 class Sendable:
-    state: ConnectionState
+    _state: ConnectionState
     id: str
 
     # channel_id
@@ -151,12 +151,12 @@ class Sendable:
                 "blocks": urllib.parse.quote(str(blocks)).replace("%25", "%").replace("%27", "%22")
             }
         query.update(param)
-        message = await self.state.http.send_message(
-            Route("POST", "chat.postMessage", token=self.state.http.bot_token),
+        message = await self._state.http.send_message(
+            Route("POST", "chat.postMessage", token=self._state.http.bot_token),
             # data=param if param != {} else None,
             query=query if query != {} else None
         )
-        msg = Message(state=self.state, data=message["message"])
+        msg = Message(state=self._state, data=message["message"])
         msg.channel_id = self.id
         return msg
 
@@ -194,11 +194,11 @@ class Sendable:
 
         else:
             raise InvalidArgumentException("`date` parameter must be `datetime`, `int` or `float`.")
-        resp = await self.state.http.send_message(
-            Route("POST", "chat.scheduleMessage", self.state.http.bot_token),
+        resp = await self._state.http.send_message(
+            Route("POST", "chat.scheduleMessage", self._state.http.bot_token),
             query=param
         )
-        message = Message(self.state, resp["message"])
+        message = Message(self._state, resp["message"])
         message.id = resp.get("post_at")
         message.channel_id = resp.get("channel")
         message.scheduled_message_id = resp.get("scheduled_message_id")
@@ -268,12 +268,12 @@ class Sendable:
                 oldest = oldest.timestamp()
 
             param["oldest"] = int(oldest)
-        rtn = await self.state.http.get_anything(
-            Route("GET", "chat.scheduledMessages.list", self.state.http.bot_token),
+        rtn = await self._state.http.get_anything(
+            Route("GET", "chat.scheduledMessages.list", self._state.http.bot_token),
             param
         )
         print(rtn)
-        messages = [ScheduledMessage(self.state, m) for m in rtn.get("scheduled_messages", [])]
+        messages = [ScheduledMessage(self._state, m) for m in rtn.get("scheduled_messages", [])]
         return messages
 
     async def send_ephemeral(self, text: str, member: Member) -> datetime:
@@ -305,8 +305,8 @@ class Sendable:
             "text": str(text),
             "user": member.id
         }
-        rtn = await self.state.http.send_message(
-            Route(method="POST", endpoint="chat.postEphemeral", token=self.state.http.bot_token),
+        rtn = await self._state.http.send_message(
+            Route(method="POST", endpoint="chat.postEphemeral", token=self._state.http.bot_token),
             data=param
         )
 
@@ -335,12 +335,12 @@ class Sendable:
         if initial_text:
             param["initial_comment"] = initial_text
 
-        sended = await self.state.http.send_files(
-            Route(method="POST", endpoint="files.upload", token=self.state.http.bot_token),
+        sended = await self._state.http.send_files(
+            Route(method="POST", endpoint="files.upload", token=self._state.http.bot_token),
             data=param,
             files=[attachment],
         )
-        return File(self.state, sended["file"])
+        return File(self._state, sended["file"])
 
     async def get_permalink(self, message: Message) -> str:
         """
@@ -360,8 +360,8 @@ class Sendable:
         """
         if not isinstance(message, Message):
             raise InvalidArgumentException("`message` parameter must instance `Message` class")
-        rtn = await self.state.http.get_anything(
-            Route("GET", "chat.getPermalink", self.state.http.user_token),
+        rtn = await self._state.http.get_anything(
+            Route("GET", "chat.getPermalink", self._state.http.user_token),
             query={
                 "message_ts": message.id,
                 "channel": self.id
@@ -379,8 +379,8 @@ class Sendable:
         param = {
             "channel": self.id
         }
-        await self.state.http.create_channel(
-            Route("POST", "conversations.archive", token=self.state.http.user_token),
+        await self._state.http.create_channel(
+            Route("POST", "conversations.archive", token=self._state.http.user_token),
             param
         )
 
@@ -400,12 +400,12 @@ class Sendable:
         query = {
             "channel": self.id
         }
-        msg = await self.state.http.get_anything(
-            Route("GET", "conversations.history", self.state.http.bot_token),
+        msg = await self._state.http.get_anything(
+            Route("GET", "conversations.history", self._state.http.bot_token),
             query=query
         )
         messages = msg["messages"]
-        return [Message(self.state, data=data) for data in messages]
+        return [Message(self._state, data=data) for data in messages]
 
     async def delete_message(self, message_id: str):
         query = {
@@ -413,24 +413,24 @@ class Sendable:
             "ts": str(message_id)
         }
         try:
-            rtn = await self.state.http.delete_message(
+            rtn = await self._state.http.delete_message(
                 Route(
                     "DELETE",
                     "chat.delete",
-                    self.state.http.bot_token
+                    self._state.http.bot_token
                 ),
                 query=query
             )
         except SlackException:
             try:
-                rtn = await self.state.http.delete_message(
+                rtn = await self._state.http.delete_message(
                     Route(
                         "DELETE",
                         "chat.delete",
-                        self.state.http.user_token
+                        self._state.http.user_token
                     ),
                     query=query
                 )
             except SlackException as exc:
                 raise exc
-        return DeletedMessage(self.state, rtn)
+        return DeletedMessage(self._state, rtn)

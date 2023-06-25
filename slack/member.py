@@ -45,7 +45,7 @@ class Profile:
     """
 
     def __init__(self, state: ConnectionState, user: "Member", data: ProfilePayload):
-        self.state = state
+        self.__state = state
         self.user = user
         self.phone = data.get("phone")
         self.skype = data.get("skype")
@@ -69,8 +69,8 @@ class Profile:
         self.image_192 = data.get("image_192")
         self.image_512 = data.get("image_512")
         self.status_text_canonical = data.get("status_text_canonical")
-        team = data.get("team")
-        self.team: Team | None = state.teams[team] if team is not None else None
+        __team = data.get("team")
+        self.team: Team | None = state.teams[__team] if __team is not None else None
 
 
 # It creates a class called User.
@@ -99,8 +99,7 @@ class Member:
     """
 
     def __init__(self, state: ConnectionState, data: MemberPayload):
-        self.http = state.http
-        self.state = state
+        self.__state = state
         self.id = data.get("id")
         self.team = state.teams[data.get("team_id")]
         self.deleted = data.get("deleted", False)
@@ -153,14 +152,14 @@ class Member:
         :class:`Message`
 
         """
-        rtn = await self.state.http.send_message(
-            Route("POST", "chat.postMessage", self.state.http.bot_token),
+        rtn = await self.__state.http.send_message(
+            Route("POST", "chat.postMessage", self.__state.http.bot_token),
             data={
                 "channel": self.id,
                 "text": str(text)
             }
         )
-        return Message(self.state, rtn.get("message"))
+        return Message(self.__state, rtn.get("message"))
 
     async def kick(self, channel: Channel):
         """
@@ -179,7 +178,7 @@ class Member:
             "user": self.id,
             "channel": channel.id
         }
-        await self.http.post_anything(
-            Route("POST", "conversations.kick", self.http.bot_token),
+        await self.__state.http.post_anything(
+            Route("POST", "conversations.kick", self.__state.http.bot_token),
             query=query
         )

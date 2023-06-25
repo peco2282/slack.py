@@ -59,7 +59,7 @@ class Context(slack.base.Sendable, Generic[BotT]):
         self.client = client
         self.message = message
         self.prefix = prefix
-        self.state = message.state
+        self.state = message._state
         self.message_id = message.id
         self.id = self.channel.id  # channel_id
         self.http = client.http

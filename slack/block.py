@@ -33,8 +33,8 @@ class Action:
     """
 
     def __init__(self, state: ConnectionState, data):
-        self.state = state
-        self.data = data
+        self.__state = state
+        self.__data = data
         self.type = data.get("type")
         self.action_id = data.get("action_id")
         self.block_id = data.get("block_id")
@@ -81,7 +81,7 @@ class Block:
     """
 
     def __init__(self, state: ConnectionState, data: BlockPayload):
-        self.state = state
+        self.__state = state
         self.__data = data
         self.member: Member | None = state.members.get(data.get("user", {}).get("id"))
         self.trigger_id = data.get("trigger_id")
@@ -102,7 +102,7 @@ class Block:
         Optional[:class:`Channel`]
             Return responsed channel
         """
-        return self.state.channels.get(self.__data.get("channel", {}).get("id", ""))
+        return self.__state.channels.get(self.__data.get("channel", {}).get("id", ""))
 
     @property
     def team(self) -> Team | None:
@@ -112,4 +112,4 @@ class Block:
         Optional[:class:`Team`]
             Return responsed team.
         """
-        return self.state.teams.get(self.__data.get("team", {}).get("id", ""))
+        return self.__state.teams.get(self.__data.get("team", {}).get("id", ""))

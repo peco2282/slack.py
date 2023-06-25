@@ -68,17 +68,17 @@ class Client:
 
     Attributes
     -----------
-    user_token: :class:`str`
+    _user_token: :class:`str`
         The your-self token. It must be start 'xoxp-...'
-    bot_token: :class:`str`
+    _bot_token: :class:`str`
         The bot token. It must be start 'xoxb-...'
-    token: Optional[:class:`str`]
+    _token: Optional[:class:`str`]
         App-level token. It is startwith 'xapp-...'
 
         .. versionchanged:: 1.4.0
             To optional.
 
-    logger: Optional[:class:`Logger.Logger`]
+    _logger: Optional[:class:`Logger.Logger`]
         Logger object.
 
         .. versionadded:: 1.4.0
@@ -118,18 +118,18 @@ class Client:
         if token is not None and not token.startswith("xapp-"):
             raise TokenTypeException("Token must be start `xapp-`")
 
-        self.ws: SlackWebSocket | None = None
-        self.user_token: str = user_token
-        self.bot_token: str = bot_token
-        self.token: str | None = token
+        self._ws: SlackWebSocket | None = None
+        self._user_token: str = user_token
+        self._bot_token: str = bot_token
+        self._token: str | None = token
         self.loop: asyncio.AbstractEventLoop = loop or asyncio.get_event_loop()
         self._closed: bool = False
         self._ready: asyncio.Event = asyncio.Event()
         self._handlers: dict[str, Callable[[], None]] = {
             "ready": self._handle_ready
         }
-        self.logger = logger or logging.getLogger(__name__)
-        utils.setup_logging(self.logger, log_level, log_format)
+        self._logger = logger or logging.getLogger(__name__)
+        utils.setup_logging(self._logger, log_level, log_format)
 
         self.http: HTTPClient = HTTPClient(
             self.loop,
@@ -144,7 +144,7 @@ class Client:
         self._teams: dict[str, Team] = {}
         self._channels: dict[str, Channel] = {}
         self._members: dict[str, Member] = {}
-        self.logger.info("setup finished")
+        self._logger.info("setup finished")
 
     def _get_state(self, **options) -> ConnectionState:
         return ConnectionState(
@@ -152,7 +152,7 @@ class Client:
             http=self.http,
             loop=self.loop,
             handlers=self._handlers,
-            logger=self.logger,
+            logger=self._logger,
             **options
         )
 
@@ -198,13 +198,13 @@ class Client:
         method = f"on_{event}"
         try:
             coro: Coro = getattr(self, method)
-            self.logger.info("dispatch event %s", method)
+            self._logger.info("dispatch event %s", method)
 
         except AttributeError:
             pass
 
         except Exception as e:
-            self.logger.error("%s occured", type(e), exc_info=e)
+            self._logger.error("%s occured", type(e), exc_info=e)
 
         else:
             self._schedule_event(coro, method, *args, **kwargs)
@@ -314,7 +314,7 @@ class Client:
         Get teams, channels and member data.
         """
         data = await self.http.login()
-        self.logger.info("login successful with wss: %s", data.get("url"))
+        self._logger.info("login successful with wss: %s", data.get("url"))
         self._teams, self._channels, self._members = await self.connection.initialize()
         await self.connect(data.get("url"))
 
@@ -322,7 +322,7 @@ class Client:
         """Close connection.
         """
         self._closed = True
-        self.logger.info("connection closed.")
+        self._logger.info("connection closed.")
 
     async def connect(self, ws_url: str) -> None:
         """
@@ -334,19 +334,19 @@ class Client:
         """
         while True:
             try:
-                coro = SlackWebSocket.from_client(client=self, ws_url=ws_url, logger=self.logger)
-                self.ws: SlackWebSocket = await asyncio.wait_for(coro, timeout=60.)
-                if not self.ws:
+                coro = SlackWebSocket.from_client(client=self, ws_url=ws_url, logger=self._logger)
+                self._ws: SlackWebSocket = await asyncio.wait_for(coro, timeout=60.)
+                if not self._ws:
                     break
                 while True:
                     try:
-                        await self.ws.poll_event()
+                        await self._ws.poll_event()
 
                     except AttributeError:
                         break
 
             except Exception as e:
-                self.logger.error("raise %s", e)
+                self._logger.error("raise %s", e)
                 raise e
 
     def _schedule_event(
@@ -371,7 +371,7 @@ class Client:
             await coro(*args, **kwargs)
 
         except asyncio.CancelledError as e:
-            self.logger.warning("%s", e)
+            self._logger.warning("%s", e)
             pass
 
         except Exception as exc:
@@ -391,4 +391,4 @@ class Client:
             The exception that was raised.
 
         """
-        self.logger.error(f"{event_name} raise {exc.__class__.__name__} in {self.__class__.__name__}")
+        self._logger.error(f"{event_name} raise {exc.__class__.__name__} in {self.__class__.__name__}")

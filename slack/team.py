@@ -45,7 +45,7 @@ class Icon:
     """
 
     def __init__(self, state: ConnectionState, team: "Team", data: IconPayload):
-        self.state = state
+        self.__state = state
         self.team: Team = team
         self.image_default: bool = data.get("image_default", False)
         self.image_34: str | None = data.get("image_34")
@@ -78,7 +78,7 @@ class Team:
     """
 
     def __init__(self, state: ConnectionState, data: TeamPayload):
-        self.state = state
+        self.__state = state
         self.id = data.get("id")
         self.name = data.get("name")
         self.url = data.get("url")
@@ -112,14 +112,14 @@ class Team:
         :class:`Channel`
             Return created channel.
         """
-        channel = await self.state.http.create_channel(
-            Route("POST", "conversations.create", self.state.http.bot_token),
+        channel = await self.__state.http.create_channel(
+            Route("POST", "conversations.create", self.__state.http.bot_token),
             {"name": name}
         )
         if join:
-            self.state.http.manage_channel(
-                Route("POST", "conversations.join", self.state.http.bot_token),
+            self.__state.http.manage_channel(
+                Route("POST", "conversations.join", self.__state.http.bot_token),
                 {"id": channel["channel"]["id"]}
             )
 
-        return Channel(self.state, channel["channel"])
+        return Channel(self.__state, channel["channel"])

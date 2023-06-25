@@ -52,6 +52,7 @@ except Exception:
     # noinspection PyTypeHints
     Dispatch = TypeVar("Dispatch")
 
+
 class ReactionEvent:
     """
     Attributes
@@ -90,6 +91,7 @@ class ReactionEvent:
         self.message_timestamp: datetime.datetime | None = ts2time(event.get("event_ts", 0))
 
 
+# noinspection PyUnusedLocal
 class ConnectionState:
     # noinspection PyUnusedLocal
     def __init__(

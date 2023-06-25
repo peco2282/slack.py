@@ -50,13 +50,13 @@ class Channel(Sendable):
     """
 
     def __init__(self, state: ConnectionState, data: ChannelPayload):
-        self.state = state
+        self.__state = state
         self.http = state.http
         self.id: str = data.get("id")
         self.name = data.get("name")
-        self.team: Team | None = self.state.teams.get(data.get("context_team_id", ""))
+        self.team: Team | None = self.__state.teams.get(data.get("context_team_id", ""))
         self.created_at: datetime = datetime.fromtimestamp(float(data.get("created", 0)))
-        self.created_by: Member | None = self.state.members.get(data.get("creator"))
+        self.created_by: Member | None = self.__state.members.get(data.get("creator"))
         # self.overload(data)
 
     def __repr__(self) -> str:
@@ -124,7 +124,7 @@ class Channel(Sendable):
             }
         )
         members = rtn["members"]
-        return [self.state.members[user] for user in members]
+        return [self.__state.members[user] for user in members]
 
     async def unarchive(self) -> None:
         """
@@ -135,8 +135,8 @@ class Channel(Sendable):
         param = {
             "channel": self.id
         }
-        await self.state.http.request(
-            Route("POST", "channels.unarchive", self.state.http.bot_token),
+        await self.__state.http.request(
+            Route("POST", "channels.unarchive", self.__state.http.bot_token),
             data=param
         )
 
@@ -204,8 +204,8 @@ class Channel(Sendable):
                 }
             )
 
-        channel = Channel(self.state, ch["channel"])
-        self.state.channels[self.id] = channel
+        channel = Channel(self.__state, ch["channel"])
+        self.__state.channels[self.id] = channel
         return channel
 
     async def reaction_messages(
@@ -245,7 +245,7 @@ class Channel(Sendable):
         items = rtn["items"]
         messages = []
         for item in items:
-            message = Message(self.state, item["message"])
+            message = Message(self.__state, item["message"])
             message.channel_id = item["channel"]
             messages.append(message)
 
@@ -272,7 +272,7 @@ class Channel(Sendable):
             query=query
         )
         files = resp["files"]
-        return [File(self.state, data) for data in files]
+        return [File(self.__state, data) for data in files]
 
 
 class DeletedChannel:

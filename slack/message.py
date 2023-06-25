@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING, Any
 from .errors import SlackException, InvalidArgumentException
 from .route import Route
 from .utils import ts2time
+from base import Sendable
 
 if TYPE_CHECKING:
     from .team import Team
@@ -57,7 +58,7 @@ class ReactionComponent:
         self.count: int = int(data["count"])
 
 
-class Message:
+class Message(Sendable):
     """This class is a constructor for the Message class. It takes in two parameters, state and data. The state
     parameter is a ConnectionState object, and the data parameter is a MessagePayload object. The function then sets the
     state, team_id, id, author, channel_id, and created_at attributes of the Message object
@@ -74,7 +75,7 @@ class Message:
     """
 
     def __init__(self, state: ConnectionState, data: MessagePayload):
-        self.state = state
+        self._state = state
         self.team_id = data.get("team")
         self.id = data.get("ts")
         self.user_id: str = data.get("user")
@@ -85,7 +86,7 @@ class Message:
         self.scheduled_message_id: str | None = None
         self.__edited: _Edited | None = data.get("edited")
         # self.__edited_ts: str = self.__edited.get("ts") if self.__edited else self.id
-        self.__edited_user: Member | None = self.state.members.get(
+        self.__edited_user: Member | None = self._state.members.get(
             self.__edited.get("user")) if self.__edited else None
         # self.edited_at = ts2time(float(self.__edited_ts))
         self.all_reactions: list[ReactionComponent | None] = [
@@ -157,7 +158,7 @@ class Message:
             Message channel.
 
         """
-        return self.state.channels[self.channel_id]
+        return self._state.channels[self.channel_id]
 
     @property
     def author(self) -> Member:
@@ -169,7 +170,7 @@ class Message:
             Message author.
 
         """
-        return self.state.members[self.user_id]
+        return self._state.members[self.user_id]
 
     @property
     def team(self) -> Team:
@@ -181,7 +182,7 @@ class Message:
             Message team.
 
         """
-        return self.state.teams[self.team_id]
+        return self._state.teams[self.team_id]
 
     async def edit(self, text: str, is_bot: bool = True):
         """|coro|
@@ -209,17 +210,17 @@ class Message:
             "text": str(text)
         }
         if is_bot:
-            route = Route("POST", "chat.update", self.state.http.bot_token)
+            route = Route("POST", "chat.update", self._state.http.bot_token)
 
         else:
-            route = Route("POST", "chat.update", self.state.http.user_token)
-        rtn = await self.state.http.send_message(
+            route = Route("POST", "chat.update", self._state.http.user_token)
+        rtn = await self._state.http.send_message(
             route,
             data=param
         )
         msg = rtn["message"]
         msg["ts"] = rtn["ts"]
-        return Message(self.state, msg)
+        return Message(self._state, msg)
 
     async def delete(self) -> DeletedMessage:
         """It deletes a message.
@@ -237,27 +238,27 @@ class Message:
             "ts": self.id
         }
         try:
-            rtn = await self.state.http.delete_message(
+            rtn = await self._state.http.delete_message(
                 Route(
                     "DELETE",
                     "chat.delete",
-                    self.state.http.bot_token
+                    self._state.http.bot_token
                 ),
                 param
             )
         except SlackException:
             try:
-                rtn = await self.state.http.delete_message(
+                rtn = await self._state.http.delete_message(
                     Route(
                         "DELETE",
                         "chat.delete",
-                        self.state.http.user_token
+                        self._state.http.user_token
                     ),
                     param
                 )
             except SlackException as exc:
                 raise exc
-        return DeletedMessage(self.state, rtn)
+        return DeletedMessage(self._state, rtn)
 
     async def reply(self, text: str):
         """
@@ -280,11 +281,11 @@ class Message:
             "thread_ts": self.id,
             "text": str(text)
         }
-        rtn = await self.state.http.send_message(
-            Route("POST", "chat.postMessage", self.state.http.bot_token),
+        rtn = await self._state.http.send_message(
+            Route("POST", "chat.postMessage", self._state.http.bot_token),
             query=param
         )
-        return Message(self.state, rtn["message"])
+        return Message(self._state, rtn["message"])
 
     async def replies(self) -> list[Message]:
         """
@@ -297,14 +298,14 @@ class Message:
         List[:class:`Message`]
             Returns original message and replied messages.
         """
-        rtn = await self.state.http.send_message(
-            Route("GET", "conversations.replies", self.state.http.bot_token),
+        rtn = await self._state.http.send_message(
+            Route("GET", "conversations.replies", self._state.http.bot_token),
             query={
                 "channel": self.channel.id,
                 "ts": self.id
             }
         )
-        return [Message(self.state, message) for message in rtn.get("messages", {})]
+        return [Message(self._state, message) for message in rtn.get("messages", {})]
 
     async def reaction_add(self, name: str, skin_tone_level: int | None = None) -> None:
         """
@@ -332,8 +333,8 @@ class Message:
             "name": str(name)
         }
         try:
-            await self.state.http.post_anything(
-                Route("POST", "reactions.add", self.state.http.bot_token),
+            await self._state.http.post_anything(
+                Route("POST", "reactions.add", self._state.http.bot_token),
                 query=query
             )
 
@@ -354,15 +355,15 @@ class Message:
             "timestamp": self.id,
             "channel": self.channel_id
         }
-        rtn = await self.state.http.send_message(
-            Route("GET", "reactions.get", self.state.http.bot_token),
+        rtn = await self._state.http.send_message(
+            Route("GET", "reactions.get", self._state.http.bot_token),
             query=query
         )
         reactions = rtn["message"].get("reactions")
         reaction_list = []
         if reactions is not None:
             reaction_list = [
-                ReactionComponent(self.state, r) for r in reactions
+                ReactionComponent(self._state, r) for r in reactions
             ]
         return reaction_list
 
@@ -381,8 +382,8 @@ class Message:
         query = {
             "name": str(name)
         }
-        await self.state.http.post_anything(
-            Route("POST", "reactions.remove", self.state.http.bot_token),
+        await self._state.http.post_anything(
+            Route("POST", "reactions.remove", self._state.http.bot_token),
             query=query
         )
 

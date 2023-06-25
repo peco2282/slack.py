@@ -42,8 +42,8 @@ class HTTPClient:
         self.token: str | None = token
         self.bot_token: str = bot_token
         self.__session: aiohttp.ClientSession | None = None
-        self.ws: SlackWebSocket
-        self.logger = logger
+        self._ws: SlackWebSocket
+        self._logger = logger
 
     async def ws_connect(self, url: str) -> aiohttp.ClientWebSocketResponse:
         """It connects to a websocket and returns a websocket object
@@ -135,7 +135,7 @@ class HTTPClient:
                     raise ForbiddenException()
 
             except json.JSONDecodeError:
-                self.logger.warning("JSON object cannot serialize.")
+                self._logger.warning("JSON object cannot serialize.")
                 return await response.text()
 
     def send_files(

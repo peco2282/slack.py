@@ -26,7 +26,7 @@ class Attachment:
 
 class PublicShare:
     def __init__(self, state: ConnectionState, data: PublicSharePayload):
-        self.state = state
+        self.__state = state
         self.reply_users: list[str | None] = data.get("reply_users", [])
         self.reply_users_count: int = data.get("reply_users_count", 0)
         self.reply_count: int = data.get("reply_count", 0)
@@ -38,7 +38,7 @@ class PublicShare:
 
 class Share:
     def __init__(self, state: ConnectionState, data: SharePayload):
-        self.state = state
+        self.__state = state
         self.__share: dict[str, list[PublicSharePayload]] = data.get("public", {})
         self.publics: dict[str, list[PublicShare]] = {
             k: [PublicShare(state, c) for c in v] for k, v in self.__share.items()
@@ -50,7 +50,7 @@ class Share:
 
 class File:
     def __init__(self, state: ConnectionState, data: FilePayload):
-        self.state = state
+        self.__state = state
         self.id = data["id"]
         self.created_at = ts2time(data["created"])
         self.name = data["name"]
@@ -58,8 +58,8 @@ class File:
         self.mimetype = data["mimetype"]
         self.filetype = data["filetype"]
         self.pretty_type = data.get("pretty_type")
-        self.user = self.state.members.get(data.get("user", ""))
-        self.team = self.state.teams.get(data.get("user_team", ""))
+        self.user = self.__state.members.get(data.get("user", ""))
+        self.team = self.__state.teams.get(data.get("user_team", ""))
         self.is_editable = data.get("editable", False)
         self.size = int(data.get("size", 0))
         self.mode = data.get("mode")
@@ -83,15 +83,15 @@ class File:
         self.is_starred: bool = data.get("is_starred", False)
         self.shares: Share = Share(state, data.get("shares", {}))
 
-        self.channels: list[Channel | None] = [self.state.channels.get(c) for c in data.get("channels", [])]
+        self.channels: list[Channel | None] = [self.__state.channels.get(c) for c in data.get("channels", [])]
         self.groups: list[str | None] = data.get("groups", [])
         self.ims: list[str | None] = data.get("ims", [])
         self.has_rich_preview: bool = data.get("has_rich_preview", False)
         self.file_access: str | None = data.get("file_access")
 
     async def create_url(self):
-        await self.state.http.get_anything(
-            Route("GET", "files.getUploadURLExternal", self.state.http.bot_token),
+        await self.__state.http.get_anything(
+            Route("GET", "files.getUploadURLExternal", self.__state.http.bot_token),
             query={
                 "filename": self.id,
                 # "length": length
