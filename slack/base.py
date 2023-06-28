@@ -7,12 +7,12 @@ from typing import TYPE_CHECKING
 
 from .attachment import File
 from .errors import InvalidArgumentException, SlackException
-from .message import Message, DeletedMessage
 from .route import Route
 from .utils import ts2time
 from .view import ViewFrame
 
 if TYPE_CHECKING:
+    from .message import Message, DeletedMessage
     from .channel import Channel
     from .attachment import Attachment
     from .member import Member

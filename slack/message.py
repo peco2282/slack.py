@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Any
 from .errors import SlackException, InvalidArgumentException
 from .route import Route
 from .utils import ts2time
-from base import Sendable
+from .base import Sendable
 
 if TYPE_CHECKING:
     from .team import Team
