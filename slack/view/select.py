@@ -2,9 +2,10 @@ from __future__ import annotations
 
 from enum import Enum
 from typing import TYPE_CHECKING
-from .view import BaseView, Placeholder
+from .view import BaseView
 
 if TYPE_CHECKING:
+    from .view import Text as Placeholder
     from ..errors import InvalidArgumentException
 
 __all__ = (
