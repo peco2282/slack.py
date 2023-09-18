@@ -75,3 +75,11 @@ rst_prolog = """
 """
 
 html_static_path = ['_static']
+
+resource_links = {
+    "slack": "https://api.slack.com",
+    "element": "https://api.slack.com/reference/block-kit/block-elements",
+    "handling": "https://api.slack.com/interactivity/handling",
+    "object": "https://api.slack.com/reference/block-kit/composition-objects",
+    "action": "https://api.slack.com/reference/interaction-payloads/block-actions"
+}
