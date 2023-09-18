@@ -1,11 +1,13 @@
 from __future__ import annotations
 
+import functools
 import logging
 import os
 import sys
+import warnings
 from datetime import datetime
 from operator import attrgetter
-from typing import Any, TypeVar, Iterable, Generator, overload
+from typing import Any, TypeVar, Iterable, Generator, overload, Callable
 
 from .errors import *
 
@@ -119,6 +121,36 @@ def get(iterator: Iterable[T], /, **kwargs) -> Generator[T]:
 
         if flag:
             yield None
+
+
+def deprecated(newfunc: str):
+    def wrapper(func: Callable[[Any], Any]):
+        # noinspection PyUnusedLocal
+        def inner(*args, **kwargs):
+            warnings.warn(f"method \"{func.__name__}\" will be replace \"{newfunc}\"", stacklevel=3)
+
+        return inner
+
+    return wrapper
+
+
+def notnone(func: Callable[[Any], Any]):
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        null = []
+        for i, arg in enumerate(args, 1):
+            if arg is None:
+                null.append(f"{i}")
+        string = ", ".join(null) + " parameter(s) is None" if len(null) != 0 else ""
+        null = []
+        for k, v in kwargs.items():
+            if v is None:
+                null.append(f"`{k}`")
+        string += " " + ", ".join(null) + " keyword is None" if len(null) != 0 else ""
+        if len(string) != 0:
+            warnings.warn(string, stacklevel=3)
+
+    return wrapper
 
 
 class _Formatter(logging.Formatter):

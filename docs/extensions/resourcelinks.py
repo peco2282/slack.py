@@ -25,7 +25,9 @@ def make_link_role(resource_links: Dict[str, str]) -> RoleFunction:
     ) -> Tuple[List[Node], List[system_message]]:
         text = utils.unescape(text)
         has_explicit_title, title, key = split_explicit_title(text)
-        full_url = resource_links[key]
+        splitted = key.split(":")
+        url_base = resource_links[splitted[0]]
+        full_url = url_base + ("#" + splitted[1] if len(splitted) >= 2 else "")
         if not has_explicit_title:
             title = full_url
         pnode = nodes.reference(title, title, internal=False, refuri=full_url)

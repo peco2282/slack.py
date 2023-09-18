@@ -6,7 +6,7 @@ from .view import BaseView
 
 if TYPE_CHECKING:
     from ..errors import InvalidArgumentException
-    from .view import Placeholder
+    from .view import Text as Placeholder
 
 
 class Button(BaseView):

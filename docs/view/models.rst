@@ -21,39 +21,39 @@ BaseView
 .. autoclass:: BaseView()
     :members:
 
-Placeholder
-~~~~~~~~~~~
+Text
+~~~~
 
-.. attributetable:: Placeholder
+.. attributetable:: Text
 
-.. autoclass:: Placeholder()
+.. autoclass:: Text()
     :members:
 
-Select
-~~~~~~
+Confirm
+~~~~~~~
 
-.. attributetable:: Select
+.. attributetable:: Confirm
 
-.. autoclass:: Select()
+.. autoclass:: Confirm()
     :members:
 
-SelectOption
-~~~~~~~~~~~~
+Buttons
+~~~~~~~
 
-.. attributetable:: SelectOption
+.. attributetable:: Button
 
-.. autoclass:: SelectOption()
+.. autoclass:: Button()
     :members:
 
 Enums
 -----
 
-SelectType
-~~~~~~~~~~
+ElementType
+~~~~~~~~~~~
 
-.. attributetable:: SelectType
+.. attributetable:: ElementType
 
-.. autoclass:: SelectType()
+.. autoclass:: ElementType()
     :members:
 
 ViewFrame
@@ -69,27 +69,18 @@ ViewFrame
 .. autoclass:: ViewFrame()
     :members:
 
+CheckBox
+~~~~~~~~
 
-View
-~~~~
+.. attributetable:: CheckBox
 
-.. attributetable:: View
-
-.. autoclass:: View()
+.. autoclass:: CheckBox()
     :members:
 
-ActionView
-~~~~~~~~~~
+Option
+~~~~~~
 
-.. py:attribute:: ActionView
+.. attributetable:: Option
 
-.. autoclass:: ActionView()
-    :members:
-
-SectionView
-~~~~~~~~~~~
-
-.. py:attribute:: SectionView
-
-.. autoclass:: SectionView()
+.. autoclass:: Option()
     :members:

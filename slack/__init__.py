@@ -13,3 +13,6 @@ from .team import *
 from .ws import *
 
 __version__ = "1.4.4"
+__author__ = "peco2282"
+__doc__ = "https://slack-py.readthedocs.io/en/latest"
+__name__ = "slack"

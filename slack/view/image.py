@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 from .view import BaseView
 
 if TYPE_CHECKING:
-    from .view import Placeholder
+    from .view import Text as Placeholder
 
 __all__ = (
     "Image",
