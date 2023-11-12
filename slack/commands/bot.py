@@ -40,14 +40,14 @@ class Bot(slack.Client):
 
     .. versionadded:: 1.2.0
 
-    Attributes
+    Parameters
     ----------
-    _user_token: :class:`str`
+    user_token: :class:`str`
         The your-self token. It must be start 'xoxp-...'
 
-    _bot_token: :class:`str`
+    bot_token: :class:`str`
         The bot token. It must be start 'xoxb-...'
-    _token: Optional[:class:`str`]
+    token: Optional[:class:`str`]
         App-level token. It is startwith 'xapp-...'
 
         .. versionchanged:: 1.4.0
@@ -86,7 +86,6 @@ class Bot(slack.Client):
         )
         self.__commands: dict[str, Command] = {}
         self.prefix = str(prefix)
-        self._logger = logger
         self._listeners: dict[str, Listener] = {}
 
     @property

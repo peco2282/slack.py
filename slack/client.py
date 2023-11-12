@@ -1,14 +1,18 @@
 from __future__ import annotations
 
+import abc
 import asyncio
 import logging
 import signal
+import warnings
 from typing import (
     Callable,
     TypeVar,
     Coroutine,
     Any,
-    TYPE_CHECKING
+    TYPE_CHECKING,
+    final,
+    overload
 )
 
 from . import utils
@@ -23,6 +27,7 @@ if TYPE_CHECKING:
     from .member import Member
 
 Coro = TypeVar("Coro", bound=Callable[..., Coroutine[Any, Any, Any]])
+T = TypeVar("T")
 
 
 def cancel_task(loop: asyncio.AbstractEventLoop):
@@ -59,6 +64,110 @@ def result_task(loop: asyncio.AbstractEventLoop):
         loop.close()
 
 
+@final
+class LoggerOption:
+    __OPTIONS: dict[str, bool] = {}
+    VALID_KEY = [
+        "ready",
+        "message",
+        "message_update",
+        "message_delete",
+        "mention",
+        "block_action",
+        "channel_join",
+        "reaction_added",
+        "reaction_removed",
+        "channel_create",
+        "channel_delete",
+        "channel_rename",
+        "channel_unarchive",
+        "member_join"
+    ]
+
+    @overload
+    def __init__(self, **options: bool):
+        ...
+
+    def __init__(self, options: dict[str, bool]):
+        self.__setoptions(options)
+
+    def __setoptions(self, options: dict[str, bool]):
+        for k in options.keys():
+            if k not in LoggerOption.VALID_KEY:
+                warnings.warn(k + " key is not available.", RuntimeWarning)
+        self.__OPTIONS = options
+
+    def set(self, key: str, state: bool):
+        self.__OPTIONS[key] = state
+
+    @property
+    def keys(self) -> list[str]:
+        return list(self.__OPTIONS.keys())
+
+    def value(self, event: str):
+        if event not in self.keys:
+            return False
+
+        return self.__OPTIONS[event]
+
+    @classmethod
+    def all(cls) -> LoggerOption:
+        self = cls.__new__(cls)
+        for k, _ in self.__OPTIONS.items():
+            self.__OPTIONS[k] = True
+        return self
+
+    @classmethod
+    def none(cls) -> LoggerOption:
+        self = cls.__new__(cls)
+        for k, _ in self.__OPTIONS.items():
+            self.__OPTIONS[k] = False
+
+        return self
+
+
+class __Manager:
+    _hash: int = -1
+    _objects: dict[str, T] = {}
+
+    def __hash__(self):
+        return self._hash
+
+    def __eq__(self, other):
+        return isinstance(other, (_TeamManager, _ChannelManager)) and other._hash != -1 and self._hash == other._hash
+
+    __dict__ = _objects
+
+    @abc.abstractmethod
+    def __init__(self, _objects: dict[str, T]):
+        self._objects = _objects
+        self._hash = hash(_objects)
+        raise NotImplementedError()
+
+    @abc.abstractmethod
+    def fetch(self, _id: str | int) -> T | None:
+        raise NotImplementedError()
+
+    get = fetch
+
+
+class _TeamManager(__Manager):
+    def __init__(self, _objects: dict[str, Team]):
+        self.teams = _objects
+
+    def fetch(self, _id: str | int) -> Team | None:
+        return self.teams.get(str(_id))
+
+
+class _ChannelManager(__Manager):
+
+    def __init__(self, _objects: dict[str, Channel]):
+        self.channels = _objects
+
+    def fetch(self, _id: str | int) -> Channel | None:
+        return self.channels.get(str(_id))
+
+
 class Client:
     r"""Create `Client` object from params.
     Represents a client connection that connects to Discord.
@@ -66,19 +175,19 @@ class Client:
 
     A number of options can be passed to the :class:`Client`.
 
-    Attributes
+    Parameters
     -----------
-    _user_token: :class:`str`
+    user_token: :class:`str`
         The your-self token. It must be start 'xoxp-...'
-    _bot_token: :class:`str`
+    bot_token: :class:`str`
         The bot token. It must be start 'xoxb-...'
-    _token: Optional[:class:`str`]
+    token: Optional[:class:`str`]
         App-level token. It is startwith 'xapp-...'
 
         .. versionchanged:: 1.4.0
             To optional.
 
-    _logger: Optional[:class:`Logger.Logger`]
+    logger: Optional[:class:`Logger.Logger`]
         Logger object.
 
         .. versionadded:: 1.4.0
@@ -87,6 +196,11 @@ class Client:
         The :class:`asyncio.AbstractEventLoop` to use for asynchronous operations.
         Defaults to ``None``, in which case the default event loop is used via
         :func:`asyncio.get_event_loop()`.
+
+    debug: :class:`bool`
+        Print announce in client object.
+
+        .. versionadded:: 1.4.5
     """
 
     def __init__(
@@ -100,6 +214,8 @@ class Client:
             log_format: logging.Formatter | None = None,
 
             loop: asyncio.AbstractEventLoop | None = None,
+
+            logger_option: LoggerOption = LoggerOption.all(),
             **options
     ):
 
@@ -129,6 +245,7 @@ class Client:
             "ready": self._handle_ready
         }
         self._logger = logger or logging.getLogger(__name__)
+        self._debug = options.get("debug", True)
         utils.setup_logging(self._logger, log_level, log_format)
 
         self.http: HTTPClient = HTTPClient(
@@ -140,11 +257,15 @@ class Client:
         )
 
         self.connection: ConnectionState = self._get_state(**options)
-        self._teams: list[dict[str, Any]]
+        # self._teams: list[dict[str, Any]]
         self._teams: dict[str, Team] = {}
         self._channels: dict[str, Channel] = {}
         self._members: dict[str, Member] = {}
-        self._logger.info("setup finished")
+        self._team_manager = _TeamManager({})
+        self._channel_manager = _ChannelManager({})
+        self._logger_option = logger_option if isinstance(logger_option, LoggerOption) else LoggerOption.all()
+        if self._debug:
+            self._logger.info("setup finished")
 
     def _get_state(self, **options) -> ConnectionState:
         return ConnectionState(
@@ -153,8 +274,33 @@ class Client:
             loop=self.loop,
             handlers=self._handlers,
             logger=self._logger,
+            client=self,
             **options
         )
+
+    @property
+    def team_manager(self) -> _TeamManager:
+        """
+        Teams manager.
+            versionadded:: 1.4.5
+
+        Returns
+        -------
+        _TeamManager
+        """
+        return self._team_manager
+
+    @property
+    def channel_manager(self) -> _ChannelManager:
+        """
+        Channels manager.
+            versionadded:: 1.4.5
+
+        Returns
+        -------
+        _ChannelManager
+        """
+        return self._channel_manager
 
     @property
     def teams(self) -> list[Team]:
@@ -191,14 +337,26 @@ class Client:
         """
         return list(self._members.values())
 
+    @property
+    def logger(self) -> logging.Logger:
+        return self._logger
+
+    @logger.setter
+    def logger(self, _logger):
+        raise ValueError("Logger value is not allow otherwise constructor.")
+
     def _handle_ready(self) -> None:
         return self._ready.set()
+
+    def __log(self, event: str, method: str) -> None:
+        if self._logger_option.value(event):
+            self._logger.info("dispatch event %s", method)
 
     def dispatch(self, event: str, *args, **kwargs) -> None:
         method = f"on_{event}"
         try:
             coro: Coro = getattr(self, method)
-            self._logger.info("dispatch event %s", method)
+            self.__log(event, method)
 
         except AttributeError:
             pass
@@ -316,6 +474,8 @@ class Client:
         data = await self.http.login()
         self._logger.info("login successful with wss: %s", data.get("url"))
         self._teams, self._channels, self._members = await self.connection.initialize()
+        self._team_manager = _TeamManager(self._teams)
+        self._channel_manager = _ChannelManager(self._channels)
         await self.connect(data.get("url"))
 
     async def close(self) -> None:

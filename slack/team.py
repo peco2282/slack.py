@@ -123,3 +123,21 @@ class Team:
             )
 
         return Channel(self.__state, channel["channel"])
+
+    @property
+    def members(self):
+        """
+        The members function returns a list of all members in the team.
+
+        ..versionadded:: 1.4.5
+
+        Returns
+        -------
+        :class:`Team`
+            A list of all members in a team.
+        """
+        members = []
+        for t, m in self.__state.members.items():
+            if self == m.team:
+                members.append(m)
+        return members
