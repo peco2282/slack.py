@@ -2,7 +2,7 @@ import re
 
 from setuptools import setup
 
-long_description: str = ""
+long_description: str
 version: str = ""
 
 with open("README.md", encoding="utf8") as f:
@@ -20,7 +20,7 @@ with open("slack/__init__.py", encoding="utf8") as f:
 if not version:
     raise RuntimeError("version is not set")
 
-requirements = []
+requirements: list[str]
 with open("requirements.txt") as f:
     requirements = f.read().splitlines()
 
