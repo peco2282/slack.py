@@ -1,5 +1,5 @@
 from slack import commands
-from slack.view import View, Select, Placeholder, SelectType
+from slack.view import Select, Text, SelectType
 
 bot = commands.Bot(
     user_token="...",
@@ -19,8 +19,8 @@ async def msg(ctx: commands.Context, *args):
     # m = await ctx.send(text="AA")
     select = Select(
         "action",
-        Placeholder(
-            "text", mrkdwn=False, emoji=True),
+        placeholder=Text(
+            "text", mrkdown=False, emoji=True),
         select_type=SelectType.users_select,
         initial_text="initial"
     )

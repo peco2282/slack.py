@@ -1,5 +1,5 @@
 import slack
-from slack.view import View, SelectType, Placeholder, Select
+from slack.view import SelectType, Text, Select
 
 client = slack.Client(
     user_token="...",
@@ -21,8 +21,8 @@ async def on_message(message: slack.Message):
     if message.content.startswith("!hello"):
         select = Select(
             "action",
-            Placeholder(
-                "text", mrkdwn=False, emoji=True),
+            placeholder=Text(
+                "text", mrkdown=False, emoji=True),
             select_type=SelectType.users_select,
             initial_text="initial"
         )

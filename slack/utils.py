@@ -29,8 +29,13 @@ errors: dict[str, SlackExceptions] = {
 
 # https://learn.microsoft.com/en-us/windows/console/console-virtual-terminal-sequences#text-formatting
 DEFAULT = 0
+BOLD = 1
+NO_BOLD = 22
 UNDERLINE = 4
 NO_UNDERLINE = 24
+
+NEGATIVE = 7
+POSITIVE = 27
 
 FOREGROUND_BLACK = 30
 FOREGROUND_RED = 31
@@ -165,7 +170,7 @@ class _Formatter(logging.Formatter):
     FORMAT: dict[int, logging.Formatter] = {
         lv: logging.Formatter(
             f"\x1b[{FOREGROUND_CYAN}m%(asctime)s\x1b[0m \x1b[{cl}m\x1b[{BLIGHT_BACKGROUND_BLACK}m"
-            f"%(levelname)-8s\x1b[0m \x1b[35m%(name)s\x1b[0m \x1b[{FOREGROUND_GREEN}m%(message)s",
+            f"%(levelname)-8s\x1b[0m \x1b[35m%(name)s\x1b[0m \x1b[{FOREGROUND_GREEN}m%(message)s\x1b[{DEFAULT}m",
             "%Y-%m-%d %H:%M:%S"
         ) for lv, cl in COLORS
     }
