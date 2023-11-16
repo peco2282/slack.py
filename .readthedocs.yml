@@ -6,6 +6,6 @@ python:
 
 build:
   tools:
-    python: 3.8
+    python: 3.10
   os: ubuntu-22.04
       
