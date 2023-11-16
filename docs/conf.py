@@ -37,6 +37,8 @@ extensions = [
     "sphinx.ext.intersphinx",
     "sphinx.ext.napoleon",
     "sphinxcontrib_trio",
+    "hoverxref.extension",
+
     "details",
     "exception_hierarchy",
     "attributetable",
@@ -83,3 +85,19 @@ resource_links = {
     "object": "https://api.slack.com/reference/block-kit/composition-objects",
     "action": "https://api.slack.com/reference/interaction-payloads/block-actions"
 }
+
+hoverx_default_type = "tooltip"
+hoverxref_domains = ["py"]
+hoverxref_role_types = dict.fromkeys(
+    ["ref", "class", "func", "meth", "attr", "exc", "data"],
+    "tooltip",
+)
+hoverxref_tooltip_theme = ["tooltipster-custom"]
+hoverxref_tooltip_lazy = True
+
+# these have to match the keys on intersphinx_mapping, and those projects must be hosted on readthedocs.
+hoverxref_intersphinx = [
+    "py",
+    "aio",
+    "req",
+]
